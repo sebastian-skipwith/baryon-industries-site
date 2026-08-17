@@ -30,12 +30,21 @@
   .nav{display:flex;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--black)}
   .brand span{font-weight:800;letter-spacing:.35em;font-size:15px}
+  .nav .tabs{display:flex;align-items:center;gap:28px}
+  .nav .tabs a{
+    color:var(--gray);text-decoration:none;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;padding-bottom:3px;border-bottom:2px solid transparent;
+    transition:color .15s,border-color .15s;
+  }
+  .nav .tabs a:hover{color:var(--black)}
+  .nav .tabs a.active{color:var(--black);border-bottom-color:var(--black)}
   .nav a.contact{
     color:var(--black);text-decoration:none;font-size:13px;letter-spacing:.12em;
     text-transform:uppercase;border:1px solid var(--black);padding:9px 18px;
     transition:background .15s,color .15s;
   }
   .nav a.contact:hover{background:var(--black);color:#fff}
+  @media(max-width:640px){.nav .tabs{gap:16px}.nav .tabs a{font-size:11px;letter-spacing:.1em}}
 
   .hero{padding:120px 0 90px}
   .hero .mark{margin-bottom:40px}
@@ -110,7 +119,12 @@
       </svg>
       <span>BARYON</span>
     </a>
-    <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+    <nav class="tabs">
+      <a class="active" href="#">Home</a>
+      <!-- Served alongside the Baryon app; when deployed, point at the app's domain. -->
+      <a href="/explore">Resource Intelligence</a>
+      <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+    </nav>
   </div>
 </header>
 
