@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lost Cabin | Baryon Autonomous Exploration</title>
+<meta name="description" content="Baryon is using autonomous aerial and ground robots in Wyoming's Big Horn Mountains to develop the technology for machine-led mineral exploration and the autonomous physical economy.">
+<meta property="og:title" content="Lost Cabin | Baryon">
+<meta property="og:description" content="A proving ground for autonomous exploration — coordinated UAV and quadruped field robotics in the Big Horn Mountains.">
+<meta property="og:type" content="article">
+<meta property="og:image" content="/assets/baryon-drone-over-snowy-mountains.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --gray:#55555c;
+    --line:#e6e6e2;
+    --max:1080px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:#ffffff;
+    color:var(--black);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+  }
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+  header{padding:28px 0;border-bottom:1px solid var(--line);background:#fff}
+  .nav{display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--black)}
+  .brand span{font-weight:800;letter-spacing:.35em;font-size:15px}
+  .nav .tabs{display:flex;align-items:center;gap:28px}
+  .nav .tabs a{
+    color:var(--gray);text-decoration:none;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;padding-bottom:3px;border-bottom:2px solid transparent;
+    transition:color .15s,border-color .15s;
+  }
+  .nav .tabs a:hover{color:var(--black)}
+  .nav .tabs a.active{color:var(--black);border-bottom-color:var(--black)}
+  .nav a.contact{
+    color:var(--black);text-decoration:none;font-size:13px;letter-spacing:.12em;
+    text-transform:uppercase;border:1px solid var(--black);padding:9px 18px;
+    transition:background .15s,color .15s;
+  }
+  .nav a.contact:hover{background:var(--black);color:#fff}
+  @media(max-width:640px){.nav .tabs{gap:14px}.nav .tabs a{font-size:10px;letter-spacing:.08em}.nav a.contact{display:none}}
+
+  .label{
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gray);margin-bottom:22px;
+  }
+  h2{font-size:clamp(26px,3.6vw,40px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:760px}
+  section{padding:90px 0;border-bottom:1px solid var(--line)}
+  section p.body{margin-top:22px;font-size:17px;color:var(--gray);max-width:640px}
+  section p.body b{color:var(--black);font-weight:600}
+
+  /* Hero — cinematic full-bleed, dark */
+  .hero{
+    position:relative;background:#0a0a0a;color:#fff;overflow:hidden;
+    min-height:78vh;display:flex;align-items:flex-end;
+  }
+  .hero .media{position:absolute;inset:0}
+  .hero .media img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;opacity:.92}
+  .hero .media::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(5,5,7,.88) 0%,rgba(5,5,7,.25) 45%,rgba(5,5,7,.15) 100%);
+  }
+  .hero .inner{position:relative;z-index:1;width:100%;padding:140px 0 72px}
+  .hero .eyebrow{
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;
+    color:#c9c9cd;text-transform:uppercase;
+  }
+  .hero h1{
+    margin-top:16px;font-size:clamp(52px,9vw,110px);line-height:.98;font-weight:800;letter-spacing:.02em;
+  }
+  .hero .sub{margin-top:14px;font-size:clamp(18px,2.4vw,24px);font-weight:600;color:#e8e8ea}
+  .hero .copy{margin-top:20px;max-width:620px;font-size:16px;color:#b9b9c0}
+  .hero .ctas{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap}
+  .hero .ctas a{
+    text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    padding:13px 26px;transition:background .15s,color .15s;
+  }
+  .hero .ctas a.primary{background:#fff;color:#0a0a0a;border:1px solid #fff}
+  .hero .ctas a.primary:hover{background:transparent;color:#fff}
+  .hero .ctas a.secondary{border:1px solid #6a6a72;color:#e8e8ea}
+  .hero .ctas a.secondary:hover{border-color:#fff}
+
+  /* Image placeholder state (asset not yet dropped in) */
+  figure.shot{position:relative;background:#101014;overflow:hidden}
+  figure.shot img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+  figure.shot.wide img{aspect-ratio:16/9}
+  figure.shot.pending{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+  figure.shot.wide.pending{aspect-ratio:16/9}
+  figure.shot.pending::before{
+    content:"IMAGE PENDING — save asset as " attr(data-file);
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.14em;
+    color:#6a6a72;padding:0 24px;text-align:center;
+  }
+  .hero .media.pending::before{
+    content:"HERO IMAGE PENDING — save asset as " attr(data-file);
+    position:absolute;top:24px;left:24px;font-family:ui-monospace,Consolas,monospace;
+    font-size:11px;letter-spacing:.14em;color:#6a6a72;
+  }
+  figcaption{
+    font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--gray);padding:10px 0 0;
+  }
+
+  /* Loop strip */
+  .chain{
+    border-bottom:1px solid var(--line);
+    padding:22px 0;overflow-x:auto;background:#fff;
+  }
+  .chain .wrap{
+    display:flex;gap:14px;align-items:center;white-space:nowrap;
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.18em;
+  }
+  .chain em{font-style:normal;color:#b9b9b4}
+
+  /* Platform blocks */
+  .platform{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:56px;align-items:center}
+  .platform .info h3{
+    font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    padding-top:18px;border-top:2px solid var(--black);
+  }
+  .platform .info .role{margin-top:10px;font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .platform .info p{margin-top:12px;font-size:15px;color:var(--gray)}
+  .platform ul{
+    margin-top:16px;list-style:none;display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .platform ul li{
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.08em;
+    border:1px solid var(--line);padding:5px 10px;color:var(--black);
+  }
+  .platform ul li.dev{color:var(--gray);border-style:dashed}
+  @media(max-width:820px){.platform{grid-template-columns:1fr;gap:28px}}
+
+  /* Mission stages */
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);margin-top:56px}
+  .stage{background:#fff;padding:28px 24px}
+  .stage .num{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.22em;color:var(--gray)}
+  .stage h3{margin-top:12px;font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .stage p{margin-top:10px;font-size:14px;color:var(--gray)}
+  @media(max-width:820px){.stages{grid-template-columns:1fr}}
+  .recursive{
+    margin-top:56px;font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.01em;
+    line-height:1.3;max-width:820px;
+  }
+
+  /* Sensor cards */
+  .sensors{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);margin-top:56px}
+  .sensor{background:#fff;padding:26px 24px;transition:background .15s}
+  .sensor:hover{background:#fafaf8}
+  .sensor h3{font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.24em}
+  .sensor p{margin-top:10px;font-size:14px;color:var(--gray)}
+  @media(max-width:820px){.sensors{grid-template-columns:1fr}}
+
+  /* Coordination */
+  .coord h2{max-width:none}
+  .coord .big{
+    margin-top:8px;font-size:clamp(30px,5vw,56px);font-weight:800;letter-spacing:-.02em;line-height:1.05;
+  }
+  .coord ul{margin-top:40px;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 48px;max-width:820px}
+  .coord ul li{
+    font-size:15px;color:var(--gray);padding:10px 0;border-bottom:1px solid var(--line);
+  }
+  .coord ul li::before{content:"— ";color:var(--black)}
+  @media(max-width:640px){.coord ul{grid-template-columns:1fr}}
+
+  /* Why cards */
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
+  .why .col h3{
+    font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    padding-top:18px;border-top:2px solid var(--black);
+  }
+  .why .col p{margin-top:12px;font-size:15px;color:var(--gray)}
+  @media(max-width:760px){.why{grid-template-columns:1fr;gap:32px}}
+  .benchmark{margin-top:64px;font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.01em}
+  .benchmark em{font-style:normal;color:#b9b9b4}
+
+  /* Progression */
+  .prog{margin-top:56px;max-width:640px}
+  .prog .step{padding:20px 0;border-bottom:1px solid var(--line)}
+  .prog .step h3{font-size:17px;font-weight:800;letter-spacing:.02em}
+  .prog .step p{font-size:14px;color:var(--gray);margin-top:4px}
+  .prog .arrow{font-family:ui-monospace,Consolas,monospace;color:#b9b9b4;padding:10px 0;font-size:14px}
+  .horizon{
+    margin-top:64px;font-size:clamp(24px,3.6vw,40px);font-weight:800;letter-spacing:-.015em;line-height:1.25;max-width:900px;
+  }
+  .horizon em{font-style:normal;color:#b9b9b4}
+
+  /* Metrics */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--line);border:1px solid var(--line);margin-top:56px}
+  .metric{background:#fff;padding:26px 22px}
+  .metric .value{font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .metric .value.pending{color:#b9b9b4}
+  .metric .name{margin-top:8px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
+  .metric .state{margin-top:4px;font-family:ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.16em;color:#b9b9b4}
+  @media(max-width:820px){.metrics{grid-template-columns:repeat(2,1fr)}}
+
+  /* Roadmap */
+  .roadmap{margin-top:56px;border-top:1px solid var(--line)}
+  .phase{display:grid;grid-template-columns:110px 1fr auto;gap:24px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .phase .num{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.22em;color:var(--gray)}
+  .phase .name{font-size:16px;font-weight:700}
+  .phase .status{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.18em;color:#b9b9b4}
+  .phase.current .status{color:var(--black)}
+  .phase.current .num,.phase.current .name{color:var(--black)}
+  .phase.done .name{color:var(--gray)}
+  .phase.future .name{color:var(--gray)}
+  @media(max-width:640px){.phase{grid-template-columns:70px 1fr auto;gap:12px}}
+
+  /* Final CTA — dark */
+  .cta-final{background:#0a0a0a;color:#fff;padding:130px 0;border-bottom:none;text-align:left}
+  .cta-final .label{color:#8a8a92}
+  .cta-final h2{color:#fff;font-size:clamp(34px,6vw,64px);letter-spacing:-.01em;max-width:900px}
+  .cta-final p{margin-top:20px;color:#b9b9c0;font-size:17px;max-width:640px}
+  .cta-final .ctas{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+  .cta-final .ctas a{
+    text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    padding:14px 30px;transition:background .15s,color .15s;
+  }
+  .cta-final .ctas a.primary{background:#fff;color:#0a0a0a;border:1px solid #fff}
+  .cta-final .ctas a.primary:hover{background:transparent;color:#fff}
+  .cta-final .ctas a.secondary{border:1px solid #6a6a72;color:#e8e8ea}
+  .cta-final .ctas a.secondary:hover{border-color:#fff}
+
+  footer{padding:36px 0 48px;border-top:1px solid var(--line)}
+  footer .wrap{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    font-size:12px;color:var(--gray);letter-spacing:.06em;
+  }
+
+  /* Scroll reveal — disabled under reduced motion */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none;transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/baryon.html">
+      <svg width="30" height="28" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
+        <path d="M9 8 L91 8 L54 82 Q50 89 46 82 Z" stroke="#0a0a0a" stroke-width="8" stroke-linejoin="round" fill="none"/>
+        <text x="50" y="47" text-anchor="middle" dominant-baseline="middle" fill="#0a0a0a" font-family="Arial, sans-serif" font-weight="800" font-size="42">B</text>
+      </svg>
+      <span>BARYON</span>
+    </a>
+    <nav class="tabs">
+      <a href="/baryon.html">Home</a>
+      <a class="active" href="/lost-cabin.html">Lost Cabin</a>
+      <a href="/explore">Resource Intelligence</a>
+      <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="media" data-file="assets/baryon-robot-on-a-mountain-plateau.jpg">
+    <img src="/assets/baryon-robot-on-a-mountain-plateau.jpg" alt="Baryon autonomous quadruped robot standing on a rocky alpine plateau in the Big Horn Mountains"
+         onerror="this.parentElement.classList.add('pending');this.remove()">
+  </div>
+  <div class="inner">
+    <div class="wrap">
+      <div class="eyebrow">Case Study 001 — Big Horn Mountains, Wyoming</div>
+      <h1>LOST CABIN</h1>
+      <p class="sub">A proving ground for autonomous exploration.</p>
+      <p class="copy">Somewhere in Wyoming's Big Horn Mountains lies the story of a historic gold discovery whose location was lost more than a century ago. Baryon is using the search as a real-world test of a larger idea: autonomous machines that can explore, measure, reason about, and understand the physical world.</p>
+      <div class="ctas">
+        <a class="primary" href="#mission">Explore the Mission</a>
+        <a class="secondary" href="#fleet">The Autonomous Fleet</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chain" aria-label="The exploration loop">
+  <div class="wrap">
+    OBSERVE <em>→</em> INTERPRET <em>→</em> PRIORITIZE <em>→</em> INVESTIGATE <em>→</em> LEARN <em>→</em> REPEAT
+  </div>
+</div>
+
+<!-- THE CHALLENGE -->
+<section>
+  <div class="wrap reveal">
+    <div class="label">The challenge</div>
+    <h2>A 160-year-old search problem.</h2>
+    <p class="body">In the 1860s, a small party of prospectors reportedly struck rich placer gold in the Big Horns, built a cabin, and were driven out — leaving a discovery no one has verifiably relocated since. What remains is exactly the kind of problem modern exploration still struggles with: <b>an enormous search area, difficult terrain, incomplete historical information, sparse observations, and multiple competing hypotheses.</b></p>
+    <p class="body">Traditional exploration requires people to repeatedly traverse difficult terrain, collect measurements, return with the data, interpret it, and decide where to investigate next. Baryon is asking a different question: <b>what happens when the exploration system itself can make that loop autonomous?</b></p>
+  </div>
+</section>
+
+<!-- THE FLEET -->
+<section id="fleet">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">The autonomous exploration team</div>
+      <h2>One mission. Multiple machines.</h2>
+      <p class="body">Lost Cabin is not a drone project or a robot-dog project. It is a <b>coordinated system</b>: fast aerial machines that survey large areas, and ground machines that investigate what the air finds. Each platform is ordinary on its own. The value is in the loop between them.</p>
+    </div>
+
+    <div class="platform reveal">
+      <figure class="shot" data-file="assets/baryon-drone-over-snowy-mountains.jpg">
+        <img src="/assets/baryon-drone-over-snowy-mountains.jpg" alt="Baryon Aerial Scout VTOL aircraft in flight over mountains with towed magnetometer deployed"
+             onerror="this.parentElement.classList.add('pending');this.remove()">
+        <figcaption>Aerial Scout · towed-magnetometer configuration</figcaption>
+      </figure>
+      <div class="info">
+        <h3>Air — Baryon Aerial Scout</h3>
+        <div class="role">Rapid reconnaissance over large areas.</div>
+        <p>A VTOL fixed-wing survey aircraft that flies systematic autonomous grids and builds a georeferenced picture of terrain, geological structures, lineaments, surface alteration, vegetation anomalies, and magnetic anomalies — the map that decides where the ground team goes.</p>
+        <ul>
+          <li>RGB mapping camera</li><li>Multispectral</li><li>LiDAR</li><li>RTK GNSS</li>
+          <li>Precision IMU</li><li>Terrain following</li><li>Magnetic survey payload</li>
+          <li>Towed magnetometer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="platform reveal">
+      <figure class="shot" data-file="assets/baryon-rover-in-the-alpine-highlands.jpg">
+        <img src="/assets/baryon-rover-in-the-alpine-highlands.jpg" alt="Baryon Ground Scout quadruped robot with LiDAR mast traversing rocky alpine terrain"
+             onerror="this.parentElement.classList.add('pending');this.remove()">
+        <figcaption>Ground Scout · alpine traverse</figcaption>
+      </figure>
+      <div class="info">
+        <h3>Ground — Baryon Ground Scout</h3>
+        <div class="role">High-resolution investigation of airborne targets.</div>
+        <p>A quadruped geophysics platform that walks to the anomalies the aircraft flags and measures them properly — denser data, closer to the rock. It is the machine that closes the gap between remote sensing and drilling.</p>
+        <ul>
+          <li>LiDAR</li><li>Stereo depth cameras</li><li>RTK GNSS</li><li>Magnetometer</li>
+          <li>Gamma-ray spectrometer</li><li>EM conductivity</li><li>XRF</li><li>Multispectral</li>
+          <li>Environmental sensors</li>
+          <li class="dev">IP/resistivity deployment — in development</li>
+          <li class="dev">GPR — in development</li>
+          <li class="dev">Autonomous sampling — in development</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW THE MISSION WORKS -->
+<section id="mission">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">How the mission works</div>
+      <h2>Autonomous exploration loop.</h2>
+    </div>
+    <div class="stages reveal">
+      <div class="stage"><div class="num">01 — RECONNOITER</div><h3>Define the space</h3><p>Historical maps, geology, elevation data, satellite imagery, and known occurrences define the initial search space.</p></div>
+      <div class="stage"><div class="num">02 — SURVEY</div><h3>Fly the grids</h3><p>Autonomous UAVs perform broad-area LiDAR, imagery, multispectral, and magnetic surveys.</p></div>
+      <div class="stage"><div class="num">03 — DETECT</div><h3>Find the anomalies</h3><p>Onboard and cloud models identify geological structures and anomalous sensor responses.</p></div>
+      <div class="stage"><div class="num">04 — DISPATCH</div><h3>Assign the ground team</h3><p>Ground robots are automatically assigned to the highest-value targets.</p></div>
+      <div class="stage"><div class="num">05 — INVESTIGATE</div><h3>Measure up close</h3><p>Quadrupeds collect denser geophysical and geochemical measurements at each target.</p></div>
+      <div class="stage"><div class="num">06 — LEARN</div><h3>Update the model</h3><p>The combined observations update a continuously evolving geological prospectivity model.</p></div>
+    </div>
+    <p class="recursive reveal">The next mission is generated from what the previous mission learned.</p>
+  </div>
+</section>
+
+<!-- MULTI-PHYSICS -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">Multi-physics exploration</div>
+      <h2>The physical world does not speak in one sensor.</h2>
+      <p class="body">No instrument detects gold directly. <b>Gold exploration is fundamentally an inference problem</b> — many weak physical signals, combined carefully, become progressively stronger geological evidence. That is why every Baryon platform carries more than one way of asking the ground a question.</p>
+    </div>
+    <div class="sensors reveal">
+      <div class="sensor"><h3>MAGNETICS</h3><p>Maps structures, lithological boundaries, intrusions, and alteration.</p></div>
+      <div class="sensor"><h3>LiDAR</h3><p>Produces high-resolution terrain geometry and identifies subtle surface features.</p></div>
+      <div class="sensor"><h3>MULTISPECTRAL</h3><p>Characterizes surface materials and alteration signatures from their spectra.</p></div>
+      <div class="sensor"><h3>RADIOMETRICS</h3><p>Measures natural gamma signatures including potassium, uranium, and thorium.</p></div>
+      <div class="sensor"><h3>EM</h3><p>Maps electrical conductivity and subsurface structures.</p></div>
+      <div class="sensor"><h3>IP / RESISTIVITY</h3><p>Higher-resolution ground investigation of potential mineralized zones.</p></div>
+      <div class="sensor"><h3>GEOCHEMISTRY</h3><p>Ground robots can ultimately collect and analyze rock and soil observations.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COORDINATION -->
+<section class="coord">
+  <div class="wrap reveal">
+    <div class="label">Machine coordination</div>
+    <h2>The product is not the robot.</h2>
+    <p class="big">It is the system that coordinates them.</p>
+    <p class="body">Baryon is not building a portfolio of disconnected machines. The long-term technology stack is an orchestration layer that lets autonomous machines work as one exploration organism:</p>
+    <ul>
+      <li>perceive their surroundings</li>
+      <li>understand mission objectives</li>
+      <li>allocate tasks across the fleet</li>
+      <li>coordinate with other machines</li>
+      <li>react to new observations</li>
+      <li>collect structured physical data</li>
+      <li>update models of the environment</li>
+      <li>decide what to investigate next</li>
+      <li>escalate high-value targets</li>
+      <li>return, recharge, redeploy — automatically</li>
+    </ul>
+  </div>
+</section>
+
+<!-- WHY LOST CABIN -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">Why Lost Cabin</div>
+      <h2>Why start here?</h2>
+    </div>
+    <div class="why reveal">
+      <div class="col"><h3>Real terrain</h3><p>Mountainous, irregular, and physically difficult — no laboratory floor.</p></div>
+      <div class="col"><h3>Real uncertainty</h3><p>The target is not precisely known. The system must reason, not follow waypoints.</p></div>
+      <div class="col"><h3>Real science</h3><p>Success requires geology, geophysics, mapping, and inference working together.</p></div>
+      <div class="col"><h3>Real autonomy</h3><p>The machines must navigate and collect useful data far from their operators.</p></div>
+      <div class="col"><h3>Real feedback</h3><p>Every mission creates information that can change the next mission.</p></div>
+      <div class="col"><h3>Real economic analogue</h3><p>The same architecture applies directly to modern mineral exploration.</p></div>
+    </div>
+    <p class="benchmark reveal">Lost Cabin is not the destination. <em>It is the benchmark.</em></p>
+  </div>
+</section>
+
+<!-- FROM LOST CABIN TO THE PHYSICAL ECONOMY -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">The trajectory</div>
+      <h2>From exploration to autonomy at industrial scale.</h2>
+      <p class="body">Lost Cabin is a deliberately constrained first problem. If machines can autonomously explore a mountain range, collect scientific observations, reason over uncertainty, coordinate follow-up missions, and improve their understanding of the environment — <b>the same fundamental architecture extends far beyond exploration.</b></p>
+    </div>
+    <div class="prog reveal">
+      <div class="step"><h3>Lost Cabin</h3><p>Autonomous geological exploration</p></div>
+      <div class="arrow">↓</div>
+      <div class="step"><h3>Mineral Exploration</h3><p>Autonomous reconnaissance and target generation</p></div>
+      <div class="arrow">↓</div>
+      <div class="step"><h3>Mining</h3><p>Autonomous drilling, sampling, surveying, and material movement</p></div>
+      <div class="arrow">↓</div>
+      <div class="step"><h3>Infrastructure + Industry</h3><p>Autonomous physical work across remote and industrial environments</p></div>
+      <div class="arrow">↓</div>
+      <div class="step"><h3>The Physical Economy</h3><p>Networks of intelligent machines performing economically useful physical work</p></div>
+    </div>
+    <p class="horizon reveal">Baryon is building toward a future where intelligence is not confined to screens. <em>It operates machines, moves through landscapes, interacts with matter, and performs work in the physical world.</em></p>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">Case study metrics</div>
+      <h2>Mission telemetry.</h2>
+      <p class="body">Metrics populate as the field program executes. <b>Nothing here is fabricated</b> — until a machine measures it, it reads as pending.</p>
+    </div>
+    <div class="metrics reveal" id="metrics"></div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="label">Development status</div>
+      <h2>Program roadmap.</h2>
+    </div>
+    <div class="roadmap reveal" id="roadmap"></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-final">
+  <div class="wrap reveal">
+    <div class="label">Case Study 001</div>
+    <h2>THE MOUNTAINS ARE THE LAB.</h2>
+    <p>Lost Cabin is Baryon's first field test of machines that can autonomously explore and understand the physical world.</p>
+    <div class="ctas">
+      <a class="primary" href="mailto:sebastianskipwith@gmail.com?subject=Follow%20the%20Lost%20Cabin%20Expedition">Follow the Expedition</a>
+      <a class="secondary" href="/baryon.html">Explore Baryon</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Baryon</span>
+    <span>Building the Autonomous Physical Economy</span>
+  </div>
+</footer>
+
+<script>
+// ---- Mission config: update these as the field program progresses. ----------
+const MISSION = {
+  currentPhase: 1, // 1-based index into roadmap below
+  metrics: [
+    { name: "Area surveyed",              value: null, unit: "km²" },
+    { name: "Autonomous flight hours",    value: null, unit: "" },
+    { name: "Autonomous ground hours",    value: null, unit: "" },
+    { name: "Geophysical observations",   value: null, unit: "" },
+    { name: "Anomalies detected",         value: null, unit: "" },
+    { name: "Ground targets investigated",value: null, unit: "" },
+    { name: "Human field hours displaced",value: null, unit: "" },
+    { name: "Missions completed",         value: null, unit: "" },
+  ],
+  roadmap: [
+    "Platform integration",
+    "Autonomous navigation",
+    "Sensor integration",
+    "Coordinated UAV + quadruped missions",
+    "Big Horn field deployment",
+    "Autonomous adaptive surveying",
+    "Commercial mineral-exploration pilots",
+  ],
+};
+// -----------------------------------------------------------------------------
+
+const fmt = (n) => typeof n === "number" ? n.toLocaleString("en-US") : "—";
+document.getElementById("metrics").innerHTML = MISSION.metrics.map(m => `
+  <div class="metric">
+    <div class="value${m.value == null ? " pending" : ""}">${fmt(m.value)}${m.value != null && m.unit ? " " + m.unit : m.value == null && m.unit ? " " + m.unit : ""}</div>
+    <div class="name">${m.name}</div>
+    ${m.value == null ? '<div class="state">FIELD PROGRAM PENDING</div>' : ""}
+  </div>`).join("");
+
+document.getElementById("roadmap").innerHTML = MISSION.roadmap.map((name, i) => {
+  const n = i + 1;
+  const cls = n < MISSION.currentPhase ? "done" : n === MISSION.currentPhase ? "current" : "future";
+  const status = n < MISSION.currentPhase ? "COMPLETE" : n === MISSION.currentPhase ? "● IN PROGRESS" : "PLANNED";
+  return `<div class="phase ${cls}">
+    <div class="num">PHASE 0${n}</div>
+    <div class="name">${name}</div>
+    <div class="status">${status}</div>
+  </div>`;
+}).join("");
+
+// Scroll reveal (no-op under prefers-reduced-motion: CSS already shows content).
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+} else {
+  document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+}
+</script>
+
+</body>
+</html>

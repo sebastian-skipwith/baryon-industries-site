@@ -93,6 +93,21 @@
   }
   .earth p.big em{font-style:normal;color:#b9b9b4}
 
+  .feature figure{position:relative;background:#101014;margin-top:44px;overflow:hidden}
+  .feature figure img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover;object-position:center 45%}
+  .feature figure.pending{aspect-ratio:21/9;display:flex;align-items:center;justify-content:center}
+  .feature figure.pending::before{
+    content:"IMAGE PENDING — save asset as " attr(data-file);
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.14em;color:#6a6a72;
+    padding:0 24px;text-align:center;
+  }
+  .feature a.view{
+    display:inline-block;margin-top:26px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--black);text-decoration:none;border:1px solid var(--black);padding:12px 26px;
+    transition:background .15s,color .15s;
+  }
+  .feature a.view:hover{background:var(--black);color:#fff}
+
   .cta{padding:110px 0;border-bottom:none}
   .cta a.mail{
     display:inline-block;margin-top:30px;font-size:17px;color:var(--black);
@@ -121,6 +136,7 @@
     </a>
     <nav class="tabs">
       <a class="active" href="#">Home</a>
+      <a href="/lost-cabin.html">Lost Cabin</a>
       <!-- Served alongside the Baryon app; when deployed, point at the app's domain. -->
       <a href="/explore">Resource Intelligence</a>
       <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
@@ -182,6 +198,19 @@
   <div class="wrap">
     <div class="label">The horizon</div>
     <p class="big">The endgame is an autonomous resource network: machines that explore, produce, process, move, and build — on this planet, <em>and then on others.</em></p>
+  </div>
+</section>
+
+<section class="feature">
+  <div class="wrap">
+    <div class="label">Field Case Study 001</div>
+    <h2>Searching for Lost Cabin.</h2>
+    <p class="body">Baryon is deploying autonomous aerial and ground robots into Wyoming's Big Horn Mountains to test a new model for machine-led mineral exploration — coordinated machines that survey, investigate, and learn.</p>
+    <figure data-file="assets/baryon-drone-amid-alpine-peaks.jpg">
+      <img src="/assets/baryon-drone-amid-alpine-peaks.jpg" alt="Baryon Aerial Scout VTOL survey aircraft on an alpine ridgeline in the Big Horn Mountains"
+           loading="lazy" onerror="this.parentElement.classList.add('pending');this.remove()">
+    </figure>
+    <a class="view" href="/lost-cabin.html">View Case Study →</a>
   </div>
 </section>
 
