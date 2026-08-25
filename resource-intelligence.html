@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resource Intelligence | Baryon</title>
+<meta name="description" content="Baryon Resource Intelligence is a living world model of the physical economy — 100,000+ resource sites, trade flows, maritime chokepoints, and satellite coverage, queryable like an analyst. Private beta.">
+<meta property="og:title" content="Baryon Resource Intelligence">
+<meta property="og:description" content="A living world model of the physical economy. Private beta.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --gray:#55555c;
+    --line:#e6e6e2;
+    --max:1080px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#ffffff;color:var(--black);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.6;
+  }
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+  header{padding:28px 0;border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--black)}
+  .brand span{font-weight:800;letter-spacing:.35em;font-size:15px}
+  .nav .tabs{display:flex;align-items:center;gap:28px}
+  .nav .tabs a{
+    color:var(--gray);text-decoration:none;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;padding-bottom:3px;border-bottom:2px solid transparent;
+    transition:color .15s,border-color .15s;
+  }
+  .nav .tabs a:hover{color:var(--black)}
+  .nav .tabs a.active{color:var(--black);border-bottom-color:var(--black)}
+  .nav a.contact{
+    color:var(--black);text-decoration:none;font-size:13px;letter-spacing:.12em;
+    text-transform:uppercase;border:1px solid var(--black);padding:9px 18px;
+    transition:background .15s,color .15s;
+  }
+  .nav a.contact:hover{background:var(--black);color:#fff}
+  @media(max-width:640px){.nav .tabs{gap:14px}.nav .tabs a{font-size:10px;letter-spacing:.08em}.nav a.contact{display:none}}
+
+  .hero{padding:110px 0 70px}
+  .eyebrow{
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--gray);
+  }
+  h1{margin-top:16px;font-size:clamp(38px,6vw,72px);line-height:1.04;font-weight:800;letter-spacing:-.02em;max-width:900px}
+  .hero p.lede{margin-top:24px;font-size:clamp(17px,2vw,20px);color:var(--gray);max-width:660px}
+
+  .stats{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(4,1fr);
+  }
+  .stat{padding:30px 24px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:none}
+  .stat .v{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.02em}
+  .stat .k{margin-top:6px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:none}}
+
+  section{padding:80px 0;border-bottom:1px solid var(--line)}
+  .label{
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gray);margin-bottom:22px;
+  }
+  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:760px}
+  section p.body{margin-top:22px;font-size:17px;color:var(--gray);max-width:640px}
+  section p.body b{color:var(--black);font-weight:600}
+
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
+  .col h3{
+    font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    padding-top:18px;border-top:2px solid var(--black);
+  }
+  .col p{margin-top:12px;font-size:15px;color:var(--gray)}
+  @media(max-width:760px){.cols{grid-template-columns:1fr;gap:32px}}
+
+  .cta{padding:100px 0;border-bottom:none}
+  .cta a.mail{
+    display:inline-block;margin-top:30px;font-size:15px;color:var(--black);
+    text-decoration:none;border:1px solid var(--black);padding:14px 30px;
+    letter-spacing:.1em;text-transform:uppercase;transition:background .15s,color .15s;
+  }
+  .cta a.mail:hover{background:var(--black);color:#fff}
+
+  footer{padding:36px 0 48px;border-top:1px solid var(--line)}
+  footer .wrap{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    font-size:12px;color:var(--gray);letter-spacing:.06em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/">
+      <svg width="30" height="28" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
+        <path d="M9 8 L91 8 L54 82 Q50 89 46 82 Z" stroke="#0a0a0a" stroke-width="8" stroke-linejoin="round" fill="none"/>
+        <text x="50" y="47" text-anchor="middle" dominant-baseline="middle" fill="#0a0a0a" font-family="Arial, sans-serif" font-weight="800" font-size="42">B</text>
+      </svg>
+      <span>BARYON</span>
+    </a>
+    <nav class="tabs">
+      <a href="/">Home</a>
+      <a href="/lost-cabin">Lost Cabin</a>
+      <a class="active" href="/resource-intelligence">Resource Intelligence</a>
+      <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Private beta</div>
+    <h1>A living world model of the physical economy.</h1>
+    <p class="lede">Baryon Resource Intelligence maps where the world's resources come from, how they move, and what they become — mines, smelters, refineries, ports, factories, trade routes, and maritime chokepoints on one queryable satellite globe, with an autonomous research agent expanding it every day.</p>
+  </div>
+</div>
+
+<div class="stats" aria-label="World model coverage">
+  <div class="stat"><div class="v">100,000+</div><div class="k">Resource sites</div></div>
+  <div class="stat"><div class="v">32</div><div class="k">Commodities</div></div>
+  <div class="stat"><div class="v">28</div><div class="k">Chokepoints, daily AIS</div></div>
+  <div class="stat"><div class="v">5</div><div class="k">Autonomous data feeds</div></div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="label">What it does</div>
+    <h2>Query the world like you'd ask an analyst.</h2>
+    <p class="body">Ask where the world's cobalt comes from, what a disruption at Hormuz touches, or what materials are inside a product on your desk — and get answers grounded in a sourced database, not a language model's guess. <b>Every row carries its source, its confidence, and its as-of date.</b> The model is deliberately honest about what it doesn't know yet.</p>
+    <div class="cols">
+      <div class="col">
+        <h3>The world model</h3>
+        <p>Mines, smelters, refineries, ports, storage terminals, and factories from federal and open datasets — USGS, the World Port Index, Global Energy Monitor — refreshed on schedule.</p>
+      </div>
+      <div class="col">
+        <h3>Live logistics</h3>
+        <p>Daily vessel transits through the world's maritime chokepoints and port-level activity derived from satellite AIS data, via IMF PortWatch.</p>
+      </div>
+      <div class="col">
+        <h3>Machine eyes</h3>
+        <p>Sentinel satellite coverage over key assets, supply-chain route graphs from facility to facility, and an autonomous agent that researches and expands the model around the clock.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <div class="label">Access</div>
+    <h2>The tool is in private beta.</h2>
+    <p class="body">Resource Intelligence currently runs as an internal Baryon system. If you explore, trade, or build with physical resources and want early access, get in touch.</p>
+    <a class="mail" href="mailto:sebastianskipwith@gmail.com?subject=Resource%20Intelligence%20beta">Request access</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Baryon</span>
+    <span>Building the Autonomous Physical Economy</span>
+  </div>
+</footer>
+
+</body>
+</html>
