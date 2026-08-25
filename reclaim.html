@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Resource Intelligence | Baryon</title>
-<meta name="description" content="Baryon Resource Intelligence is a living world model of the physical economy — 100,000+ resource sites, trade flows, maritime chokepoints, and satellite coverage, queryable like an analyst. Private beta.">
-<meta property="og:title" content="Baryon Resource Intelligence">
-<meta property="og:description" content="A living world model of the physical economy. Private beta.">
+<title>Reclaim | Baryon</title>
+<meta name="description" content="Baryon Reclaim is an AI material arbitrage engine: it appraises scrap, surplus, and unwanted equipment, prices the recoverable material, and finds the highest-value path for it. Private beta.">
+<meta property="og:title" content="Baryon Reclaim">
+<meta property="og:description" content="An AI appraisal engine for the waste stream. Private beta.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
 <style>
@@ -41,7 +41,7 @@
     transition:background .15s,color .15s;
   }
   .nav a.contact:hover{background:var(--black);color:#fff}
-  @media(max-width:640px){.nav .tabs{gap:14px}.nav .tabs a{font-size:10px;letter-spacing:.08em}.nav a.contact{display:none}}
+  @media(max-width:640px){.nav .tabs{gap:12px}.nav .tabs a{font-size:10px;letter-spacing:.06em}.nav a.contact{display:none}}
 
   .hero{padding:110px 0 70px}
   .eyebrow{
@@ -51,15 +51,15 @@
   h1{margin-top:16px;font-size:clamp(38px,6vw,72px);line-height:1.04;font-weight:800;letter-spacing:-.02em;max-width:900px}
   .hero p.lede{margin-top:24px;font-size:clamp(17px,2vw,20px);color:var(--gray);max-width:660px}
 
-  .stats{
+  .chain{
     border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    display:grid;grid-template-columns:repeat(4,1fr);
+    padding:22px 0;overflow-x:auto;
   }
-  .stat{padding:30px 24px;border-right:1px solid var(--line)}
-  .stat:last-child{border-right:none}
-  .stat .v{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.02em}
-  .stat .k{margin-top:6px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
-  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:none}}
+  .chain .wrap{
+    display:flex;gap:14px;align-items:center;white-space:nowrap;
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.18em;
+  }
+  .chain em{font-style:normal;color:#b9b9b4}
 
   section{padding:80px 0;border-bottom:1px solid var(--line)}
   .label{
@@ -77,6 +77,18 @@
   }
   .col p{margin-top:12px;font-size:15px;color:var(--gray)}
   @media(max-width:760px){.cols{grid-template-columns:1fr;gap:32px}}
+
+  /* Example appraisal table */
+  .example{margin-top:56px;max-width:560px;border:1px solid var(--line)}
+  .example .head{
+    padding:14px 20px;border-bottom:1px solid var(--line);
+    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.14em;color:var(--gray);
+  }
+  .example table{width:100%;border-collapse:collapse;font-size:14px}
+  .example td{padding:9px 20px;border-bottom:1px solid var(--line)}
+  .example td:last-child{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+  .example tr.total td{font-weight:800;border-bottom:none}
+  .example .neg{color:#a04040}
 
   .cta{padding:100px 0;border-bottom:none}
   .cta a.mail{
@@ -107,8 +119,8 @@
     <nav class="tabs">
       <a href="/">Home</a>
       <a href="/lost-cabin">Lost Cabin</a>
-      <a class="active" href="/resource-intelligence">Resource Intelligence</a>
-      <a href="/reclaim">Reclaim</a>
+      <a href="/resource-intelligence">Resource Intelligence</a>
+      <a class="active" href="/reclaim">Reclaim</a>
       <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
     </nav>
   </div>
@@ -117,35 +129,54 @@
 <div class="hero">
   <div class="wrap">
     <div class="eyebrow">Private beta</div>
-    <h1>A living world model of the physical economy.</h1>
-    <p class="lede">Baryon Resource Intelligence maps where the world's resources come from, how they move, and what they become — mines, smelters, refineries, ports, factories, trade routes, and maritime chokepoints on one queryable satellite globe, with an autonomous research agent expanding it every day.</p>
+    <h1>The waste stream is a commodity market nobody is pricing.</h1>
+    <p class="lede">Reclaim is Baryon's material arbitrage engine. Point it at any listing for scrap, surplus, or unwanted equipment — an auction lot, a marketplace find, a pile behind a shop — and it estimates what the material is actually worth, what it costs to recover, and whether the trade is worth making.</p>
   </div>
 </div>
 
-<div class="stats" aria-label="World model coverage">
-  <div class="stat"><div class="v">100,000+</div><div class="k">Resource sites</div></div>
-  <div class="stat"><div class="v">32</div><div class="k">Commodities</div></div>
-  <div class="stat"><div class="v">28</div><div class="k">Chokepoints, daily AIS</div></div>
-  <div class="stat"><div class="v">5</div><div class="k">Autonomous data feeds</div></div>
+<div class="chain" aria-label="The Reclaim loop">
+  <div class="wrap">
+    DISCOVER <em>→</em> IDENTIFY <em>→</em> VALUE <em>→</em> OPTIMIZE <em>→</em> ACQUIRE <em>→</em> ROUTE <em>→</em> VERIFY <em>→</em> LEARN
+  </div>
 </div>
 
 <section>
   <div class="wrap">
-    <div class="label">What it does</div>
-    <h2>Query the world like you'd ask an analyst.</h2>
-    <p class="body">Ask where the world's cobalt comes from, what a disruption at Hormuz touches, or what materials are inside a product on your desk — and get answers grounded in a sourced database, not a language model's guess. <b>Every row carries its source, its confidence, and its as-of date.</b> The model is deliberately honest about what it doesn't know yet.</p>
+    <div class="label">How it works</div>
+    <h2>Every object is a bundle of commodities with a logistics problem attached.</h2>
+    <p class="body">Reclaim reads a listing and decomposes it: objects → materials → weights → recoverable fractions. It prices each fraction against sourced scrap benchmarks, compares scrap value against reselling intact or parting out — <b>the value waterfall</b> — then subtracts the full cost of recovery: loading, transport, processing, disposal, and a risk reserve. What's left is the number that matters: <b>expected net</b>.</p>
+    <div class="example">
+      <div class="head">EXAMPLE — "FREE: old commercial electrical equipment, must haul away"</div>
+      <table>
+        <tr><td>Estimated weight</td><td>~2,400 lb</td></tr>
+        <tr><td>Copper (wire, windings, bus)</td><td>~310 lb</td></tr>
+        <tr><td>Steel / mixed ferrous</td><td>~1,450 lb</td></tr>
+        <tr><td>Estimated gross recovery</td><td>$1,720</td></tr>
+        <tr><td>Pickup, transport, processing</td><td class="neg">−$635</td></tr>
+        <tr><td>Risk reserve</td><td class="neg">−$150</td></tr>
+        <tr class="total"><td>Expected net</td><td>$935</td></tr>
+      </table>
+    </div>
+    <p class="body" style="margin-top:28px;font-size:13px">Illustrative figures. Real appraisals carry weight ranges, per-material pricing with sources and as-of dates, and a stated confidence.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="label">The engine</div>
+    <h2>Built on the same world model as Resource Intelligence.</h2>
     <div class="cols">
       <div class="col">
-        <h3>The world model</h3>
-        <p>Mines, smelters, refineries, ports, storage terminals, and factories from federal and open datasets — USGS, the World Port Index, Global Energy Monitor — refreshed on schedule.</p>
+        <h3>Sourced pricing</h3>
+        <p>Scrap benchmarks with a source and an as-of date on every row, refreshed by an autonomous research agent — the same honest-data discipline as Baryon's world model.</p>
       </div>
       <div class="col">
-        <h3>Live logistics</h3>
-        <p>Daily vessel transits through the world's maritime chokepoints and port-level activity derived from satellite AIS data, via IMF PortWatch.</p>
+        <h3>Value waterfall</h3>
+        <p>Resell intact, part out, or scrap — the engine recommends the highest-value realistic disposition, not just the commodity number.</p>
       </div>
       <div class="col">
-        <h3>Machine eyes</h3>
-        <p>Sentinel satellite coverage over key assets, supply-chain route graphs from facility to facility, and an autonomous agent that researches and expands the model around the clock.</p>
+        <h3>Provenance first</h3>
+        <p>Theft-prone material — copper, catalytic converters, utility equipment — is flagged automatically. Clean ownership is a requirement, not an afterthought.</p>
       </div>
     </div>
   </div>
@@ -154,9 +185,9 @@
 <section class="cta">
   <div class="wrap">
     <div class="label">Access</div>
-    <h2>The tool is in private beta.</h2>
-    <p class="body">Resource Intelligence currently runs as an internal Baryon system. If you explore, trade, or build with physical resources and want early access, get in touch.</p>
-    <a class="mail" href="mailto:sebastianskipwith@gmail.com?subject=Resource%20Intelligence%20beta">Request access</a>
+    <h2>Reclaim is in private beta.</h2>
+    <p class="body">The appraisal engine currently runs as an internal Baryon system. If you clear buildings, run a shop with a scrap pile, haul material, or operate a yard — get in touch.</p>
+    <a class="mail" href="mailto:sebastianskipwith@gmail.com?subject=Reclaim%20beta">Request access</a>
   </div>
 </section>
 
