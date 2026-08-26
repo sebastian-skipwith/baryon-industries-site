@@ -4,112 +4,122 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Resource Intelligence | Baryon</title>
-<meta name="description" content="A living world model of the physical economy — 100,000+ resource sites, trade routes, and maritime chokepoints on an interactive satellite globe, plus production, consumption, and reserves for every commodity.">
+<meta name="description" content="A living world model of the physical economy — 100,000+ resource sites, real traced trade routes, maritime chokepoints, and per-commodity production, consumption, and reserves.">
 <meta property="og:title" content="Baryon Resource Intelligence">
-<meta property="og:description" content="Explore 100,000+ resource sites and every commodity's production, consumption, and reserves.">
+<meta property="og:description" content="Explore 100,000+ resource sites, real traced trade routes, and every commodity's production, consumption, and reserves.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/maplibre/maplibre-gl.css">
 <style>
   :root{
-    --black:#0a0a0a;
-    --gray:#55555c;
-    --line:#e6e6e2;
-    --max:1180px;
+    --black:#0a0a0a; --gray:#55555c; --line:#e6e6e2;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
   body{
-    background:#ffffff;color:var(--black);
+    background:#fff;color:var(--black);
     font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;line-height:1.6;
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+    display:flex;flex-direction:column;overflow:hidden;
   }
-  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
-  header{padding:28px 0;border-bottom:1px solid var(--line)}
+  header{padding:16px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
   .nav{display:flex;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--black)}
-  .brand span{font-weight:800;letter-spacing:.35em;font-size:15px}
-  .nav .tabs{display:flex;align-items:center;gap:28px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--black)}
+  .brand span{font-weight:800;letter-spacing:.35em;font-size:14px}
+  .nav .tabs{display:flex;align-items:center;gap:22px}
   .nav .tabs a{
-    color:var(--gray);text-decoration:none;font-size:12px;letter-spacing:.18em;
-    text-transform:uppercase;padding-bottom:3px;border-bottom:2px solid transparent;
-    transition:color .15s,border-color .15s;
+    color:var(--gray);text-decoration:none;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;padding-bottom:2px;border-bottom:2px solid transparent;
   }
   .nav .tabs a:hover{color:var(--black)}
   .nav .tabs a.active{color:var(--black);border-bottom-color:var(--black)}
-  .nav a.contact{
-    color:var(--black);text-decoration:none;font-size:13px;letter-spacing:.12em;
-    text-transform:uppercase;border:1px solid var(--black);padding:9px 18px;
-    transition:background .15s,color .15s;
+  @media(max-width:700px){.nav .tabs{gap:10px}.nav .tabs a{font-size:9px;letter-spacing:.05em}}
+
+  /* Split layout: dashboard left, map right */
+  main{flex:1;display:flex;min-height:0}
+  aside{
+    width:430px;max-width:46vw;flex-shrink:0;border-right:1px solid var(--line);
+    overflow-y:auto;padding:18px 20px 40px;
   }
-  .nav a.contact:hover{background:var(--black);color:#fff}
-  @media(max-width:640px){.nav .tabs{gap:12px}.nav .tabs a{font-size:10px;letter-spacing:.06em}.nav a.contact{display:none}}
-
-  .hero{padding:70px 0 40px}
-  .eyebrow{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gray)}
-  h1{margin-top:14px;font-size:clamp(34px,5vw,60px);line-height:1.05;font-weight:800;letter-spacing:-.02em;max-width:900px}
-  .hero p.lede{margin-top:18px;font-size:clamp(16px,2vw,19px);color:var(--gray);max-width:680px}
-
-  .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
-  .stat{padding:24px;border-right:1px solid var(--line)}
-  .stat:last-child{border-right:none}
-  .stat .v{font-size:clamp(22px,2.6vw,32px);font-weight:800;letter-spacing:-.02em}
-  .stat .k{margin-top:4px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gray)}
-  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:none}}
-
-  /* Globe */
-  .globe-frame{position:relative;margin:36px auto 0;max-width:var(--max);padding:0 24px}
-  #map{height:72vh;min-height:480px;border-radius:10px;background:#050507;overflow:hidden}
+  @media(max-width:700px){main{flex-direction:column}aside{width:100%;max-width:none;height:45%;border-right:none;border-bottom:1px solid var(--line)}}
+  .mapwrap{flex:1;position:relative;background:#050507;min-width:0}
+  #map{position:absolute;inset:0}
   .legend{
-    position:absolute;right:36px;bottom:40px;z-index:5;display:flex;flex-wrap:wrap;justify-content:flex-end;
-    gap:4px 12px;max-width:60%;background:rgba(0,0,0,.6);border:1px solid #2a2a30;border-radius:6px;
-    padding:6px 12px;font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#a9a9b0;backdrop-filter:blur(4px);
+    position:absolute;right:12px;bottom:34px;z-index:5;display:flex;flex-wrap:wrap;justify-content:flex-end;
+    gap:3px 10px;max-width:70%;background:rgba(0,0,0,.6);border:1px solid #2a2a30;border-radius:6px;
+    padding:5px 10px;font-family:ui-monospace,Consolas,monospace;font-size:9.5px;color:#a9a9b0;
   }
   .dossier{
-    position:absolute;top:36px;right:36px;z-index:6;width:330px;max-width:calc(100% - 72px);
-    background:rgba(8,8,10,.88);border:1px solid #2a2a30;border-radius:10px;padding:14px 16px;
-    color:#e6e6ea;backdrop-filter:blur(6px);display:none;
+    position:absolute;top:12px;right:12px;z-index:6;width:310px;max-width:calc(100% - 24px);
+    background:rgba(8,8,10,.9);border:1px solid #2a2a30;border-radius:10px;padding:12px 14px;
+    color:#e6e6ea;display:none;
   }
-  .dossier .close{position:absolute;top:8px;right:12px;cursor:pointer;color:#8a8a92;background:none;border:none;font-size:14px}
-  .dossier h3{font-size:15px;font-weight:700}
+  .dossier .close{position:absolute;top:6px;right:10px;cursor:pointer;color:#8a8a92;background:none;border:none;font-size:13px}
+  .dossier h3{font-size:14px;font-weight:700;padding-right:16px}
   .dossier .meta{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#9a9aa2;margin-top:2px}
-  .dossier p{font-size:12px;margin-top:8px;color:#c9c9cf}
-  .dossier .src{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#7a7a82;margin-top:10px}
-  .hint{margin-top:10px;font-size:11px;color:#8a8a90;text-align:center}
+  .dossier p{font-size:11.5px;margin-top:6px;color:#c9c9cf;white-space:pre-wrap}
+  .dossier .src{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#7a7a82;margin-top:8px}
 
-  section{padding:80px 0;border-bottom:1px solid var(--line)}
-  .label{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gray);margin-bottom:18px}
-  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:820px}
-  section p.body{margin-top:18px;font-size:16px;color:var(--gray);max-width:660px}
-
-  /* Balances table */
-  .bal-wrap{margin-top:40px;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
-  table.bal{width:100%;min-width:860px;border-collapse:collapse;font-size:13.5px}
-  table.bal th{
-    text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:#fafaf8;
-    font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);
+  /* Left dashboard */
+  .lbl{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gray);margin:18px 0 8px}
+  .lbl:first-child{margin-top:0}
+  input.search,select.commodity{
+    width:100%;padding:9px 12px;border:1px solid #d4d4ce;border-radius:6px;font-size:13px;background:#fafaf8;
   }
-  table.bal td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
-  table.bal tr:last-child td{border-bottom:none}
-  table.bal .cname{font-weight:700}
-  table.bal .src{font-family:ui-monospace,Consolas,monospace;font-size:9.5px;color:#9a9a94;margin-top:2px}
-  table.bal .muted{color:var(--gray)}
-  table.bal .note{font-size:11.5px;color:#8a8a84;margin-top:2px}
-  .years{font-family:ui-monospace,Consolas,monospace;font-weight:700;font-size:13px}
-  .years.red{color:#c0392b}.years.amber{color:#b07800}.years.green{color:#1e8e5a}
-  .bar{height:5px;width:96px;background:#eeeeea;border-radius:3px;margin-top:5px;overflow:hidden}
-  .bar i{display:block;height:100%}
-  .bar i.red{background:#c0392b}.bar i.amber{background:#d99000}.bar i.green{background:#1e8e5a}
+  input.search:focus,select.commodity:focus{outline:none;border-color:var(--black)}
+  .search-hits{border:1px solid var(--line);border-radius:6px;margin-top:6px;max-height:180px;overflow-y:auto;display:none}
+  .search-hits button{
+    display:block;width:100%;text-align:left;padding:7px 10px;background:none;border:none;border-bottom:1px solid #f0f0ec;
+    font-size:12px;cursor:pointer;
+  }
+  .search-hits button:hover{background:#fafaf8}
+  .search-hits button:last-child{border-bottom:none}
+  .search-hits .sub{font-family:ui-monospace,Consolas,monospace;font-size:9.5px;color:#9a9a94}
 
-  footer{padding:36px 0 48px;border-top:1px solid var(--line)}
-  footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;color:var(--gray);letter-spacing:.06em}
+  .filters{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    padding:5px 10px;border:1px solid #d4d4ce;border-radius:5px;background:#fff;font-size:11.5px;cursor:pointer;
+    font-family:ui-monospace,Consolas,monospace;color:#3a3a40;
+  }
+  .chip.on{background:var(--black);color:#fff;border-color:var(--black)}
+
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .tile{border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+  .tile .v{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .tile .k{font-family:ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray);margin-top:2px}
+
+  .balrow{
+    display:flex;align-items:center;gap:10px;width:100%;padding:8px 6px;border:none;background:none;
+    border-bottom:1px solid #f0f0ec;font-size:12.5px;cursor:pointer;text-align:left;
+  }
+  .balrow:hover{background:#fafaf8}
+  .balrow .nm{flex:1;font-weight:600}
+  .balrow .yrs{font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;width:52px;text-align:right}
+  .balrow .bar{width:70px;height:5px;background:#eeeeea;border-radius:3px;overflow:hidden}
+  .balrow .bar i{display:block;height:100%}
+  .red{color:#c0392b}.amber{color:#b07800}.green{color:#1e8e5a}
+  i.red{background:#c0392b}i.amber{background:#d99000}i.green{background:#1e8e5a}
+
+  .detail .back{background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;padding:0;letter-spacing:.1em;text-transform:uppercase;font-family:ui-monospace,Consolas,monospace}
+  .detail h2{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-top:6px}
+  .card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;margin-top:8px}
+  .card b{font-weight:700}
+  .card .src{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#9a9a94;margin-top:6px}
+  .sharebar{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px}
+  .sharebar .c{width:110px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sharebar .track{flex:1;height:8px;background:#eeeeea;border-radius:4px;overflow:hidden}
+  .sharebar .track i{display:block;height:100%;background:#0a0a0a}
+  .sharebar .amt{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:var(--gray);width:130px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srcline{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#9a9a94;margin-top:4px}
+  .note{font-size:11px;color:#8a8a84;margin-top:12px;line-height:1.5}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="wrap nav">
+  <div class="nav">
     <a class="brand" href="/">
-      <svg width="30" height="28" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
+      <svg width="26" height="24" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
         <path d="M9 8 L91 8 L54 82 Q50 89 46 82 Z" stroke="#0a0a0a" stroke-width="8" stroke-linejoin="round" fill="none"/>
         <text x="50" y="47" text-anchor="middle" dominant-baseline="middle" fill="#0a0a0a" font-family="Arial, sans-serif" font-weight="800" font-size="42">B</text>
       </svg>
@@ -120,136 +130,177 @@
       <a href="/lost-cabin">Lost Cabin</a>
       <a class="active" href="/resource-intelligence">Resource Intelligence</a>
       <a href="/reclaim">Reclaim</a>
-      <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
     </nav>
   </div>
 </header>
 
-<div class="hero">
-  <div class="wrap">
-    <div class="eyebrow">Live world model</div>
-    <h1>A living world model of the physical economy.</h1>
-    <p class="lede">Every mine, smelter, refinery, port, factory, and maritime chokepoint the model knows about — on one satellite globe. Below it: how much of every commodity the world produces, consumes, and still has in the ground. Every figure sourced and dated.</p>
-  </div>
-</div>
+<main>
+  <aside id="panel">
+    <div class="lbl">Search the world model</div>
+    <input class="search" id="q" placeholder="Search 100,000+ sites — try Escondida, Suez, Gigafactory…">
+    <div class="search-hits" id="hits"></div>
 
-<div class="stats" aria-label="World model coverage">
-  <div class="stat"><div class="v" id="st-sites">—</div><div class="k">Resource sites</div></div>
-  <div class="stat"><div class="v" id="st-comm">—</div><div class="k">Commodities</div></div>
-  <div class="stat"><div class="v" id="st-choke">—</div><div class="k">Maritime chokepoints</div></div>
-  <div class="stat"><div class="v" id="st-gen">—</div><div class="k">Data snapshot</div></div>
-</div>
+    <div class="lbl">Commodity</div>
+    <select class="commodity" id="commodity"><option value="">All commodities — overview</option></select>
 
-<div class="globe-frame">
-  <div id="map"></div>
-  <div class="legend">
-    <span><span style="color:#f0a500">●</span> mine</span>
-    <span><span style="color:#38bdf8">●</span> smelter/refinery</span>
-    <span><span style="color:#34d399">●</span> port</span>
-    <span><span style="color:#2dd4bf">●</span> storage</span>
-    <span><span style="color:#a78bfa">●</span> factory</span>
-    <span><span style="color:#f43f5e">●</span> chokepoint</span>
-    <span><span style="color:#71717a">●</span> archive cluster</span>
-    <span><span style="color:#f0a500">—</span> trade route</span>
-  </div>
-  <div class="dossier" id="dossier">
-    <button class="close" onclick="document.getElementById('dossier').style.display='none'">✕</button>
-    <h3 id="d-name"></h3>
-    <div class="meta" id="d-meta"></div>
-    <p id="d-notes"></p>
-    <div class="src" id="d-src"></div>
-  </div>
-  <div class="hint">Drag to rotate · scroll to zoom · click any point for details. 100,000+ sites cluster into gray bubbles — zoom to expand.</div>
-</div>
-
-<section>
-  <div class="wrap">
-    <div class="label">Commodity balances</div>
-    <h2>Produced. Consumed. Left in the ground.</h2>
-    <p class="body">Annual global production, annual consumption, and known reserves for every commodity in the model. <b>"Years left" divides reserves by current production</b> — a static snapshot, not a forecast: reserves grow with exploration, technology, and price.</p>
-    <div class="bal-wrap">
-      <table class="bal">
-        <thead>
-          <tr><th>Commodity</th><th>Production / yr</th><th>Consumption / yr</th><th>Known reserves</th><th>Years left</th></tr>
-        </thead>
-        <tbody id="bal-body"></tbody>
-      </table>
+    <div class="lbl">Map layers</div>
+    <div class="filters" id="filters">
+      <button class="chip on" data-f="archive">archive sites</button>
+      <button class="chip on" data-f="flows">trade routes</button>
+      <button class="chip on" data-f="mine">mines</button>
+      <button class="chip on" data-f="processing">smelters/refineries</button>
+      <button class="chip on" data-f="port">ports</button>
+      <button class="chip on" data-f="factory">factories</button>
+      <button class="chip on" data-f="chokepoint">chokepoints</button>
     </div>
-    <p class="body" style="font-size:12.5px;margin-top:16px">Baselines ≈ USGS Mineral Commodity Summaries, IEA, worldsteel, WNA (2025 data year), refreshed as newer figures are published.</p>
-  </div>
-</section>
 
-<footer>
-  <div class="wrap">
-    <span>© 2026 Baryon</span>
-    <span>Building the Autonomous Physical Economy</span>
+    <div id="overview">
+      <div class="lbl">World model</div>
+      <div class="tiles">
+        <div class="tile"><div class="v" id="st-sites">—</div><div class="k">Resource sites</div></div>
+        <div class="tile"><div class="v" id="st-comm">—</div><div class="k">Commodities</div></div>
+        <div class="tile"><div class="v" id="st-choke">—</div><div class="k">Chokepoints (daily AIS)</div></div>
+        <div class="tile"><div class="v" id="st-gen">—</div><div class="k">Data snapshot</div></div>
+      </div>
+      <div class="lbl">Commodity balances — click for detail</div>
+      <div id="ballist"></div>
+      <p class="note">"Years left" = known reserves ÷ current annual production — a static snapshot, not a forecast. Baselines ≈ USGS MCS, IEA, worldsteel, WNA (2025 data year).</p>
+    </div>
+
+    <div id="detail" class="detail" style="display:none">
+      <button class="back" onclick="selectCommodity('')">← All commodities</button>
+      <h2 id="d-title"></h2>
+      <div class="card" id="d-balance"></div>
+      <div class="lbl">Consumption by country</div>
+      <div id="d-cons"></div>
+      <div class="lbl">Reserves by country</div>
+      <div id="d-res"></div>
+      <p class="note">The map is filtered to this commodity's sites and routes. Sources and as-of dates shown per block.</p>
+    </div>
+
+    <p class="note">Trade routes are traced along real corridors: sea legs follow the global shipping-lane network (through Suez, Panama, and cape roundings); land legs follow road/rail corridors. Every quantity is a sourced estimate.</p>
+  </aside>
+
+  <div class="mapwrap">
+    <div id="map"></div>
+    <div class="legend">
+      <span><span style="color:#f0a500">●</span> mine</span>
+      <span><span style="color:#38bdf8">●</span> smelter/refinery</span>
+      <span><span style="color:#34d399">●</span> port</span>
+      <span><span style="color:#a78bfa">●</span> factory</span>
+      <span><span style="color:#f43f5e">●</span> chokepoint</span>
+      <span><span style="color:#71717a">●</span> archive cluster</span>
+      <span><span style="color:#f0a500">—</span> sea</span>
+      <span><span style="color:#38bdf8">—</span> rail</span>
+      <span><span style="color:#34d399">—</span> pipeline</span>
+    </div>
+    <div class="dossier" id="dossier">
+      <button class="close" onclick="document.getElementById('dossier').style.display='none'">✕</button>
+      <h3 id="ds-name"></h3>
+      <div class="meta" id="ds-meta"></div>
+      <p id="ds-notes"></p>
+      <div class="src" id="ds-src"></div>
+    </div>
   </div>
-</footer>
+</main>
 
 <script type="module">
 import * as maplibregl from "/maplibre/maplibre-gl.mjs";
 maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
 const TYPE_COLOR = { mine:"#f0a500", deposit:"#a8a888", smelter:"#38bdf8", refinery:"#38bdf8", processing:"#38bdf8", port:"#34d399", storage:"#2dd4bf", factory:"#a78bfa", chokepoint:"#f43f5e" };
+const TYPE_GROUP = { mine:"mine", deposit:"mine", smelter:"processing", refinery:"processing", processing:"processing", port:"port", storage:"port", factory:"factory", chokepoint:"chokepoint" };
+const MODE_COLOR = { sea:"#f0a500", rail:"#38bdf8", road:"#a8a29e", pipeline:"#34d399", mixed:"#f0a500", unknown:"#f0a500" };
 
-// Stats + balances render immediately; the globe streams in.
-fetch("/data/stats.json").then(r=>r.json()).then(s=>{
-  document.getElementById("st-sites").textContent = s.sites.toLocaleString("en-US");
-  document.getElementById("st-comm").textContent = s.commodities;
-  document.getElementById("st-choke").textContent = s.chokepoints;
-  document.getElementById("st-gen").textContent = s.generated;
-});
-fetch("/data/balances.json").then(r=>r.json()).then(rows=>{
-  document.getElementById("bal-body").innerHTML = rows.map(b=>{
-    const cls = b.years==null ? "" : b.years<25 ? "red" : b.years<60 ? "amber" : "green";
-    const pct = b.years==null ? 0 : Math.min(100, b.years/150*100);
-    return `<tr>
-      <td><div class="cname">${b.name}</div><div class="src">${b.source} · as of ${b.asOf}</div></td>
-      <td>${b.production}</td>
-      <td class="muted">${b.consumption ?? "—"}</td>
-      <td class="muted">${b.reserves ?? "—"}${b.note?`<div class="note">${b.note}</div>`:""}</td>
-      <td>${b.years==null ? '<span class="muted">n/a</span>' : `<span class="years ${cls}">≈${b.years}y</span><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div>`}</td>
-    </tr>`;
-  }).join("");
-});
+let BULK=null, CURATED=[], FLOWS=[], BALANCES=[], SHARES={};
+const state = { commodity:"", off:new Set() };
+const $ = id => document.getElementById(id);
 
-// ---- Globe ------------------------------------------------------------------
-function greatCircle(a, b, n=64){
-  const rad=d=>d*Math.PI/180, deg=r=>r*180/Math.PI;
-  const xyz=(la,lo)=>[Math.cos(rad(la))*Math.cos(rad(lo)),Math.cos(rad(la))*Math.sin(rad(lo)),Math.sin(rad(la))];
-  const A=xyz(a[1],a[0]), B=xyz(b[1],b[0]);
-  const w=Math.acos(Math.min(1,Math.max(-1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])));
-  if(w<1e-6) return [a,b];
-  const pts=[];
-  for(let i=0;i<=n;i++){
-    const t=i/n, s1=Math.sin((1-t)*w)/Math.sin(w), s2=Math.sin(t*w)/Math.sin(w);
-    const x=s1*A[0]+s2*B[0], y=s1*A[1]+s2*B[1], z=s1*A[2]+s2*B[2];
-    pts.push([deg(Math.atan2(y,x)), deg(Math.atan2(z,Math.hypot(x,y)))]);
-  }
-  for(let i=1;i<pts.length;i++){
-    while(pts[i][0]-pts[i-1][0]>180)pts[i][0]-=360;
-    while(pts[i][0]-pts[i-1][0]<-180)pts[i][0]+=360;
-  }
-  return pts;
+// ---- Data + left dashboard --------------------------------------------------
+const [stats, balances, shares] = await Promise.all([
+  fetch("/data/stats.json").then(r=>r.json()),
+  fetch("/data/balances.json").then(r=>r.json()),
+  fetch("/data/shares.json").then(r=>r.json()),
+]);
+BALANCES = balances; SHARES = shares;
+$("st-sites").textContent = stats.sites.toLocaleString("en-US");
+$("st-comm").textContent = stats.commodities;
+$("st-choke").textContent = stats.chokepoints;
+$("st-gen").textContent = stats.generated;
+
+const sel = $("commodity");
+balances.forEach(b => { const o=document.createElement("option"); o.value=b.name; o.textContent=b.name; sel.appendChild(o); });
+sel.addEventListener("change", () => selectCommodity(sel.value));
+
+$("ballist").innerHTML = balances.map(b => {
+  const cls = b.years==null ? "" : b.years<25 ? "red" : b.years<60 ? "amber" : "green";
+  const pct = b.years==null ? 0 : Math.min(100, b.years/150*100);
+  return `<button class="balrow" data-c="${b.name}">
+    <span class="nm">${b.name}</span>
+    <span class="bar"><i class="${cls}" style="width:${pct}%"></i></span>
+    <span class="yrs ${cls}">${b.years==null?"n/a":"≈"+b.years+"y"}</span>
+  </button>`;
+}).join("");
+$("ballist").addEventListener("click", e => { const r=e.target.closest(".balrow"); if(r) selectCommodity(r.dataset.c); });
+
+function shareBars(rows){
+  if(!rows || !rows.length) return '<div class="note">No breakdown in the model yet — the research agent fills these in.</div>';
+  return rows.map(r=>`<div class="sharebar"><span class="c">${r.country}</span><span class="track"><i style="width:${Math.max(2,(r.share??0)*100)}%"></i></span><span class="amt">${r.amount}</span></div>`).join("")
+    + `<div class="srcline">${rows[0].source} · as of ${rows[0].asOf}</div>`;
 }
 
+window.selectCommodity = function(name){
+  state.commodity = name;
+  sel.value = name;
+  $("overview").style.display = name ? "none" : "block";
+  $("detail").style.display = name ? "block" : "none";
+  if (name){
+    const b = BALANCES.find(x=>x.name===name);
+    $("d-title").textContent = name;
+    $("d-balance").innerHTML = b ? `
+      <div><b>Production:</b> ${b.production}</div>
+      ${b.consumption?`<div><b>Consumption:</b> ${b.consumption}</div>`:""}
+      ${b.reserves?`<div><b>Known reserves:</b> ${b.reserves}</div>`:""}
+      ${b.years!=null?`<div><b>Years left at current production:</b> <span class="${b.years<25?"red":b.years<60?"amber":"green"}" style="font-weight:800">≈${b.years}y</span></div>`:""}
+      ${b.note?`<div style="color:#8a8a84;font-size:11px;margin-top:4px">${b.note}</div>`:""}
+      <div class="src">${b.source} · as of ${b.asOf}</div>` : "No balance row yet.";
+    const s = SHARES[name] ?? {};
+    $("d-cons").innerHTML = shareBars(s.consumption);
+    $("d-res").innerHTML = shareBars(s.reserves);
+  }
+  applyFilters();
+};
+
+// ---- Filters ----------------------------------------------------------------
+$("filters").addEventListener("click", e => {
+  const chip = e.target.closest(".chip"); if(!chip) return;
+  chip.classList.toggle("on");
+  const f = chip.dataset.f;
+  if (chip.classList.contains("on")) state.off.delete(f); else state.off.add(f);
+  applyFilters();
+});
+
+// ---- Map --------------------------------------------------------------------
 const map = new maplibregl.Map({
   container:"map",
   style:{
-    version:8,
-    projection:{type:"globe"},
+    version:8, projection:{type:"globe"},
     sources:{ sat:{ type:"raster", tiles:["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"], tileSize:256, maxzoom:19, attribution:"Imagery © Esri, Maxar, Earthstar Geographics" } },
     layers:[ {id:"bg",type:"background",paint:{"background-color":"#050507"}}, {id:"sat",type:"raster",source:"sat"} ],
     sky:{ "atmosphere-blend":["interpolate",["linear"],["zoom"],0,1,6,1,8,0] }
   },
-  center:[-20,15], zoom:1.5, maxZoom:18, attributionControl:{compact:true}
+  center:[-10,18], zoom:1.4, maxZoom:18, attributionControl:{compact:true}
 });
 map.addControl(new maplibregl.NavigationControl(), "bottom-right");
 
 map.on("load", async ()=>{
-  // Archive sites — clustered.
-  const bulk = await fetch("/data/sites.geojson").then(r=>r.json());
-  map.addSource("bulk",{type:"geojson",data:bulk,cluster:true,clusterMaxZoom:9,clusterRadius:45});
+  [BULK, CURATED, FLOWS] = await Promise.all([
+    fetch("/data/sites.geojson").then(r=>r.json()),
+    fetch("/data/curated.json").then(r=>r.json()),
+    fetch("/data/flows.json").then(r=>r.json()),
+  ]);
+
+  map.addSource("bulk",{type:"geojson",data:BULK,cluster:true,clusterMaxZoom:9,clusterRadius:45});
   map.addLayer({id:"bulk-clusters",type:"circle",source:"bulk",filter:["has","point_count"],paint:{
     "circle-color":"#52525b","circle-opacity":.55,
     "circle-radius":["step",["get","point_count"],8,25,11,100,15,500,20,2000,26],
@@ -259,30 +310,25 @@ map.on("load", async ()=>{
     "circle-color":["match",["get","t"],"mine","#f0a500","deposit","#a8a888","smelter","#38bdf8","refinery","#38bdf8","processing","#38bdf8","port","#34d399","storage","#2dd4bf","factory","#a78bfa","#f0a500"],
     "circle-opacity":.75,"circle-stroke-color":"#050507","circle-stroke-width":.5}});
 
-  // Trade routes.
-  const flows = await fetch("/data/flows.json").then(r=>r.json());
-  map.addSource("flows",{type:"geojson",data:{type:"FeatureCollection",features:flows.map(f=>({
-    type:"Feature",geometry:{type:"LineString",coordinates:greatCircle(f.from,f.to)},
-    properties:{label:f.label,color:f.mode==="rail"?"#38bdf8":f.mode==="pipeline"?"#34d399":f.mode==="road"?"#a8a29e":"#f0a500"}}))}});
-  map.addLayer({id:"flows",type:"line",source:"flows",paint:{"line-color":["get","color"],"line-width":1.3,"line-opacity":.55}});
+  map.addSource("flows",{type:"geojson",data:flowsFC()});
+  map.addLayer({id:"flows",type:"line",source:"flows",paint:{"line-color":["get","color"],"line-width":1.5,"line-opacity":.65}});
 
-  // Curated sites — detailed dots.
-  const curated = await fetch("/data/curated.json").then(r=>r.json());
-  map.addSource("cur",{type:"geojson",data:{type:"FeatureCollection",features:curated.map((s,i)=>({
-    type:"Feature",geometry:{type:"Point",coordinates:[s.lng,s.lat]},
-    properties:{i, color:TYPE_COLOR[s.type]??"#f0a500", label:`${s.name} — ${s.commodity} ${s.type} · ${s.country}`}}))}});
+  map.addSource("cur",{type:"geojson",data:curatedFC()});
   map.addLayer({id:"cur-glow",type:"circle",source:"cur",paint:{"circle-radius":["interpolate",["linear"],["zoom"],1,7,8,14],"circle-color":["get","color"],"circle-opacity":.18}});
   map.addLayer({id:"cur-dot",type:"circle",source:"cur",paint:{"circle-radius":["interpolate",["linear"],["zoom"],1,3.2,8,6],"circle-color":["get","color"],"circle-stroke-color":"#050507","circle-stroke-width":1}});
 
   const popup = new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:10});
   const hover=(layer,get)=>{
     map.on("mouseenter",layer,e=>{ map.getCanvas().style.cursor="pointer";
-      const f=e.features[0]; popup.setLngLat(f.geometry.coordinates).setHTML(`<div style="font-family:monospace;font-size:11px;color:#111">${get(f)}</div>`).addTo(map); });
+      const f=e.features[0];
+      const pos = f.geometry.type==="Point" ? f.geometry.coordinates : e.lngLat;
+      popup.setLngLat(pos).setHTML(`<div style="font-family:monospace;font-size:11px;color:#111;max-width:260px">${get(f)}</div>`).addTo(map); });
     map.on("mouseleave",layer,()=>{ map.getCanvas().style.cursor=""; popup.remove(); });
   };
   hover("cur-dot",f=>f.properties.label);
   hover("bulk-dot",f=>`${f.properties.n} — ${f.properties.c} ${f.properties.t} · ${f.properties.k}`);
   hover("bulk-clusters",f=>`${f.properties.point_count} sites — click to expand`);
+  hover("flows",f=>f.properties.label);
 
   map.on("click","bulk-clusters",async e=>{
     const f=e.features[0];
@@ -290,7 +336,7 @@ map.on("load", async ()=>{
     map.easeTo({center:f.geometry.coordinates,zoom:z+0.3});
   });
   map.on("click","cur-dot",e=>{
-    const s=curated[e.features[0].properties.i];
+    const s=CURATED[e.features[0].properties.i];
     showDossier(s.name, `${s.commodity} · ${s.type} · ${s.country} · ${s.status}`,
       [s.operator&&`Operator: ${s.operator}`, s.production&&`Production: ${s.production}`, s.capacity&&`Capacity: ${s.capacity}`].filter(Boolean).join("\n"),
       `source: ${s.source} · confidence: ${s.confidence}`);
@@ -298,17 +344,63 @@ map.on("load", async ()=>{
   });
   map.on("click","bulk-dot",e=>{
     const p=e.features[0].properties;
-    showDossier(p.n, `${p.c} · ${p.t} · ${p.k}`, "", "archive tier — bulk-imported public dataset row");
+    showDossier(p.n, `${p.c} · ${p.t} · ${p.k}`, "", "archive tier — bulk public-dataset row");
   });
+
+  applyFilters();
 });
 
-function showDossier(name, meta, notes, src){
-  document.getElementById("d-name").textContent=name;
-  document.getElementById("d-meta").textContent=meta;
-  document.getElementById("d-notes").textContent=notes;
-  document.getElementById("d-src").textContent=src;
-  document.getElementById("dossier").style.display="block";
+function curatedFC(){
+  const feats = CURATED.map((s,i)=>({s,i}))
+    .filter(({s}) => !state.off.has(TYPE_GROUP[s.type] ?? "mine"))
+    .filter(({s}) => !state.commodity || s.commodity===state.commodity)
+    .map(({s,i})=>({ type:"Feature", geometry:{type:"Point",coordinates:[s.lng,s.lat]},
+      properties:{ i, color:TYPE_COLOR[s.type]??"#f0a500", label:`${s.name} — ${s.commodity} ${s.type} · ${s.country}` }}));
+  return {type:"FeatureCollection",features:feats};
 }
+function flowsFC(){
+  const feats = state.off.has("flows") ? [] : FLOWS
+    .filter(f => !state.commodity || f.commodity===state.commodity)
+    .map(f=>({ type:"Feature",
+      geometry:{type:"LineString",coordinates: f.path ?? [f.from,f.to]},
+      properties:{label:f.label,color:MODE_COLOR[f.mode]??"#f0a500"}}));
+  return {type:"FeatureCollection",features:feats};
+}
+function applyFilters(){
+  if(!map.getSource("bulk")) return;
+  const bulkFeats = state.off.has("archive") ? [] : BULK.features
+    .filter(f => !state.off.has(TYPE_GROUP[f.properties.t] ?? "mine"))
+    .filter(f => !state.commodity || f.properties.c===state.commodity);
+  map.getSource("bulk").setData({type:"FeatureCollection",features:bulkFeats});
+  map.getSource("cur").setData(curatedFC());
+  map.getSource("flows").setData(flowsFC());
+}
+
+// ---- Search -----------------------------------------------------------------
+let tId=null;
+$("q").addEventListener("input", ()=>{ clearTimeout(tId); tId=setTimeout(search, 200); });
+function search(){
+  const q=$("q").value.trim().toLowerCase();
+  const box=$("hits");
+  if(q.length<2 || !BULK){ box.style.display="none"; return; }
+  const hits=[];
+  for(const s of CURATED){ if(s.name.toLowerCase().includes(q)) hits.push({n:s.name,sub:`${s.commodity} ${s.type} · ${s.country}`,lng:s.lng,lat:s.lat}); if(hits.length>=25) break; }
+  if(hits.length<25) for(const f of BULK.features){ const p=f.properties;
+    if(p.n.toLowerCase().includes(q)){ hits.push({n:p.n,sub:`${p.c} ${p.t} · ${p.k}`,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}); if(hits.length>=25) break; } }
+  box.innerHTML = hits.map((h,i)=>`<button data-i="${i}"><div>${h.n}</div><div class="sub">${h.sub}</div></button>`).join("") || '<button disabled>No matches</button>';
+  box.style.display="block";
+  box.onclick = e => { const b=e.target.closest("button[data-i]"); if(!b) return;
+    const h=hits[Number(b.dataset.i)];
+    map.flyTo({center:[h.lng,h.lat],zoom:10.5,speed:1.8});
+    box.style.display="none";
+  };
+}
+
+window.showDossier = function(name, meta, notes, src){
+  $("ds-name").textContent=name; $("ds-meta").textContent=meta;
+  $("ds-notes").textContent=notes; $("ds-src").textContent=src;
+  $("dossier").style.display="block";
+};
 </script>
 
 </body>
