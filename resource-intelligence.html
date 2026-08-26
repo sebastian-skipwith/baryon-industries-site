@@ -112,6 +112,29 @@
   .sharebar .amt{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:var(--gray);width:130px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .srcline{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#9a9a94;margin-top:4px}
   .note{font-size:11px;color:#8a8a84;margin-top:12px;line-height:1.5}
+
+  .prodlist button{
+    display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;
+    border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;
+  }
+  .prodlist button:hover{border-color:var(--black)}
+  .prodlist .pm{font-family:ui-monospace,Consolas,monospace;font-size:9.5px;color:#9a9a94;margin-top:2px}
+  .matrow{
+    display:flex;gap:10px;width:100%;text-align:left;padding:8px 6px;border:none;background:none;
+    border-bottom:1px solid #f0f0ec;font-size:12px;cursor:pointer;align-items:flex-start;
+  }
+  .matrow:hover{background:#fafaf8}
+  .matrow .num{
+    flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--black);color:#fff;
+    font-family:ui-monospace,Consolas,monospace;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .matrow .cmp{font-weight:600}
+  .matrow .sub{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#8a8a84;margin-top:1px}
+  .pmarker{
+    width:22px;height:22px;border-radius:50%;background:#f0a500;border:2px solid #fff;color:#0a0a0a;
+    font:700 11px ui-monospace,Consolas,monospace;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 6px rgba(0,0,0,.5);cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -162,9 +185,22 @@
         <div class="tile"><div class="v" id="st-choke">—</div><div class="k">Chokepoints (daily AIS)</div></div>
         <div class="tile"><div class="v" id="st-gen">—</div><div class="k">Data snapshot</div></div>
       </div>
+      <div class="lbl">Product chains — rock to finished good</div>
+      <div id="prodlist" class="prodlist"></div>
+
       <div class="lbl">Commodity balances — click for detail</div>
       <div id="ballist"></div>
       <p class="note">"Years left" = known reserves ÷ current annual production — a static snapshot, not a forecast. Baselines ≈ USGS MCS, IEA, worldsteel, WNA (2025 data year).</p>
+    </div>
+
+    <div id="pdetail" class="detail" style="display:none">
+      <button class="back" onclick="selectProduct('')">← All products</button>
+      <h2 id="p-title"></h2>
+      <div id="p-maker" class="srcline" style="margin-top:2px"></div>
+      <p id="p-desc" style="font-size:12.5px;color:#55555c;margin-top:8px"></p>
+      <div class="lbl">Material chain — click a row to fly to its source</div>
+      <div id="p-mats"></div>
+      <p class="note">Numbered markers on the map are each material's example source. Real chains use many suppliers — these are documented representative sources, each with its own citation and confidence.</p>
     </div>
 
     <div id="detail" class="detail" style="display:none">
@@ -212,17 +248,68 @@ const TYPE_COLOR = { mine:"#f0a500", deposit:"#a8a888", smelter:"#38bdf8", refin
 const TYPE_GROUP = { mine:"mine", deposit:"mine", smelter:"processing", refinery:"processing", processing:"processing", port:"port", storage:"port", factory:"factory", chokepoint:"chokepoint" };
 const MODE_COLOR = { sea:"#f0a500", rail:"#38bdf8", road:"#a8a29e", pipeline:"#34d399", mixed:"#f0a500", unknown:"#f0a500" };
 
-let BULK=null, CURATED=[], FLOWS=[], BALANCES=[], SHARES={};
-const state = { commodity:"", off:new Set() };
+let BULK=null, CURATED=[], FLOWS=[], BALANCES=[], SHARES={}, PRODUCTS=[];
+let productMarkers = [];
+const state = { commodity:"", product:"", off:new Set() };
 const $ = id => document.getElementById(id);
 
 // ---- Data + left dashboard --------------------------------------------------
-const [stats, balances, shares] = await Promise.all([
+const [stats, balances, shares, products] = await Promise.all([
   fetch("/data/stats.json").then(r=>r.json()),
   fetch("/data/balances.json").then(r=>r.json()),
   fetch("/data/shares.json").then(r=>r.json()),
+  fetch("/data/products.json").then(r=>r.json()),
 ]);
-BALANCES = balances; SHARES = shares;
+BALANCES = balances; SHARES = shares; PRODUCTS = products;
+
+$("prodlist").innerHTML = products.map(p => `
+  <button data-p="${p.name}">
+    <div style="font-weight:700">${p.name}</div>
+    <div class="pm">${p.materials.length} materials · ${[...new Set(p.materials.map(m=>m.site?.country).filter(Boolean))].length} source countries${p.maker?` · ${p.maker}`:""}</div>
+  </button>`).join("");
+$("prodlist").addEventListener("click", e => { const b=e.target.closest("button[data-p]"); if(b) selectProduct(b.dataset.p); });
+
+window.selectProduct = function(name){
+  state.product = name;
+  productMarkers.forEach(m=>m.remove()); productMarkers = [];
+  $("overview").style.display = name ? "none" : "block";
+  $("pdetail").style.display = name ? "block" : "none";
+  $("detail").style.display = "none";
+  state.commodity = ""; sel.value = "";
+  if (name){
+    const p = PRODUCTS.find(x=>x.name===name);
+    $("p-title").textContent = p.name;
+    $("p-maker").textContent = p.maker ?? "";
+    $("p-desc").textContent = p.description ?? "";
+    $("p-mats").innerHTML = p.materials.map((m,i)=>`
+      <button class="matrow" data-i="${i}">
+        <span class="num">${i+1}</span>
+        <span>
+          <div class="cmp">${m.component}</div>
+          <div class="sub">${m.commodity}${m.site?` · ${m.site.name}, ${m.site.country}`:" · source not yet mapped"}</div>
+          ${m.notes?`<div class="sub" style="color:#a5a59e">${m.notes}</div>`:""}
+          <div class="sub" style="color:#b5b5ae">${m.source} · ${m.confidence}</div>
+        </span>
+      </button>`).join("");
+    $("p-mats").onclick = e => { const r=e.target.closest(".matrow"); if(!r) return;
+      const s = p.materials[Number(r.dataset.i)].site;
+      if (s) map.flyTo({center:[s.lng,s.lat],zoom:10,speed:1.8});
+    };
+    // Numbered source markers + fit the map to the whole chain.
+    const bounds = new maplibregl.LngLatBounds();
+    p.materials.forEach((m,i)=>{
+      if(!m.site) return;
+      const el = document.createElement("div");
+      el.className = "pmarker"; el.textContent = String(i+1);
+      el.title = `${m.component} — ${m.site.name}, ${m.site.country}`;
+      el.onclick = () => map.flyTo({center:[m.site.lng,m.site.lat],zoom:10,speed:1.8});
+      productMarkers.push(new maplibregl.Marker({element:el}).setLngLat([m.site.lng,m.site.lat]).addTo(map));
+      bounds.extend([m.site.lng,m.site.lat]);
+    });
+    if(!bounds.isEmpty()) map.fitBounds(bounds,{padding:70,maxZoom:4});
+  }
+  applyFilters();
+};
 $("st-sites").textContent = stats.sites.toLocaleString("en-US");
 $("st-comm").textContent = stats.commodities;
 $("st-choke").textContent = stats.chokepoints;
@@ -252,6 +339,7 @@ function shareBars(rows){
 window.selectCommodity = function(name){
   state.commodity = name;
   sel.value = name;
+  if (state.product) { state.product=""; productMarkers.forEach(m=>m.remove()); productMarkers=[]; $("pdetail").style.display="none"; }
   $("overview").style.display = name ? "none" : "block";
   $("detail").style.display = name ? "block" : "none";
   if (name){
