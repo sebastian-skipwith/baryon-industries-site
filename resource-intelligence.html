@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Resource Intelligence | Baryon</title>
-<meta name="description" content="Baryon Resource Intelligence is a living world model of the physical economy — 100,000+ resource sites, trade flows, maritime chokepoints, and satellite coverage, queryable like an analyst. Private beta.">
+<meta name="description" content="A living world model of the physical economy — 100,000+ resource sites, trade routes, and maritime chokepoints on an interactive satellite globe, plus production, consumption, and reserves for every commodity.">
 <meta property="og:title" content="Baryon Resource Intelligence">
-<meta property="og:description" content="A living world model of the physical economy. Private beta.">
+<meta property="og:description" content="Explore 100,000+ resource sites and every commodity's production, consumption, and reserves.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/maplibre/maplibre-gl.css">
 <style>
   :root{
     --black:#0a0a0a;
     --gray:#55555c;
     --line:#e6e6e2;
-    --max:1080px;
+    --max:1180px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{
@@ -41,56 +42,66 @@
     transition:background .15s,color .15s;
   }
   .nav a.contact:hover{background:var(--black);color:#fff}
-  @media(max-width:640px){.nav .tabs{gap:14px}.nav .tabs a{font-size:10px;letter-spacing:.08em}.nav a.contact{display:none}}
+  @media(max-width:640px){.nav .tabs{gap:12px}.nav .tabs a{font-size:10px;letter-spacing:.06em}.nav a.contact{display:none}}
 
-  .hero{padding:110px 0 70px}
-  .eyebrow{
-    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;
-    text-transform:uppercase;color:var(--gray);
-  }
-  h1{margin-top:16px;font-size:clamp(38px,6vw,72px);line-height:1.04;font-weight:800;letter-spacing:-.02em;max-width:900px}
-  .hero p.lede{margin-top:24px;font-size:clamp(17px,2vw,20px);color:var(--gray);max-width:660px}
+  .hero{padding:70px 0 40px}
+  .eyebrow{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gray)}
+  h1{margin-top:14px;font-size:clamp(34px,5vw,60px);line-height:1.05;font-weight:800;letter-spacing:-.02em;max-width:900px}
+  .hero p.lede{margin-top:18px;font-size:clamp(16px,2vw,19px);color:var(--gray);max-width:680px}
 
-  .stats{
-    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    display:grid;grid-template-columns:repeat(4,1fr);
-  }
-  .stat{padding:30px 24px;border-right:1px solid var(--line)}
+  .stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+  .stat{padding:24px;border-right:1px solid var(--line)}
   .stat:last-child{border-right:none}
-  .stat .v{font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.02em}
-  .stat .k{margin-top:6px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
+  .stat .v{font-size:clamp(22px,2.6vw,32px);font-weight:800;letter-spacing:-.02em}
+  .stat .k{margin-top:4px;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gray)}
   @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:none}}
 
+  /* Globe */
+  .globe-frame{position:relative;margin:36px auto 0;max-width:var(--max);padding:0 24px}
+  #map{height:72vh;min-height:480px;border-radius:10px;background:#050507;overflow:hidden}
+  .legend{
+    position:absolute;right:36px;bottom:40px;z-index:5;display:flex;flex-wrap:wrap;justify-content:flex-end;
+    gap:4px 12px;max-width:60%;background:rgba(0,0,0,.6);border:1px solid #2a2a30;border-radius:6px;
+    padding:6px 12px;font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#a9a9b0;backdrop-filter:blur(4px);
+  }
+  .dossier{
+    position:absolute;top:36px;right:36px;z-index:6;width:330px;max-width:calc(100% - 72px);
+    background:rgba(8,8,10,.88);border:1px solid #2a2a30;border-radius:10px;padding:14px 16px;
+    color:#e6e6ea;backdrop-filter:blur(6px);display:none;
+  }
+  .dossier .close{position:absolute;top:8px;right:12px;cursor:pointer;color:#8a8a92;background:none;border:none;font-size:14px}
+  .dossier h3{font-size:15px;font-weight:700}
+  .dossier .meta{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#9a9aa2;margin-top:2px}
+  .dossier p{font-size:12px;margin-top:8px;color:#c9c9cf}
+  .dossier .src{font-family:ui-monospace,Consolas,monospace;font-size:9px;color:#7a7a82;margin-top:10px}
+  .hint{margin-top:10px;font-size:11px;color:#8a8a90;text-align:center}
+
   section{padding:80px 0;border-bottom:1px solid var(--line)}
-  .label{
-    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;
-    text-transform:uppercase;color:var(--gray);margin-bottom:22px;
-  }
-  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:760px}
-  section p.body{margin-top:22px;font-size:17px;color:var(--gray);max-width:640px}
-  section p.body b{color:var(--black);font-weight:600}
+  .label{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gray);margin-bottom:18px}
+  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:820px}
+  section p.body{margin-top:18px;font-size:16px;color:var(--gray);max-width:660px}
 
-  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
-  .col h3{
-    font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
-    padding-top:18px;border-top:2px solid var(--black);
+  /* Balances table */
+  .bal-wrap{margin-top:40px;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+  table.bal{width:100%;min-width:860px;border-collapse:collapse;font-size:13.5px}
+  table.bal th{
+    text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:#fafaf8;
+    font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);
   }
-  .col p{margin-top:12px;font-size:15px;color:var(--gray)}
-  @media(max-width:760px){.cols{grid-template-columns:1fr;gap:32px}}
-
-  .cta{padding:100px 0;border-bottom:none}
-  .cta a.mail{
-    display:inline-block;margin-top:30px;font-size:15px;color:var(--black);
-    text-decoration:none;border:1px solid var(--black);padding:14px 30px;
-    letter-spacing:.1em;text-transform:uppercase;transition:background .15s,color .15s;
-  }
-  .cta a.mail:hover{background:var(--black);color:#fff}
+  table.bal td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.bal tr:last-child td{border-bottom:none}
+  table.bal .cname{font-weight:700}
+  table.bal .src{font-family:ui-monospace,Consolas,monospace;font-size:9.5px;color:#9a9a94;margin-top:2px}
+  table.bal .muted{color:var(--gray)}
+  table.bal .note{font-size:11.5px;color:#8a8a84;margin-top:2px}
+  .years{font-family:ui-monospace,Consolas,monospace;font-weight:700;font-size:13px}
+  .years.red{color:#c0392b}.years.amber{color:#b07800}.years.green{color:#1e8e5a}
+  .bar{height:5px;width:96px;background:#eeeeea;border-radius:3px;margin-top:5px;overflow:hidden}
+  .bar i{display:block;height:100%}
+  .bar i.red{background:#c0392b}.bar i.amber{background:#d99000}.bar i.green{background:#1e8e5a}
 
   footer{padding:36px 0 48px;border-top:1px solid var(--line)}
-  footer .wrap{
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    font-size:12px;color:var(--gray);letter-spacing:.06em;
-  }
+  footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;color:var(--gray);letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -116,47 +127,55 @@
 
 <div class="hero">
   <div class="wrap">
-    <div class="eyebrow">Private beta</div>
+    <div class="eyebrow">Live world model</div>
     <h1>A living world model of the physical economy.</h1>
-    <p class="lede">Baryon Resource Intelligence maps where the world's resources come from, how they move, and what they become — mines, smelters, refineries, ports, factories, trade routes, and maritime chokepoints on one queryable satellite globe, with an autonomous research agent expanding it every day.</p>
+    <p class="lede">Every mine, smelter, refinery, port, factory, and maritime chokepoint the model knows about — on one satellite globe. Below it: how much of every commodity the world produces, consumes, and still has in the ground. Every figure sourced and dated.</p>
   </div>
 </div>
 
 <div class="stats" aria-label="World model coverage">
-  <div class="stat"><div class="v">100,000+</div><div class="k">Resource sites</div></div>
-  <div class="stat"><div class="v">32</div><div class="k">Commodities</div></div>
-  <div class="stat"><div class="v">28</div><div class="k">Chokepoints, daily AIS</div></div>
-  <div class="stat"><div class="v">5</div><div class="k">Autonomous data feeds</div></div>
+  <div class="stat"><div class="v" id="st-sites">—</div><div class="k">Resource sites</div></div>
+  <div class="stat"><div class="v" id="st-comm">—</div><div class="k">Commodities</div></div>
+  <div class="stat"><div class="v" id="st-choke">—</div><div class="k">Maritime chokepoints</div></div>
+  <div class="stat"><div class="v" id="st-gen">—</div><div class="k">Data snapshot</div></div>
+</div>
+
+<div class="globe-frame">
+  <div id="map"></div>
+  <div class="legend">
+    <span><span style="color:#f0a500">●</span> mine</span>
+    <span><span style="color:#38bdf8">●</span> smelter/refinery</span>
+    <span><span style="color:#34d399">●</span> port</span>
+    <span><span style="color:#2dd4bf">●</span> storage</span>
+    <span><span style="color:#a78bfa">●</span> factory</span>
+    <span><span style="color:#f43f5e">●</span> chokepoint</span>
+    <span><span style="color:#71717a">●</span> archive cluster</span>
+    <span><span style="color:#f0a500">—</span> trade route</span>
+  </div>
+  <div class="dossier" id="dossier">
+    <button class="close" onclick="document.getElementById('dossier').style.display='none'">✕</button>
+    <h3 id="d-name"></h3>
+    <div class="meta" id="d-meta"></div>
+    <p id="d-notes"></p>
+    <div class="src" id="d-src"></div>
+  </div>
+  <div class="hint">Drag to rotate · scroll to zoom · click any point for details. 100,000+ sites cluster into gray bubbles — zoom to expand.</div>
 </div>
 
 <section>
   <div class="wrap">
-    <div class="label">What it does</div>
-    <h2>Query the world like you'd ask an analyst.</h2>
-    <p class="body">Ask where the world's cobalt comes from, what a disruption at Hormuz touches, or what materials are inside a product on your desk — and get answers grounded in a sourced database, not a language model's guess. <b>Every row carries its source, its confidence, and its as-of date.</b> The model is deliberately honest about what it doesn't know yet.</p>
-    <div class="cols">
-      <div class="col">
-        <h3>The world model</h3>
-        <p>Mines, smelters, refineries, ports, storage terminals, and factories from federal and open datasets — USGS, the World Port Index, Global Energy Monitor — refreshed on schedule.</p>
-      </div>
-      <div class="col">
-        <h3>Live logistics</h3>
-        <p>Daily vessel transits through the world's maritime chokepoints and port-level activity derived from satellite AIS data, via IMF PortWatch.</p>
-      </div>
-      <div class="col">
-        <h3>Machine eyes</h3>
-        <p>Sentinel satellite coverage over key assets, supply-chain route graphs from facility to facility, and an autonomous agent that researches and expands the model around the clock.</p>
-      </div>
+    <div class="label">Commodity balances</div>
+    <h2>Produced. Consumed. Left in the ground.</h2>
+    <p class="body">Annual global production, annual consumption, and known reserves for every commodity in the model. <b>"Years left" divides reserves by current production</b> — a static snapshot, not a forecast: reserves grow with exploration, technology, and price.</p>
+    <div class="bal-wrap">
+      <table class="bal">
+        <thead>
+          <tr><th>Commodity</th><th>Production / yr</th><th>Consumption / yr</th><th>Known reserves</th><th>Years left</th></tr>
+        </thead>
+        <tbody id="bal-body"></tbody>
+      </table>
     </div>
-  </div>
-</section>
-
-<section class="cta">
-  <div class="wrap">
-    <div class="label">Access</div>
-    <h2>The tool is in private beta.</h2>
-    <p class="body">Resource Intelligence currently runs as an internal Baryon system. If you explore, trade, or build with physical resources and want early access, get in touch.</p>
-    <a class="mail" href="mailto:sebastianskipwith@gmail.com?subject=Resource%20Intelligence%20beta">Request access</a>
+    <p class="body" style="font-size:12.5px;margin-top:16px">Baselines ≈ USGS Mineral Commodity Summaries, IEA, worldsteel, WNA (2025 data year), refreshed as newer figures are published.</p>
   </div>
 </section>
 
@@ -166,6 +185,131 @@
     <span>Building the Autonomous Physical Economy</span>
   </div>
 </footer>
+
+<script type="module">
+import * as maplibregl from "/maplibre/maplibre-gl.mjs";
+maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+
+const TYPE_COLOR = { mine:"#f0a500", deposit:"#a8a888", smelter:"#38bdf8", refinery:"#38bdf8", processing:"#38bdf8", port:"#34d399", storage:"#2dd4bf", factory:"#a78bfa", chokepoint:"#f43f5e" };
+
+// Stats + balances render immediately; the globe streams in.
+fetch("/data/stats.json").then(r=>r.json()).then(s=>{
+  document.getElementById("st-sites").textContent = s.sites.toLocaleString("en-US");
+  document.getElementById("st-comm").textContent = s.commodities;
+  document.getElementById("st-choke").textContent = s.chokepoints;
+  document.getElementById("st-gen").textContent = s.generated;
+});
+fetch("/data/balances.json").then(r=>r.json()).then(rows=>{
+  document.getElementById("bal-body").innerHTML = rows.map(b=>{
+    const cls = b.years==null ? "" : b.years<25 ? "red" : b.years<60 ? "amber" : "green";
+    const pct = b.years==null ? 0 : Math.min(100, b.years/150*100);
+    return `<tr>
+      <td><div class="cname">${b.name}</div><div class="src">${b.source} · as of ${b.asOf}</div></td>
+      <td>${b.production}</td>
+      <td class="muted">${b.consumption ?? "—"}</td>
+      <td class="muted">${b.reserves ?? "—"}${b.note?`<div class="note">${b.note}</div>`:""}</td>
+      <td>${b.years==null ? '<span class="muted">n/a</span>' : `<span class="years ${cls}">≈${b.years}y</span><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div>`}</td>
+    </tr>`;
+  }).join("");
+});
+
+// ---- Globe ------------------------------------------------------------------
+function greatCircle(a, b, n=64){
+  const rad=d=>d*Math.PI/180, deg=r=>r*180/Math.PI;
+  const xyz=(la,lo)=>[Math.cos(rad(la))*Math.cos(rad(lo)),Math.cos(rad(la))*Math.sin(rad(lo)),Math.sin(rad(la))];
+  const A=xyz(a[1],a[0]), B=xyz(b[1],b[0]);
+  const w=Math.acos(Math.min(1,Math.max(-1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])));
+  if(w<1e-6) return [a,b];
+  const pts=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n, s1=Math.sin((1-t)*w)/Math.sin(w), s2=Math.sin(t*w)/Math.sin(w);
+    const x=s1*A[0]+s2*B[0], y=s1*A[1]+s2*B[1], z=s1*A[2]+s2*B[2];
+    pts.push([deg(Math.atan2(y,x)), deg(Math.atan2(z,Math.hypot(x,y)))]);
+  }
+  for(let i=1;i<pts.length;i++){
+    while(pts[i][0]-pts[i-1][0]>180)pts[i][0]-=360;
+    while(pts[i][0]-pts[i-1][0]<-180)pts[i][0]+=360;
+  }
+  return pts;
+}
+
+const map = new maplibregl.Map({
+  container:"map",
+  style:{
+    version:8,
+    projection:{type:"globe"},
+    sources:{ sat:{ type:"raster", tiles:["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"], tileSize:256, maxzoom:19, attribution:"Imagery © Esri, Maxar, Earthstar Geographics" } },
+    layers:[ {id:"bg",type:"background",paint:{"background-color":"#050507"}}, {id:"sat",type:"raster",source:"sat"} ],
+    sky:{ "atmosphere-blend":["interpolate",["linear"],["zoom"],0,1,6,1,8,0] }
+  },
+  center:[-20,15], zoom:1.5, maxZoom:18, attributionControl:{compact:true}
+});
+map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+
+map.on("load", async ()=>{
+  // Archive sites — clustered.
+  const bulk = await fetch("/data/sites.geojson").then(r=>r.json());
+  map.addSource("bulk",{type:"geojson",data:bulk,cluster:true,clusterMaxZoom:9,clusterRadius:45});
+  map.addLayer({id:"bulk-clusters",type:"circle",source:"bulk",filter:["has","point_count"],paint:{
+    "circle-color":"#52525b","circle-opacity":.55,
+    "circle-radius":["step",["get","point_count"],8,25,11,100,15,500,20,2000,26],
+    "circle-stroke-color":"#a1a1aa","circle-stroke-width":1,"circle-stroke-opacity":.5}});
+  map.addLayer({id:"bulk-dot",type:"circle",source:"bulk",filter:["!",["has","point_count"]],paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],1,2,8,4.5],
+    "circle-color":["match",["get","t"],"mine","#f0a500","deposit","#a8a888","smelter","#38bdf8","refinery","#38bdf8","processing","#38bdf8","port","#34d399","storage","#2dd4bf","factory","#a78bfa","#f0a500"],
+    "circle-opacity":.75,"circle-stroke-color":"#050507","circle-stroke-width":.5}});
+
+  // Trade routes.
+  const flows = await fetch("/data/flows.json").then(r=>r.json());
+  map.addSource("flows",{type:"geojson",data:{type:"FeatureCollection",features:flows.map(f=>({
+    type:"Feature",geometry:{type:"LineString",coordinates:greatCircle(f.from,f.to)},
+    properties:{label:f.label,color:f.mode==="rail"?"#38bdf8":f.mode==="pipeline"?"#34d399":f.mode==="road"?"#a8a29e":"#f0a500"}}))}});
+  map.addLayer({id:"flows",type:"line",source:"flows",paint:{"line-color":["get","color"],"line-width":1.3,"line-opacity":.55}});
+
+  // Curated sites — detailed dots.
+  const curated = await fetch("/data/curated.json").then(r=>r.json());
+  map.addSource("cur",{type:"geojson",data:{type:"FeatureCollection",features:curated.map((s,i)=>({
+    type:"Feature",geometry:{type:"Point",coordinates:[s.lng,s.lat]},
+    properties:{i, color:TYPE_COLOR[s.type]??"#f0a500", label:`${s.name} — ${s.commodity} ${s.type} · ${s.country}`}}))}});
+  map.addLayer({id:"cur-glow",type:"circle",source:"cur",paint:{"circle-radius":["interpolate",["linear"],["zoom"],1,7,8,14],"circle-color":["get","color"],"circle-opacity":.18}});
+  map.addLayer({id:"cur-dot",type:"circle",source:"cur",paint:{"circle-radius":["interpolate",["linear"],["zoom"],1,3.2,8,6],"circle-color":["get","color"],"circle-stroke-color":"#050507","circle-stroke-width":1}});
+
+  const popup = new maplibregl.Popup({closeButton:false,closeOnClick:false,offset:10});
+  const hover=(layer,get)=>{
+    map.on("mouseenter",layer,e=>{ map.getCanvas().style.cursor="pointer";
+      const f=e.features[0]; popup.setLngLat(f.geometry.coordinates).setHTML(`<div style="font-family:monospace;font-size:11px;color:#111">${get(f)}</div>`).addTo(map); });
+    map.on("mouseleave",layer,()=>{ map.getCanvas().style.cursor=""; popup.remove(); });
+  };
+  hover("cur-dot",f=>f.properties.label);
+  hover("bulk-dot",f=>`${f.properties.n} — ${f.properties.c} ${f.properties.t} · ${f.properties.k}`);
+  hover("bulk-clusters",f=>`${f.properties.point_count} sites — click to expand`);
+
+  map.on("click","bulk-clusters",async e=>{
+    const f=e.features[0];
+    const z=await map.getSource("bulk").getClusterExpansionZoom(f.properties.cluster_id);
+    map.easeTo({center:f.geometry.coordinates,zoom:z+0.3});
+  });
+  map.on("click","cur-dot",e=>{
+    const s=curated[e.features[0].properties.i];
+    showDossier(s.name, `${s.commodity} · ${s.type} · ${s.country} · ${s.status}`,
+      [s.operator&&`Operator: ${s.operator}`, s.production&&`Production: ${s.production}`, s.capacity&&`Capacity: ${s.capacity}`].filter(Boolean).join("\n"),
+      `source: ${s.source} · confidence: ${s.confidence}`);
+    map.flyTo({center:[s.lng,s.lat],zoom:11.5,speed:1.6});
+  });
+  map.on("click","bulk-dot",e=>{
+    const p=e.features[0].properties;
+    showDossier(p.n, `${p.c} · ${p.t} · ${p.k}`, "", "archive tier — bulk-imported public dataset row");
+  });
+});
+
+function showDossier(name, meta, notes, src){
+  document.getElementById("d-name").textContent=name;
+  document.getElementById("d-meta").textContent=meta;
+  document.getElementById("d-notes").textContent=notes;
+  document.getElementById("d-src").textContent=src;
+  document.getElementById("dossier").style.display="block";
+}
+</script>
 
 </body>
 </html>

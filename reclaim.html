@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reclaim | Baryon</title>
-<meta name="description" content="Baryon Reclaim is an AI material arbitrage engine: it appraises scrap, surplus, and unwanted equipment, prices the recoverable material, and finds the highest-value path for it. Private beta.">
+<meta name="description" content="Reclaim is Baryon's material arbitrage engine. Use the live scrap profitability calculator: enter what's in a load, and get gross recovery, full cost stack, and expected net against sourced benchmark prices.">
 <meta property="og:title" content="Baryon Reclaim">
-<meta property="og:description" content="An AI appraisal engine for the waste stream. Private beta.">
+<meta property="og:description" content="Is that pile of scrap worth hauling? Run the numbers.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
 <style>
@@ -43,66 +43,58 @@
   .nav a.contact:hover{background:var(--black);color:#fff}
   @media(max-width:640px){.nav .tabs{gap:12px}.nav .tabs a{font-size:10px;letter-spacing:.06em}.nav a.contact{display:none}}
 
-  .hero{padding:110px 0 70px}
-  .eyebrow{
-    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;
-    text-transform:uppercase;color:var(--gray);
-  }
-  h1{margin-top:16px;font-size:clamp(38px,6vw,72px);line-height:1.04;font-weight:800;letter-spacing:-.02em;max-width:900px}
-  .hero p.lede{margin-top:24px;font-size:clamp(17px,2vw,20px);color:var(--gray);max-width:660px}
+  .hero{padding:80px 0 50px}
+  .eyebrow{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gray)}
+  h1{margin-top:14px;font-size:clamp(34px,5.4vw,64px);line-height:1.05;font-weight:800;letter-spacing:-.02em;max-width:900px}
+  .hero p.lede{margin-top:20px;font-size:clamp(16px,2vw,19px);color:var(--gray);max-width:660px}
 
-  .chain{
-    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    padding:22px 0;overflow-x:auto;
-  }
-  .chain .wrap{
-    display:flex;gap:14px;align-items:center;white-space:nowrap;
-    font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.18em;
-  }
+  .chain{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;overflow-x:auto}
+  .chain .wrap{display:flex;gap:14px;align-items:center;white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.18em}
   .chain em{font-style:normal;color:#b9b9b4}
 
-  section{padding:80px 0;border-bottom:1px solid var(--line)}
-  .label{
-    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;
-    text-transform:uppercase;color:var(--gray);margin-bottom:22px;
-  }
-  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:760px}
-  section p.body{margin-top:22px;font-size:17px;color:var(--gray);max-width:640px}
+  section{padding:70px 0;border-bottom:1px solid var(--line)}
+  .label{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gray);margin-bottom:18px}
+  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:820px}
+  section p.body{margin-top:18px;font-size:16px;color:var(--gray);max-width:660px}
   section p.body b{color:var(--black);font-weight:600}
 
-  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
-  .col h3{
-    font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
-    padding-top:18px;border-top:2px solid var(--black);
+  /* Calculator */
+  .calc{display:grid;grid-template-columns:1.4fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);margin-top:40px}
+  @media(max-width:860px){.calc{grid-template-columns:1fr}}
+  .pane{background:#fff;padding:26px}
+  .pane h3{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gray);margin-bottom:16px}
+  table.mats{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.mats td{padding:7px 6px;border-bottom:1px solid #f0f0ec;vertical-align:middle}
+  table.mats tr:last-child td{border-bottom:none}
+  table.mats .price{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--gray);white-space:nowrap}
+  table.mats input{
+    width:86px;padding:6px 8px;border:1px solid #d8d8d2;border-radius:4px;font-size:13px;text-align:right;
   }
+  table.mats input:focus{outline:none;border-color:var(--black)}
+  table.mats .rowval{font-family:ui-monospace,Consolas,monospace;font-size:12px;text-align:right;white-space:nowrap;min-width:70px}
+  .costrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #f0f0ec;font-size:13.5px}
+  .costrow:last-of-type{border-bottom:none}
+  .costrow input{width:96px;padding:6px 8px;border:1px solid #d8d8d2;border-radius:4px;font-size:13px;text-align:right}
+  .costrow input:focus{outline:none;border-color:var(--black)}
+  .result{margin-top:18px;border-top:2px solid var(--black);padding-top:14px}
+  .result .line{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
+  .result .line span:last-child{font-family:ui-monospace,Consolas,monospace}
+  .result .net{font-size:20px;font-weight:800;padding-top:8px}
+  .verdict{
+    display:inline-block;margin-top:12px;padding:6px 16px;font-weight:800;font-size:14px;letter-spacing:.08em;border:2px solid;
+  }
+  .verdict.buy{color:#1e8e5a;border-color:#1e8e5a}
+  .verdict.maybe{color:#b07800;border-color:#b07800}
+  .verdict.pass{color:#c0392b;border-color:#c0392b}
+  .asof{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#9a9a94;margin-top:14px;line-height:1.5}
+
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
+  .col h3{font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding-top:18px;border-top:2px solid var(--black)}
   .col p{margin-top:12px;font-size:15px;color:var(--gray)}
   @media(max-width:760px){.cols{grid-template-columns:1fr;gap:32px}}
 
-  /* Example appraisal table */
-  .example{margin-top:56px;max-width:560px;border:1px solid var(--line)}
-  .example .head{
-    padding:14px 20px;border-bottom:1px solid var(--line);
-    font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.14em;color:var(--gray);
-  }
-  .example table{width:100%;border-collapse:collapse;font-size:14px}
-  .example td{padding:9px 20px;border-bottom:1px solid var(--line)}
-  .example td:last-child{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:13px}
-  .example tr.total td{font-weight:800;border-bottom:none}
-  .example .neg{color:#a04040}
-
-  .cta{padding:100px 0;border-bottom:none}
-  .cta a.mail{
-    display:inline-block;margin-top:30px;font-size:15px;color:var(--black);
-    text-decoration:none;border:1px solid var(--black);padding:14px 30px;
-    letter-spacing:.1em;text-transform:uppercase;transition:background .15s,color .15s;
-  }
-  .cta a.mail:hover{background:var(--black);color:#fff}
-
   footer{padding:36px 0 48px;border-top:1px solid var(--line)}
-  footer .wrap{
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    font-size:12px;color:var(--gray);letter-spacing:.06em;
-  }
+  footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;color:var(--gray);letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -128,9 +120,9 @@
 
 <div class="hero">
   <div class="wrap">
-    <div class="eyebrow">Private beta</div>
-    <h1>The waste stream is a commodity market nobody is pricing.</h1>
-    <p class="lede">Reclaim is Baryon's material arbitrage engine. Point it at any listing for scrap, surplus, or unwanted equipment — an auction lot, a marketplace find, a pile behind a shop — and it estimates what the material is actually worth, what it costs to recover, and whether the trade is worth making.</p>
+    <div class="eyebrow">Live tool</div>
+    <h1>Is that pile worth hauling? Run the numbers.</h1>
+    <p class="lede">Reclaim is Baryon's material arbitrage engine. Enter what's in a load — copper, motors, aluminum, steel — plus what it costs to acquire and move, and get the number that matters: <b style="color:#0a0a0a">expected net</b>, priced against sourced scrap benchmarks.</p>
   </div>
 </div>
 
@@ -142,52 +134,54 @@
 
 <section>
   <div class="wrap">
-    <div class="label">How it works</div>
-    <h2>Every object is a bundle of commodities with a logistics problem attached.</h2>
-    <p class="body">Reclaim reads a listing and decomposes it: objects → materials → weights → recoverable fractions. It prices each fraction against sourced scrap benchmarks, compares scrap value against reselling intact or parting out — <b>the value waterfall</b> — then subtracts the full cost of recovery: loading, transport, processing, disposal, and a risk reserve. What's left is the number that matters: <b>expected net</b>.</p>
-    <div class="example">
-      <div class="head">EXAMPLE — "FREE: old commercial electrical equipment, must haul away"</div>
-      <table>
-        <tr><td>Estimated weight</td><td>~2,400 lb</td></tr>
-        <tr><td>Copper (wire, windings, bus)</td><td>~310 lb</td></tr>
-        <tr><td>Steel / mixed ferrous</td><td>~1,450 lb</td></tr>
-        <tr><td>Estimated gross recovery</td><td>$1,720</td></tr>
-        <tr><td>Pickup, transport, processing</td><td class="neg">−$635</td></tr>
-        <tr><td>Risk reserve</td><td class="neg">−$150</td></tr>
-        <tr class="total"><td>Expected net</td><td>$935</td></tr>
-      </table>
+    <div class="label">The calculator</div>
+    <h2>Materials in, verdict out.</h2>
+    <div class="calc">
+      <div class="pane">
+        <h3>What's in the load (lb)</h3>
+        <table class="mats"><tbody id="mats"></tbody></table>
+      </div>
+      <div class="pane">
+        <h3>Cost stack</h3>
+        <div class="costrow"><span>Purchase price ($)</span><input type="number" id="c-buy" value="0" min="0" step="any"></div>
+        <div class="costrow"><span>Loading / labor ($)</span><input type="number" id="c-labor" value="100" min="0" step="any"></div>
+        <div class="costrow"><span>Round-trip miles</span><input type="number" id="c-miles" value="40" min="0" step="any"></div>
+        <div class="costrow"><span>Cost per mile ($)</span><input type="number" id="c-permile" value="2.50" min="0" step="any"></div>
+        <div class="costrow"><span>Disposal / dump fees ($)</span><input type="number" id="c-disposal" value="0" min="0" step="any"></div>
+        <div class="costrow"><span>Risk reserve (% of gross)</span><input type="number" id="c-risk" value="15" min="0" max="100" step="any"></div>
+        <div class="result">
+          <div class="line"><span>Gross recovery</span><span id="r-gross">$0</span></div>
+          <div class="line"><span>Total costs</span><span id="r-costs">$0</span></div>
+          <div class="line net"><span>Expected net</span><span id="r-net">$0</span></div>
+          <div class="line"><span>ROI on cash</span><span id="r-roi">—</span></div>
+          <span class="verdict pass" id="r-verdict">ENTER A LOAD</span>
+        </div>
+        <div class="asof" id="asof"></div>
+      </div>
     </div>
-    <p class="body" style="margin-top:28px;font-size:13px">Illustrative figures. Real appraisals carry weight ranges, per-material pricing with sources and as-of dates, and a stated confidence.</p>
+    <p class="body" style="font-size:13px;margin-top:18px">Benchmarks are national baselines — your local yard will differ; call before you haul. Only handle material with clear ownership: copper, catalytic converters, and utility equipment carry theft-law requirements in most states.</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="label">The engine</div>
-    <h2>Built on the same world model as Resource Intelligence.</h2>
+    <div class="label">Where this goes</div>
+    <h2>The calculator is step one. The engine is the point.</h2>
     <div class="cols">
       <div class="col">
-        <h3>Sourced pricing</h3>
-        <p>Scrap benchmarks with a source and an as-of date on every row, refreshed by an autonomous research agent — the same honest-data discipline as Baryon's world model.</p>
+        <h3>AI appraisal</h3>
+        <p>The full engine reads a raw listing — "old electrical stuff, must haul away" — and produces the material breakdown, weight ranges, value waterfall (resell → parts → scrap), and verdict automatically.</p>
       </div>
       <div class="col">
-        <h3>Value waterfall</h3>
-        <p>Resell intact, part out, or scrap — the engine recommends the highest-value realistic disposition, not just the commodity number.</p>
+        <h3>Sourced pricing</h3>
+        <p>Every benchmark carries a source and an as-of date, refreshed by the same autonomous research agent that maintains Baryon's world model.</p>
       </div>
       <div class="col">
         <h3>Provenance first</h3>
-        <p>Theft-prone material — copper, catalytic converters, utility equipment — is flagged automatically. Clean ownership is a requirement, not an afterthought.</p>
+        <p>Theft-prone material is flagged automatically. Clean ownership is a requirement of the system, not an afterthought.</p>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="cta">
-  <div class="wrap">
-    <div class="label">Access</div>
-    <h2>Reclaim is in private beta.</h2>
-    <p class="body">The appraisal engine currently runs as an internal Baryon system. If you clear buildings, run a shop with a scrap pile, haul material, or operate a yard — get in touch.</p>
-    <a class="mail" href="mailto:sebastianskipwith@gmail.com?subject=Reclaim%20beta">Request access</a>
+    <p class="body" style="margin-top:40px">Want the full engine, or want to route real loads? <a href="mailto:sebastianskipwith@gmail.com?subject=Reclaim" style="color:#0a0a0a;font-weight:600">Get in touch →</a></p>
   </div>
 </section>
 
@@ -197,6 +191,52 @@
     <span>Building the Autonomous Physical Economy</span>
   </div>
 </footer>
+
+<script>
+let PRICES = [];
+const $ = (id) => document.getElementById(id);
+const money = (n) => `${n < 0 ? "−" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+
+fetch("/data/scrap.json").then(r => r.json()).then(rows => {
+  PRICES = rows.filter(r => r.perLb > 0);
+  $("mats").innerHTML = PRICES.map((p, i) => `
+    <tr>
+      <td>${p.label}${p.detail ? `<div style="font-size:10.5px;color:#9a9a94">${p.detail}</div>` : ""}</td>
+      <td class="price">$${p.perLb.toFixed(2)}/lb</td>
+      <td><input type="number" min="0" step="any" placeholder="0" data-i="${i}" class="lb"></td>
+      <td class="rowval" id="rv-${i}"></td>
+    </tr>`).join("");
+  $("asof").textContent = `${rows[0].source} · as of ${rows[0].asOf}`;
+  document.querySelectorAll("input").forEach(el => el.addEventListener("input", calc));
+  calc();
+});
+
+function calc() {
+  let gross = 0;
+  document.querySelectorAll("input.lb").forEach(el => {
+    const i = Number(el.dataset.i);
+    const v = (Number(el.value) || 0) * PRICES[i].perLb;
+    gross += v;
+    $("rv-" + i).textContent = v > 0 ? money(v) : "";
+  });
+  const buy = Number($("c-buy").value) || 0;
+  const costs =
+    buy + (Number($("c-labor").value) || 0) +
+    (Number($("c-miles").value) || 0) * (Number($("c-permile").value) || 0) +
+    (Number($("c-disposal").value) || 0) +
+    gross * ((Number($("c-risk").value) || 0) / 100);
+  const net = gross - costs;
+  $("r-gross").textContent = money(gross);
+  $("r-costs").textContent = money(-costs).replace("−", "−");
+  $("r-net").textContent = money(net);
+  $("r-roi").textContent = buy > 0 ? `${Math.round((net / buy) * 100)}%` : (net > 0 ? "∞ (free acquisition)" : "—");
+  const v = $("r-verdict");
+  if (gross === 0) { v.textContent = "ENTER A LOAD"; v.className = "verdict pass"; }
+  else if (net > 150) { v.textContent = "BUY — WORTH THE TRIP"; v.className = "verdict buy"; }
+  else if (net > 0) { v.textContent = "MAYBE — THIN MARGIN"; v.className = "verdict maybe"; }
+  else { v.textContent = "PASS — YOU'D LOSE MONEY"; v.className = "verdict pass"; }
+}
+</script>
 
 </body>
 </html>
