@@ -57,3 +57,5 @@
 .ev-popup{color:#172720;font:12px/1.7 system-ui;white-space:pre-line;max-width:280px}
 @media(max-width:800px){.ev-split{grid-template-columns:1fr}.ev-metrics{grid-template-columns:repeat(2,1fr)}.ri-state{display:none}.ev-heading{display:block}.ev-badge{display:inline-block;margin-top:12px}.ev-map{height:340px}.ri-nav{padding:7px 10px}.evidence-view{padding-top:20px}header .nav{gap:12px;flex-wrap:wrap}header .nav .tabs{flex-wrap:wrap}.ev-toolbar select{margin-left:0}.ev-toolbar label{display:flex;flex-direction:column;gap:5px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+.ev-score-track{flex:1;min-width:0}
