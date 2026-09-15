@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/maplibre/maplibre-gl.css">
+<link rel="stylesheet" href="/assets/resource-evidence.css?v=20260915a">
 <style>
   :root{
     --black:#0a0a0a; --gray:#55555c; --line:#e6e6e2;
@@ -157,7 +158,15 @@
   </div>
 </header>
 
-<main>
+<nav class="ri-nav" aria-label="Resource Intelligence views">
+  <a href="#world" aria-current="page">World model</a>
+  <a href="#soil">Earth evidence</a>
+  <a href="#cores">Drill cores</a>
+  <a href="#models">Model evaluation</a>
+  <a href="#trade">Trade evidence</a>
+  <span class="ri-state">REGIONAL EARTH MODEL · IN DEVELOPMENT</span>
+</nav>
+<main data-ri-view="world">
   <aside id="panel">
     <div class="lbl">Search the world model</div>
     <input class="search" id="q" placeholder="Search 100,000+ sites — try Escondida, Suez, Gigafactory…">
@@ -178,6 +187,11 @@
     </div>
 
     <div id="overview">
+      <div class="card" style="background:#f2f6f1;border-color:#c8d7ca;margin-bottom:16px">
+        <b>Earth evidence is now available</b>
+        <p style="margin-top:5px">Explore measured soil chemistry, drill-core intervals and the first frozen model evaluation.</p>
+        <p style="margin-top:7px"><a href="#soil" style="color:#205b46">Open Earth evidence →</a></p>
+      </div>
       <div class="lbl">World model</div>
       <div class="tiles">
         <div class="tile"><div class="v" id="st-sites">—</div><div class="k">Resource sites</div></div>
@@ -239,6 +253,11 @@
     </div>
   </div>
 </main>
+<section id="view-soil" data-ri-view="soil" class="evidence-view" aria-label="Earth evidence" hidden></section>
+<section id="view-cores" data-ri-view="cores" class="evidence-view" aria-label="Drill-core evidence" hidden></section>
+<section id="view-models" data-ri-view="models" class="evidence-view" aria-label="Model evaluation" hidden></section>
+<section id="view-trade" data-ri-view="trade" class="evidence-view" aria-label="Trade evidence" hidden></section>
+<script type="module" src="/assets/resource-evidence.js?v=20260915a"></script>
 
 <script type="module">
 import * as maplibregl from "/maplibre/maplibre-gl.mjs";
@@ -252,6 +271,14 @@ let BULK=null, CURATED=[], FLOWS=[], BALANCES=[], SHARES={}, PRODUCTS=[];
 let productMarkers = [];
 const state = { commodity:"", product:"", off:new Set() };
 const $ = id => document.getElementById(id);
+
+// Load the large world inventory only when its view is opened.
+if (['#soil','#cores','#models','#trade'].includes(location.hash)) {
+  await new Promise(resolve => {
+    const listener = event => { if(event.detail === 'world') { window.removeEventListener('baryon:view', listener); resolve(); } };
+    window.addEventListener('baryon:view', listener);
+  });
+}
 
 // ---- Data + left dashboard --------------------------------------------------
 const [stats, balances, shares, products] = await Promise.all([
