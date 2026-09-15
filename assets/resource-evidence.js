@@ -184,9 +184,12 @@ async function renderSupply(container) {
       <div><div class="ev-card ev-card-body"><h2>Next evidence to acquire</h2><div id="ev-supply-investigations"></div><p class="ev-small">Rules prioritize availability, downstream delivery, then process adequacy. This is an investigation guide; acquisitions and decision improvements have not been executed or evaluated.</p></div>
       <div class="ev-card ev-card-body"><h2>Connect the evidence</h2>${evidence.context.map(c => `<h3>${escape(c.title)}</h3><p>${escape(c.text)}</p><div class="ev-links">${sources(c.sourceIds)}</div>`).join('')}<div class="ev-links"><a href="#cores">Inspect the drill-core record →</a><a href="#world">Explore the global inventory →</a><a href="#trade">Trade integration status →</a></div></div></div></div>
     <div class="ev-card ev-card-body"><h2>Sources and assumptions</h2><p class="ev-small">Reviewed ${evidence.reviewedAt}. Publication dates and retrieval dates are separate. ${escape(evidence.confidence)}</p><details><summary>Inspect every reported input</summary><div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Input</th><th>Value</th><th>Evidence type</th><th>Source and vintage</th></tr></thead><tbody>${Object.values(f).map(v => `<tr><td>${escape(v.label)}<small>${escape(v.note)}</small></td><td>${fmt(v.value)} ${escape(v.unit)}</td><td>${escape(v.kind.replaceAll('_',' '))}</td><td>${sources([v.sourceId])}<small>${escape(v.section)}${v.effectiveDate ? ' · effective '+v.effectiveDate : ''}</small></td></tr>`).join('')}</tbody></table></div></details>
-    ${jsonDetails('Source retrieval dates and fingerprints',evidence.sources)}<div class="ev-links"><a href="/data/evidence/${escape(manifest.supply.file)}" download>Download evidence snapshot</a><button class="ev-button" id="ev-supply-download">Download this scenario</button></div><p class="ev-small">${escape(evidence.scope)}</p></div>${footer()}`;
-  let currentInput, currentResult;
+    ${jsonDetails('Source retrieval dates and fingerprints',evidence.sources)}<div class="ev-links"><a href="/data/evidence/${escape(manifest.supply.file)}" download>Download evidence snapshot</a><button class="ev-button" id="ev-supply-download">View scenario report</button></div><div id="ev-supply-report" hidden></div><p class="ev-small">${escape(evidence.scope)}</p></div>${footer()}`;
+  let currentInput, currentResult, reportUrl;
   const recalculate = () => {
+    $('ev-supply-report').hidden = true;
+    $('ev-supply-report').textContent = '';
+    if (reportUrl) { URL.revokeObjectURL(reportUrl); reportUrl = null; }
     currentInput = Object.fromEntries(Object.keys(INPUTS).map(key => [key,$(`ev-input-${key}`).valueAsNumber]));
     currentResult = calculateCopperSupply(currentInput);
     $('ev-supply-download').disabled = !currentResult.ok;
@@ -216,8 +219,11 @@ async function renderSupply(container) {
   $('ev-supply-download').addEventListener('click',() => {
     if (!currentResult.ok) return;
     const report = { generatedAt: new Date().toISOString(), evidenceId: evidence.id, evidenceSha256: manifest.supply.sha256, input: currentInput, result: currentResult, investigations: nextSupplyInvestigations(currentResult), evidence };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
-    const a = document.createElement('a'); a.href=url; a.download='baryon-copperwood-scenario.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000);
+    const raw = JSON.stringify(report,null,2);
+    if (reportUrl) URL.revokeObjectURL(reportUrl);
+    reportUrl = URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+    $('ev-supply-report').innerHTML = `<h3>Scenario report</h3><p class="ev-small">This report includes your assumptions, calculated outputs, unknowns, source references and the evidence fingerprint. Select the text to copy it, or save it as JSON.</p><a href="${escape(reportUrl)}" download="baryon-copperwood-scenario.json">Save report as JSON</a><pre class="ev-json" tabindex="0" aria-label="Scenario report JSON">${escape(raw)}</pre>`;
+    $('ev-supply-report').hidden = false;
   });
   recalculate();
 }
