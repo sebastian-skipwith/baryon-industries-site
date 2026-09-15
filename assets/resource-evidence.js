@@ -1,4 +1,5 @@
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
+import { calculateCopperSupply, scenarioPreset, nextSupplyInvestigations, INPUTS } from '/assets/copper-balance.mjs?v=20260915d';
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -30,7 +31,7 @@ const footer = () => `<div class="ev-footer">Public evidence snapshot · ${escap
 function fail(target,error) { target.innerHTML=`<div class="ev-error" role="alert">${escape(error.message)} <button class="ev-button" onclick="location.reload()">Reload evidence</button></div>`; }
 async function selectView() {
   const requested=location.hash.slice(1).split('?')[0];
-  const view=['soil','cores','models','trade'].includes(requested)?requested:'world';
+  const view=['soil','cores','models','trade','supply'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
   window.dispatchEvent(new CustomEvent('baryon:view',{detail:view}));
@@ -43,7 +44,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade}[view])(container);
+    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);
@@ -160,4 +161,63 @@ async function renderTrade(container) {
   container.innerHTML=heading('Physical economy / trade evidence','Connect materials to their movement','The existing world model maps sourced facilities, product chains and trade corridors. A monthly copper-trade evidence importer now runs locally; its public data release is pending redistribution rights.','Source access')+
     `<div class="ev-split"><div class="ev-card ev-card-body"><h2>Monthly copper corridor</h2><p>The initial query covers Chile–China copper ores and concentrates, refined cathodes, and waste and scrap. The local ledger retains the query scope, period, retrieval time, source-response hash, missing quantities and estimation flags.</p><div class="ev-note">${escape(t.note)}</div><div class="ev-links"><a href="${t.sourceUrl}" target="_blank" rel="noopener">Explore UN Comtrade ↗</a><a href="${t.policyUrl}" target="_blank" rel="noopener">Publication policy ↗</a></div></div>
     <div class="ev-card ev-card-body"><h2>From trade to usable supply</h2><p>Trade records describe reported goods, not live shipments, production, capacity or demand. Ore weight includes non-metal material. Imports and mirror exports cannot be added together.</p><p>Connecting geology to additional supply still requires processing routes, recovery, infrastructure, timing and independently sourced production constraints. Missing rows are not zero.</p><div class="ev-links"><a href="#world">Explore the world model →</a><a href="#models">Inspect evaluated model results →</a></div></div></div>${footer()}`;
+}
+
+async function renderSupply(container) {
+  if (!manifest.supply) throw new Error('Supply evidence is not included in this snapshot.');
+  const evidence = await data(manifest.supply), f = evidence.facts;
+  const sources = ids => ids.map(id => { const s = evidence.sources[id]; return `<a href="${escape(s.url)}" target="_blank" rel="noopener">${escape(s.name)} · ${escape(s.publicationDate || 'publication date unknown')} ↗</a>`; }).join(' · ');
+  const defaults = scenarioPreset(evidence);
+  container.innerHTML = heading('Supply decisions / Copperwood, Michigan','From ore to usable copper','Test one potential copper source against an annual requirement. Follow the calculation from ore feed to concentrate and payable metal, then inspect what is still needed to establish delivery.','Scenario · sourced inputs') +
+    `<div class="ev-metrics">${metric('29,291 t/year','2023 study · payable Cu average')}${metric('1.45% Cu','reported reserve-average grade')}${metric('Unverified','first delivery date')}${metric(fmt(manifest.core.summary.drillHoles),'linked USGS drill holes')}</div>
+    <div class="ev-supply-grid">
+      <div class="ev-card ev-card-body"><h2>Set the scenario</h2><p class="ev-small">A 365-day year. Throughput is the nominal rate before availability. All outputs below are calculations from these inputs.</p>
+      <div class="ev-preset-row"><button class="ev-button" data-supply-preset="early">2023 · first 3 years</button><button class="ev-button" data-supply-preset="later">2023 · later years</button><button class="ev-button" data-supply-preset="optimization">2026 · recovery sensitivity</button></div>
+      <p id="ev-preset-note" class="ev-small">2023 later-year design with reserve-average grade as a proxy.</p>
+      <div class="ev-input-grid">${Object.entries(INPUTS).map(([key,rule]) => `<label for="ev-input-${key}">${escape(rule.label)} <span>${escape(rule.unit)}</span><input type="number" id="ev-input-${key}" data-supply-input="${key}" value="${defaults[key]}" min="${rule.exclusiveMin ? 0.01 : rule.min}" max="${rule.max}" step="any" required></label>`).join('')}</div>
+      <p class="ev-small">Effective payability includes the study's concentrate loss. The grade proxy does not reproduce the annual mining schedule.</p></div>
+      <div><div id="ev-supply-answer" class="ev-card ev-card-body" aria-live="polite"></div>
+      <div class="ev-card ev-card-body"><h2>Reported study benchmark</h2><p>${fmt(f.annualPayable.value,0)} t/year of payable copper. The simplified scenario can differ because the full feasibility model follows a mine schedule and ramp-up exclusions.</p><div class="ev-links">${sources(['fs2023'])}</div><p class="ev-small">The 2026 recovery preset combines proposed metallurgy with older throughput and grade assumptions. It is a sensitivity case, not an updated feasibility result.</p></div></div>
+    </div>
+    <div class="ev-card ev-card-body"><h2>The material path</h2><div id="ev-supply-flow" aria-live="polite"></div><p class="ev-small">Grinding and flotation produce concentrate. Payability is a commercial metal basis; it does not measure refining recovery or a physical shipment. No smelter or refinery output is inferred.</p></div>
+    <div class="ev-split"><div class="ev-card ev-card-body"><h2>What constrains delivery?</h2>${evidence.gates.map(g => `<div class="ev-gate"><span class="ev-badge">${escape(g.status)}</span><h3>${escape(g.title)}</h3><p>${escape(g.text)}</p><div class="ev-links">${sources(g.sourceIds)}</div></div>`).join('')}</div>
+      <div><div class="ev-card ev-card-body"><h2>Next evidence to acquire</h2><div id="ev-supply-investigations"></div><p class="ev-small">Rules prioritize availability, downstream delivery, then process adequacy. This is an investigation guide; acquisitions and decision improvements have not been executed or evaluated.</p></div>
+      <div class="ev-card ev-card-body"><h2>Connect the evidence</h2>${evidence.context.map(c => `<h3>${escape(c.title)}</h3><p>${escape(c.text)}</p><div class="ev-links">${sources(c.sourceIds)}</div>`).join('')}<div class="ev-links"><a href="#cores">Inspect the drill-core record →</a><a href="#world">Explore the global inventory →</a><a href="#trade">Trade integration status →</a></div></div></div></div>
+    <div class="ev-card ev-card-body"><h2>Sources and assumptions</h2><p class="ev-small">Reviewed ${evidence.reviewedAt}. Publication dates and retrieval dates are separate. ${escape(evidence.confidence)}</p><details><summary>Inspect every reported input</summary><div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Input</th><th>Value</th><th>Evidence type</th><th>Source and vintage</th></tr></thead><tbody>${Object.values(f).map(v => `<tr><td>${escape(v.label)}<small>${escape(v.note)}</small></td><td>${fmt(v.value)} ${escape(v.unit)}</td><td>${escape(v.kind.replaceAll('_',' '))}</td><td>${sources([v.sourceId])}<small>${escape(v.section)}${v.effectiveDate ? ' · effective '+v.effectiveDate : ''}</small></td></tr>`).join('')}</tbody></table></div></details>
+    ${jsonDetails('Source retrieval dates and fingerprints',evidence.sources)}<div class="ev-links"><a href="/data/evidence/${escape(manifest.supply.file)}" download>Download evidence snapshot</a><button class="ev-button" id="ev-supply-download">Download this scenario</button></div><p class="ev-small">${escape(evidence.scope)}</p></div>${footer()}`;
+  let currentInput, currentResult;
+  const recalculate = () => {
+    currentInput = Object.fromEntries(Object.keys(INPUTS).map(key => [key,$(`ev-input-${key}`).valueAsNumber]));
+    currentResult = calculateCopperSupply(currentInput);
+    $('ev-supply-download').disabled = !currentResult.ok;
+    if (!currentResult.ok) {
+      $('ev-supply-answer').innerHTML = `<h2>Revise the scenario</h2><div class="ev-error" role="alert">${currentResult.errors.map(escape).join('<br>')}</div>`;
+      $('ev-supply-flow').textContent = 'No result for invalid or incomplete inputs.';
+      $('ev-supply-investigations').textContent = 'Enter a valid scenario to see the process investigation.';
+      return;
+    }
+    const r = currentResult;
+    $('ev-supply-answer').innerHTML = `<div class="ev-kicker">Calculated payable copper</div><div class="ev-supply-total">${fmt(r.payableCopperTonnes,0)} <span>t Cu/year</span></div><h2>${r.targetMet ? 'Scenario reaches the target' : 'Scenario falls short of the target'}</h2><p>${fmt(Math.abs(r.targetGapTonnes),0)} t/year ${r.targetMet ? 'above' : 'below'} the ${fmt(r.targetTonnes,0)} t/year payable target.</p><p>Required copper recovery with the other inputs fixed: <strong>${r.requiredRecoveryPct === null ? 'No finite solution' : fmt(r.requiredRecoveryPct,2)+'%'}</strong>. ${r.targetPossibleAtFullRecovery ? 'This is an arithmetic threshold, not demonstrated recovery.' : 'Recovery alone cannot reach this target.'}</p><div class="ev-note"><strong>Delivered refined copper: unknown.</strong><br>Development timing and downstream commitments remain unverified even when the scenario meets the target.</div>`;
+    $('ev-supply-flow').innerHTML = `<div class="ev-flow">${[
+      ['Ore feed',r.oreTonnes,'t ore/year'],['Copper in feed',r.containedCopperTonnes,'t Cu/year'],['Copper in concentrate',r.recoveredCopperTonnes,'t Cu/year'],['Payable copper',r.payableCopperTonnes,'t Cu/year'],
+    ].map(([label,value,unit],i) => `<div class="ev-flow-step"><span>${i+1} · ${escape(label)}</span><strong>${fmt(value,0)}</strong><small>${unit}</small></div>`).join('')}</div><p>${fmt(r.concentrateDryTonnes,0)} t/year dry concentrate at ${fmt(currentInput.concentrateGradePct)}% Cu. ${fmt(r.residualCopperTonnes,0)} t/year of feed copper remains outside the recovered concentrate.</p>`;
+    $('ev-supply-investigations').innerHTML = `<ol class="ev-investigations">${nextSupplyInvestigations(r).map(item => `<li><h3>${escape(item.question)}</h3><p>${escape(item.action)}</p><p class="ev-small">${escape(item.reason)}</p></li>`).join('')}</ol>`;
+  };
+  container.querySelectorAll('[data-supply-input]').forEach(node => node.addEventListener('input',() => {
+    $('ev-preset-note').textContent = 'Edited scenario. Check the source ledger to compare your assumptions with reported inputs.';
+    recalculate();
+  }));
+  container.querySelectorAll('[data-supply-preset]').forEach(node => node.addEventListener('click',() => {
+    const preset = scenarioPreset(evidence,node.dataset.supplyPreset);
+    for (const key of Object.keys(INPUTS)) if (key !== 'targetTonnes') $(`ev-input-${key}`).value = preset[key];
+    $('ev-preset-note').textContent = node.dataset.supplyPreset === 'optimization' ? 'Hybrid sensitivity: proposed 2026 metallurgy with 2023 later-year throughput and reserve grade. No updated feasibility result is implied.' : `2023 ${node.dataset.supplyPreset === 'early' ? 'first-three-year' : 'later-year'} design with reserve-average grade as a proxy.`;
+    recalculate();
+  }));
+  $('ev-supply-download').addEventListener('click',() => {
+    if (!currentResult.ok) return;
+    const report = { generatedAt: new Date().toISOString(), evidenceId: evidence.id, evidenceSha256: manifest.supply.sha256, input: currentInput, result: currentResult, investigations: nextSupplyInvestigations(currentResult), evidence };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
+    const a = document.createElement('a'); a.href=url; a.download='baryon-copperwood-scenario.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000);
+  });
+  recalculate();
 }
