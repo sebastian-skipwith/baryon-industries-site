@@ -59,6 +59,9 @@
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 
 .ev-score-track{flex:1;min-width:0}
+.ev-chart-scroll{overflow-x:auto}
+.ev-structure-profile{width:100%;min-width:620px;display:block}
+.ev-structure-profile text{font:11px ui-monospace,monospace;fill:#59625e}
 .ev-supply-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 .ev-preset-row{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 10px}
 .ev-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:18px 0}

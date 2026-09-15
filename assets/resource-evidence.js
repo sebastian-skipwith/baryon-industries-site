@@ -1,4 +1,5 @@
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
+import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
 import { calculateCopperSupply, scenarioPreset, nextSupplyInvestigations, INPUTS } from '/assets/copper-balance.mjs?v=20260915d';
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 const $ = id => document.getElementById(id);
@@ -31,12 +32,12 @@ const footer = () => `<div class="ev-footer">Public evidence snapshot · ${escap
 function fail(target,error) { target.innerHTML=`<div class="ev-error" role="alert">${escape(error.message)} <button class="ev-button" onclick="location.reload()">Reload evidence</button></div>`; }
 async function selectView() {
   const requested=location.hash.slice(1).split('?')[0];
-  const view=['soil','cores','models','trade','supply'].includes(requested)?requested:'world';
+  const view=['soil','cores','models','trade','supply','structure'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
   window.dispatchEvent(new CustomEvent('baryon:view',{detail:view}));
   if(view==='world'){window.dispatchEvent(new Event('resize'));return;}
-  if(initialized.has(view)){if(view==='soil')soilMap?.resize();return;}
+  if(initialized.has(view)){if(view==='soil')soilMap?.resize();if(view==='structure')structureMap?.resize();return;}
   initialized.add(view);
   const target=$(`view-${view}`);
   target.innerHTML='<div class="ev-container" role="status">Loading verified evidence…</div>';
@@ -44,11 +45,90 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply}[view])(container);
+    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);
 selectView();
+
+let structureMap, structureRegion, structureRequest=0, structurePoints=[];
+async function renderStructure(container) {
+  const s=manifest.structure;
+  if(!s)throw new Error('Earth structure is not available in this evidence snapshot.');
+  container.innerHTML=heading('Earth model / deep geological context','Inside the subduction zones','Explore the USGS Slab2 geometry model across 27 regions. Choose a region and latitude to inspect modeled depth, source uncertainty and overlapping slab branches.','External model · 2018')+
+    `<div class="ev-metrics">${metric(fmt(s.summary.regions),'model regions')}${metric(fmt(s.summary.nativeGridNodes),'native grid nodes')}${metric(fmt(s.summary.supplementaryNodes),'overlapping branch nodes')}${metric(fmt(s.summary.depthRangeKm[1],1)+' km','deepest modeled node')}</div>
+    <div class="ev-card"><div class="ev-toolbar"><label>Slab region <select id="ev-structure-region" disabled>${s.regions.map(r=>`<option value="${r.code}" ${r.code==='cas'?'selected':''}>${escape(r.name)}</option>`).join('')}</select></label><button class="ev-button" id="ev-structure-global" disabled>Global view</button><span class="ev-legend">Depth km · 0 <i class="ev-gradient"></i> 700</span></div>
+    <div id="ev-structure-map" class="ev-map" aria-label="USGS slab geometry map"></div><div class="ev-caption" id="ev-structure-map-status" role="status">Loading global model preview…</div></div>
+    <div class="ev-note">This is a published geophysical model, not measured mineral composition or a new Baryon prediction. Regions outside the model remain unknown. Ingesting it does not establish improved discovery accuracy.</div>
+    <div id="ev-structure-region-body" aria-live="polite"></div>
+    <div class="ev-split"><div class="ev-card ev-card-body"><h2>What this layer adds</h2><p>Deep structural context for the Earth model. Soil samples, drill-core assays and slab geometry represent different physical quantities and depth scales; their proximity alone does not establish mineralization.</p><p>${escape(s.scope)}</p><div class="ev-links"><a href="#soil">Measured soil chemistry</a><a href="#cores">Reported drill-core intervals</a><a href="#models">Research and evaluation</a></div></div>
+    <div class="ev-card ev-card-body"><h2>USGS Slab2 · March 2018 release</h2><p>Gavin Hayes / U.S. Geological Survey. ${escape(s.source.license)}. Acquired ${day(s.source.acquiredAt)} UTC; acquisition is not a model update.</p><p>${escape(s.source.updateFrequency)}. Horizontal and vertical datums are not named in the supplied grid metadata.</p><div class="ev-links"><a href="${escape(s.source.productUrl)}" target="_blank" rel="noopener">USGS product ↗</a><a href="${escape(s.source.url)}" target="_blank" rel="noopener">Data release ↗</a><a href="${escape(s.source.paperUrl)}" target="_blank" rel="noopener">Model paper ↗</a></div>${jsonDetails('Source dates, conventions, warnings and fingerprints',s.source)}</div></div>${footer()}`;
+  const overview=await data(s.overview);
+  structureMap=new maplibregl.Map({container:'ev-structure-map',center:[-155,12],zoom:1.3,style:{version:8,projection:{type:'globe'},sources:{imagery:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}},layers:[{id:'background',type:'background',paint:{'background-color':'#102022'}},{id:'imagery',type:'raster',source:'imagery',paint:{'raster-opacity':.6}}]}});
+  structureMap.addControl(new maplibregl.NavigationControl(),'top-right');
+  structureMap.on('load',()=>{
+    structureMap.addSource('slabs',{type:'geojson',data:{type:'FeatureCollection',features:overview.map(([region,lon,lat,depth,index,kind])=>({type:'Feature',geometry:{type:'Point',coordinates:[wrapLongitude(lon),lat]},properties:{region,depth,index,kind}}))}});
+    structureMap.addLayer({id:'slabs',type:'circle',source:'slabs',paint:{'circle-radius':['interpolate',['linear'],['zoom'],1,1.7,6,4],'circle-color':['interpolate',['linear'],['get','depth'],0,'#b5def8',100,'#44b9ba',300,'#ead786',500,'#f28a48',700,'#e45b45'],'circle-opacity':.8,'circle-stroke-width':['case',['==',['get','kind'],1],1,0],'circle-stroke-color':'#fff'}});
+    structureMap.addSource('slab-profile',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    structureMap.addLayer({id:'slab-profile',type:'circle',source:'slab-profile',paint:{'circle-radius':5,'circle-color':'#fff','circle-stroke-width':1.5,'circle-stroke-color':'#172e28','circle-opacity':.8}});
+    structureMap.on('click','slabs',event=>{const p=event.features?.[0]?.properties;if(p){$('ev-structure-region').value=p.region;loadStructureRegion(p.region,false,{kind:Number(p.kind),index:Number(p.index)});}});
+    structureMap.on('mouseenter','slabs',()=>{structureMap.getCanvas().style.cursor='pointer';});
+    structureMap.on('mouseleave','slabs',()=>{structureMap.getCanvas().style.cursor='';});
+    $('ev-structure-map-status').textContent=`${fmt(s.summary.displayGridNodes)} sampled grid points + ${fmt(overview.length-s.summary.displayGridNodes)} branch preview points. Color = modeled depth; white outline = supplementary branch. Click a point or choose a region. Missing cells stay absent.`;
+    if(structureRegion)updateStructureProfile();
+  });
+  $('ev-structure-global').onclick=()=>structureMap.flyTo({center:[-155,12],zoom:1.3});
+  $('ev-structure-region').onchange=()=>loadStructureRegion($('ev-structure-region').value,true);
+  await loadStructureRegion('cas',false);
+  $('ev-structure-region').disabled=false;
+  $('ev-structure-global').disabled=false;
+}
+async function loadStructureRegion(code,fly,selection) {
+  const request=++structureRequest, target=$('ev-structure-region-body');
+  structureRegion=null;
+  target.innerHTML='<p role="status">Loading verified regional model…</p>';
+  structureMap.getSource('slab-profile')?.setData({type:'FeatureCollection',features:[]});
+  try {
+    const descriptor=manifest.structure.regions.find(r=>r.code===code), region=await data(descriptor);
+    if(request!==structureRequest)return;
+    const rows=latitudeRows(region);
+    if(!rows.length)throw new Error('No sampled latitude rows in this region.');
+    structureRegion=region;
+    let chosen=rows[Math.floor(rows.length/2)].row, selectedNode;
+    if(selection?.kind===0){selectedNode=gridNode(region,region.nodes[selection.index]);chosen=selectedNode.row;}
+    if(selection?.kind===1){const p=region.supplement[selection.index];chosen=rows.reduce((a,b)=>Math.abs(a.latitude-p[1])<Math.abs(b.latitude-p[1])?a:b).row;selectedNode={kind:'supplementary_node',sourceLongitude:p[0],longitude:wrapLongitude(p[0]),latitude:p[1],depthKm:p[2],strikeDeg:p[3],dipDeg:p[4],uncertaintyKm:p[5],shiftUncertaintyKm:p[6],smoothingUncertaintyKm:p[7],thicknessKm:p[8],sourceRow:p[9]};}
+    target.innerHTML=`<div class="ev-card"><div class="ev-toolbar"><h2>${escape(region.name)} · cross-section</h2><label>Latitude <select id="ev-structure-latitude">${rows.map(r=>`<option value="${r.row}" ${r.row===chosen?'selected':''}>${fmt(r.latitude,3)}° · ${r.count} grid nodes</option>`).join('')}</select></label></div><div class="ev-card-body" id="ev-structure-chart"></div><div class="ev-caption" id="ev-structure-profile-caption"></div></div>
+      <div class="ev-split"><div class="ev-card ev-card-body"><h2>Node inspector</h2><div id="ev-structure-node">Select a chart point or a table row to inspect its source attributes.</div></div><div class="ev-card ev-card-body"><h2>Resolution and limits</h2><p>Native grid: ${fmt(region.grid.sourceStepLongitude,3)}° × ${fmt(region.grid.sourceStepLatitude,3)}°. Preview: every fifth index (${fmt(region.grid.displayStepLongitude,3)}° × ${fmt(region.grid.displayStepLatitude,3)}°). Angular spacing is not a uniform distance.</p><p>${fmt(region.summary.nativeGridNodes)} native grid nodes; ${fmt(region.nodes.length)} preview nodes; ${fmt(region.supplement.length)} supplementary nodes retained. Native depth range: ${region.summary.nativeDepthRangeKm.map(n=>fmt(n,3)).join(' to ')} km.</p><p>${region.warnings.map(escape).join(' ')}</p><div class="ev-links"><a href="/data/evidence/${escape(descriptor.file)}" download>Download regional model</a><a href="${escape(region.sourceUrl)}" target="_blank" rel="noopener">Regional source ↗</a></div>${jsonDetails('Regional source hashes and coverage',{sourceFiles:region.sourceFiles,summary:region.summary,warnings:region.warnings})}</div></div>
+      <div class="ev-card"><div class="ev-card-body"><h2>Cross-section nodes</h2><p id="ev-structure-table-caption"></p></div><div class="ev-table-wrap" id="ev-structure-table"></div></div>`;
+    $('ev-structure-latitude').onchange=updateStructureProfile;
+    updateStructureProfile();
+    if(selectedNode)inspectStructureNode(selectedNode);
+    if(fly){const first=region.nodes[0],last=region.nodes.at(-1),x=region.grid.longitudes,y=region.grid.latitudes;structureMap.flyTo({center:[wrapLongitude((x[0]+x.at(-1))/2),(y[first[0]]+y[last[0]])/2],zoom:3.5});}
+  }catch(error){if(request===structureRequest)fail(target,error);}
+}
+function inspectStructureNode(point) {
+  const branch=point.kind==='supplementary_node';
+  $('ev-structure-node').innerHTML=`<span class="ev-badge">${branch?'Supplementary branch':'Sampled grid node'}</span><h3>${fmt(point.depthKm,3)} km modeled depth</h3><p>${fmt(point.latitude,6)}° latitude, ${fmt(point.longitude,6)}° longitude.<br>Source PDF standard deviation: ${fmt(point.uncertaintyKm,3)}${point.uncertaintyKm===null?'':' km'}.<br>Strike: ${fmt(point.strikeDeg,3)}° · dip: ${fmt(point.dipDeg,3)}° · thickness: ${fmt(point.thicknessKm,3)} km.</p><p class="ev-small">2018 external model. ${branch?'CSV row '+point.sourceRow:'Source grid row '+point.row+', column '+point.column+' (zero-based)'}. Datum unspecified. Source standard deviation is not total uncertainty or a calibrated Baryon prediction interval.</p>${jsonDetails('All source attributes for this node',point)}`;
+}
+function updateStructureProfile() {
+  if(!structureRegion || !$('ev-structure-latitude'))return;
+  const p=latitudeProfile(structureRegion,Number($('ev-structure-latitude').value));
+  structurePoints=[...p.nodes,...p.supplementary];
+  $('ev-structure-node').textContent='Select a chart point or a table row to inspect its source attributes.';
+  $('ev-structure-chart').innerHTML=structureChart(p);
+  $('ev-structure-profile-caption').textContent=`${fmt(p.latitude,3)}° latitude · ${fmt(p.nodes.length)} grid nodes on this row; ${fmt(p.supplementary.length)} supplementary nodes projected from ±${fmt(p.halfWidthDegrees,3)}° latitude. Horizontal distance runs east along this latitude from ${fmt(wrapLongitude(p.originLongitude),3)}°. Points are not joined across gaps. Vertical bars show source PDF standard deviation; absent uncertainty is not zero. Axes have different scales; no ground-surface or borehole tie is implied.`;
+  const table=[...p.nodes.slice(0,60),...p.supplementary.slice(0,60)];
+  $('ev-structure-table-caption').textContent=`Showing ${table.length} of ${fmt(structurePoints.length)} profile points (up to 60 per type). The chart includes every profile point; regional download contains all retained nodes.`;
+  $('ev-structure-table').innerHTML=`<table class="ev-table"><thead><tr><th>Inspect</th><th>Longitude / latitude</th><th>Modeled depth</th><th>Source PDF SD</th></tr></thead><tbody>${table.map(n=>`<tr><td><button data-slab-node="${structurePoints.indexOf(n)}">${n.kind==='sampled_grid_node'?'Grid '+n.row+':'+n.column:'Branch row '+n.sourceRow}</button></td><td>${fmt(n.longitude,4)}° / ${fmt(n.latitude,4)}°</td><td>${fmt(n.depthKm,3)} km</td><td>${n.uncertaintyKm===null?'Unknown':fmt(n.uncertaintyKm,3)+' km'}</td></tr>`).join('')}</tbody></table>`;
+  $('ev-structure-region-body').querySelectorAll('[data-slab-node]').forEach(el=>{el.onclick=()=>{inspectStructureNode(structurePoints[Number(el.dataset.slabNode)]);$('ev-structure-node').scrollIntoView({block:'nearest'});};});
+  structureMap.getSource('slab-profile')?.setData({type:'FeatureCollection',features:p.nodes.map(n=>({type:'Feature',geometry:{type:'Point',coordinates:[n.longitude,n.latitude]},properties:{}}))});
+}
+function structureChart(profile) {
+  const points=[...profile.nodes,...profile.supplementary],left=80,right=850,top=35,bottom=360;
+  const extent=points.reduce((a,p)=>{const u=p.uncertaintyKm??0;return {min:Math.min(a.min,p.depthKm-u),max:Math.max(a.max,p.depthKm+u),distance:Math.max(a.distance,p.distanceKm)};},{min:0,max:0,distance:1});
+  const span=extent.max-extent.min||1,x=n=>left+n/extent.distance*(right-left),y=n=>top+(n-extent.min)/span*(bottom-top);
+  return `<div class="ev-chart-scroll"><svg class="ev-structure-profile" viewBox="0 0 890 415" role="img" aria-label="${escape(structureRegion.name)} modeled slab depth at ${fmt(profile.latitude,3)} degrees latitude"><title>Slab depth profile: modeled nodes and source uncertainty; no interpolation</title>${[0,.25,.5,.75,1].map(t=>`<line x1="${left}" x2="${right}" y1="${top+t*(bottom-top)}" y2="${top+t*(bottom-top)}" stroke="#e3e9e3"/><text x="${left-12}" y="${top+t*(bottom-top)+4}" text-anchor="end">${fmt(extent.min+t*span,1)}</text><text x="${left+t*(right-left)}" y="388" text-anchor="middle">${fmt(t*extent.distance,0)}</text>`).join('')}${points.map((n,i)=>{const branch=n.kind==='supplementary_node',color=branch?'#ad670f':'#177b74',u=n.uncertaintyKm;return `${u===null?'':`<line x1="${x(n.distanceKm)}" x2="${x(n.distanceKm)}" y1="${y(n.depthKm-u)}" y2="${y(n.depthKm+u)}" stroke="${color}" opacity=".18"/>`}<circle data-slab-node="${i}" cx="${x(n.distanceKm)}" cy="${y(n.depthKm)}" r="${branch?2.4:3.5}" fill="${branch?'white':color}" stroke="${color}" stroke-width="1" style="cursor:pointer"><title>${branch?'Branch':'Grid'}: ${fmt(n.depthKm,3)} km, ${fmt(n.longitude,4)}° longitude; source SD ${fmt(u,3)} km</title></circle>`;}).join('')}<text x="${left}" y="16">Modeled depth (km) ↓</text><text x="${right}" y="413" text-anchor="end">Distance east along latitude (km) →</text></svg></div><p class="ev-small"><span class="ev-teal">● Sampled grid</span> · <span class="ev-amber">○ Supplementary branch</span> · source standard deviation bars. Click points to inspect; the table provides keyboard access.</p>`;
+}
 
 async function renderSoil(container) {
   const s=manifest.soil, summary=s.summary;
