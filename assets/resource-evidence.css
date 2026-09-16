@@ -59,6 +59,13 @@
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 
 .ev-score-track{flex:1;min-width:0}
+.ev-location-form{display:flex;flex-wrap:wrap;align-items:end;gap:14px;margin:15px 0}
+.ev-location-form label{font-size:12px;font-weight:600}
+.ev-location-form input{display:block;margin-top:6px;width:175px}
+.ev-location-form button{min-height:35px}
+.ev-column-profile{width:100%;display:block}
+.ev-column-profile text{font:11px ui-monospace,monospace;fill:#59625e}
+#view-bedrock .ev-card p,#view-bedrock .ev-card li{overflow-wrap:anywhere}
 .ev-chart-scroll{overflow-x:auto}
 .ev-structure-profile{width:100%;min-width:620px;display:block}
 .ev-structure-profile text{font:11px ui-monospace,monospace;fill:#59625e}

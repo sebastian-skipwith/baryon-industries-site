@@ -1,5 +1,6 @@
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
+import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260916a';
 import { calculateCopperSupply, scenarioPreset, nextSupplyInvestigations, INPUTS } from '/assets/copper-balance.mjs?v=20260915d';
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 const $ = id => document.getElementById(id);
@@ -32,12 +33,12 @@ const footer = () => `<div class="ev-footer">Public evidence snapshot · ${escap
 function fail(target,error) { target.innerHTML=`<div class="ev-error" role="alert">${escape(error.message)} <button class="ev-button" onclick="location.reload()">Reload evidence</button></div>`; }
 async function selectView() {
   const requested=location.hash.slice(1).split('?')[0];
-  const view=['soil','cores','models','trade','supply','structure'].includes(requested)?requested:'world';
+  const view=['soil','cores','models','trade','supply','structure','bedrock'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
   window.dispatchEvent(new CustomEvent('baryon:view',{detail:view}));
   if(view==='world'){window.dispatchEvent(new Event('resize'));return;}
-  if(initialized.has(view)){if(view==='soil')soilMap?.resize();if(view==='structure')structureMap?.resize();return;}
+  if(initialized.has(view)){if(view==='soil')soilMap?.resize();if(view==='structure')structureMap?.resize();if(view==='bedrock')activateBedrock();return;}
   initialized.add(view);
   const target=$(`view-${view}`);
   target.innerHTML='<div class="ev-container" role="status">Loading verified evidence…</div>';
@@ -45,7 +46,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure}[view])(container);
+    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);
@@ -204,7 +205,10 @@ async function loadCore() {
   try {
     const rows=await data(hole);if(request!==coreRequest)return;
     $('ev-core-download').href=`/data/evidence/${hole.file}`;
-    target.innerHTML=`<h2>Drill hole ${escape(hole.id)}</h2><p>${hole.records} records · ${hole.flaggedRecords} flagged · ${escape(hole.coordinateStatus)}.</p><p class="ev-small"><span class="ev-teal">● Cu: four-acid OES</span> &nbsp; <span class="ev-amber">● Cu: sinter AES</span> · mg/kg on a log1p horizontal scale. Vertical axis is reported interval depth in metres, not established as true vertical.</p>${profile(rows,hole)}<div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Sample / collected</th><th>Source depth → metres</th><th>Cu · four-acid OES</th><th>Cu · sinter AES</th><th>Geology / quality</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escape(r.sampleId)}<small>${day(r.collectedOn)}</small>${jsonDetails('All assays & metadata',r)}</td><td>${escape(r.depth.raw)}<small>${r.depth.fromM===null?'Interval unusable':`${fmt(r.depth.fromM,3)}–${fmt(r.depth.toM,3)} m`}</small></td><td>${assay(r.assays.find(a=>a.sourceField==='Cu_pct_OES_HF'))}</td><td>${assay(r.assays.find(a=>a.sourceField==='Cu_ppm_AES_ST'))}</td><td>${escape(r.lithology||'Unknown lithology')}<small>${escape(r.stratigraphy||'Unknown stratigraphy')}</small><small>${escape(quality([...r.flags,...r.depth.flags]))}</small></td></tr>`).join('')}</tbody></table></div>`;
+    const regional=rows.find(r=>Number.isFinite(r.latitude)&&Number.isFinite(r.longitude));
+    const regionalLink=manifest.bedrock&&regional?`<p><a href="#bedrock?lon=${regional.longitude}&lat=${regional.latitude}">Inspect regional bedrock near the first source coordinate →</a></p><p class="ev-small">Regional cell averages do not establish this hole's collar elevation or trajectory.</p>`:'';
+
+    target.innerHTML=`<h2>Drill hole ${escape(hole.id)}</h2>${regionalLink}<p>${hole.records} records · ${hole.flaggedRecords} flagged · ${escape(hole.coordinateStatus)}.</p><p class="ev-small"><span class="ev-teal">● Cu: four-acid OES</span> &nbsp; <span class="ev-amber">● Cu: sinter AES</span> · mg/kg on a log1p horizontal scale. Vertical axis is reported interval depth in metres, not established as true vertical.</p>${profile(rows,hole)}<div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Sample / collected</th><th>Source depth → metres</th><th>Cu · four-acid OES</th><th>Cu · sinter AES</th><th>Geology / quality</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escape(r.sampleId)}<small>${day(r.collectedOn)}</small>${jsonDetails('All assays & metadata',r)}</td><td>${escape(r.depth.raw)}<small>${r.depth.fromM===null?'Interval unusable':`${fmt(r.depth.fromM,3)}–${fmt(r.depth.toM,3)} m`}</small></td><td>${assay(r.assays.find(a=>a.sourceField==='Cu_pct_OES_HF'))}</td><td>${assay(r.assays.find(a=>a.sourceField==='Cu_ppm_AES_ST'))}</td><td>${escape(r.lithology||'Unknown lithology')}<small>${escape(r.stratigraphy||'Unknown stratigraphy')}</small><small>${escape(quality([...r.flags,...r.depth.flags]))}</small></td></tr>`).join('')}</tbody></table></div>`;
   }catch(error){if(request===coreRequest)fail(target,error);}
 }
 function profile(rows,hole) {
