@@ -1,3 +1,4 @@
+import {renderFlows} from '/assets/copper-flows-view.mjs?v=20260917a';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
 import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260916a';
@@ -33,7 +34,7 @@ const footer = () => `<div class="ev-footer">Public evidence snapshot · ${escap
 function fail(target,error) { target.innerHTML=`<div class="ev-error" role="alert">${escape(error.message)} <button class="ev-button" onclick="location.reload()">Reload evidence</button></div>`; }
 async function selectView() {
   const requested=location.hash.slice(1).split('?')[0];
-  const view=['soil','cores','models','trade','supply','structure','bedrock'].includes(requested)?requested:'world';
+  const view=['soil','cores','models','trade','supply','structure','bedrock','flows'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
   window.dispatchEvent(new CustomEvent('baryon:view',{detail:view}));
@@ -46,7 +47,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
+    await ({flows:c=>renderFlows(c,{descriptor:manifest.flows,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);

@@ -88,3 +88,20 @@
 .ev-investigations li{padding:0 0 10px 4px}
 .ev-button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:800px){.ev-supply-grid{grid-template-columns:1fr}.ev-flow{grid-template-columns:1fr 1fr}.ev-flow-step strong{font-size:21px}.ev-input-grid{gap:12px}.ev-gate .ev-badge{float:none}}
+
+.ev-flow-terms{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:20px 0}
+.ev-flow-terms>div{background:#f3f6f2;border:1px solid #dbe4d9;padding:14px;border-radius:5px}
+.ev-flow-terms span,.ev-flow-totals span{display:block;font-size:11px;color:#53605b}
+.ev-flow-terms strong{display:block;font:600 21px/1.7 ui-monospace,monospace;letter-spacing:-.05em}
+.ev-flow-terms small{color:#59635e;font-size:10px}
+.ev-flow-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;border-top:1px solid #dde3da;padding:18px 0}
+.ev-flow-totals strong{display:block;font-size:26px;letter-spacing:-.03em}
+.ev-flow-chart{margin:18px 0}
+.ev-flow-month{width:100%;display:grid;grid-template-columns:130px minmax(0,1fr);gap:15px;align-items:center;text-align:left;border:1px solid transparent;border-radius:4px;background:transparent;padding:7px;font:12px inherit;cursor:pointer}
+.ev-flow-month:hover,.ev-flow-month[aria-pressed=true]{background:#f0f5ef;border-color:#b8cbc1}
+.ev-flow-bars{display:block;padding-right:65px}
+.ev-flow-bar-row{position:relative;display:flex;gap:8px;align-items:center;margin:3px 0;height:15px}
+.ev-flow-bar-row i{height:12px;display:block;background:#177b74;flex-shrink:0}
+.ev-flow-bar-row i.use{background:#ad670f}
+.ev-flow-bar-row small{font:10px ui-monospace,monospace;color:#4f5a52;white-space:nowrap}
+@media(max-width:850px){.ev-flow-terms{grid-template-columns:repeat(2,minmax(0,1fr))}.ev-flow-totals{grid-template-columns:1fr}.ev-flow-month{grid-template-columns:92px minmax(0,1fr);gap:8px;font-size:11px}.ev-flow-terms strong{font-size:18px}}
