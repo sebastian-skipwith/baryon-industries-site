@@ -1,0 +1,129 @@
+/* World Model — earthdata module: plate boundaries, volcanoes, historical tsunamis and
+   earthquakes, magnetics, seafloor, soils, forest loss, glaciers and mineral deposits.
+   Legends render inside the Layers panel; cards inside #card. */
+
+/* ---------------------------------------------------------------- legends */
+.ed-legend { margin: 10px 6px 0 0; display: grid; gap: 10px; font-size: 0.72rem; line-height: 1.4; color: var(--graphite); }
+.ed-key { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.ed-key > span { display: inline-flex; align-items: center; gap: 7px; }
+.ed-sw { flex: none; display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.18); }
+.ed-sw.dot { width: 10px; height: 10px; border-radius: 999px; }
+.ed-sw.line { width: 18px; height: 4px; border-radius: 999px; box-shadow: none; }
+.ed-sw.dash { width: 18px; height: 3px; border-radius: 0; box-shadow: none; background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
+.ed-sw.tri { width: 13px; height: 12px; border-radius: 0; box-shadow: none; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.ed-sw-svg { flex: none; display: block; }
+.ed-sw.hatch { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--c) 55%, transparent) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 70%, transparent); }
+.ed-ramp { display: grid; gap: 4px; }
+.ed-ramp .bar { height: 10px; border-radius: 999px; background: var(--g); box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.12); }
+.ed-ramp .ticks { position: relative; height: 14px; font: 500 0.68rem var(--font-sans); color: var(--ink-soft); }
+.ed-ramp .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.ed-ramp .ticks span.l { transform: none; }
+.ed-ramp .ticks span.r { transform: translateX(-100%); }
+.ed-ramp .cap { display: flex; justify-content: space-between; gap: 10px; font-size: 0.68rem; color: var(--ink-soft); }
+.ed-legend .ed-note { margin: 0; font-size: 0.7rem; line-height: 1.5; color: var(--ink-soft); }
+.ed-legend a, .ed-card .note a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 2px; }
+.ed-legend a:hover, .ed-card .note a:hover { text-decoration-color: currentColor; }
+.ed-legend .ed-probe { justify-self: start; gap: 6px; }
+.ed-legend .ed-probe svg { flex: none; }
+body[data-ed-probing="soil"] .ed-probe[data-ed-probe="soil"], body[data-ed-probing="magnetic"] .ed-probe[data-ed-probe="magnetic"] { background: var(--ink); color: var(--paper); }
+
+/* ---------------------------------------------------------------- cards */
+.ed-card .ed-head { display: flex; align-items: flex-start; gap: 14px; }
+.ed-card .ed-head .grow { flex: 1; min-width: 0; }
+.ed-card .ed-head .eyebrow { display: block; margin-right: 34px; }
+.ed-card .ed-head h3 { margin-top: 2px; overflow-wrap: anywhere; }
+/* A long unit (AD 1–1499) widens the badge rather than wrapping or clipping; the bottom pad clears the colour bar. */
+.ed-badge {
+  position: relative; flex: none; display: grid; place-content: center; justify-items: center; min-width: 56px; height: 56px; padding: 0 7px 5px;
+  border-radius: 16px; background: var(--ink); color: #fff; text-align: center; overflow: hidden;
+}
+.ed-badge::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--c, #fff); }
+.ed-badge b { font-size: 1.28rem; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
+/* Units keep their case (nT, mm/yr, km², pH). */
+.ed-badge small { margin-top: 4px; font-size: 0.68rem; font-weight: 500; line-height: 1.2; letter-spacing: 0.02em; white-space: nowrap; }
+.ed-badge svg { margin-bottom: 3px; }
+/* Long labels wrap inside their column instead of squeezing the values. */
+.ed-card .kv { margin-top: 14px; grid-template-columns: fit-content(46%) 1fr; }
+.ed-card .kv dd { overflow-wrap: anywhere; }
+.ed-card .card-actions .btn svg { flex: none; }
+.ed-card .ed-lead { margin-top: 12px; }
+.ed-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.ed-chips .chip { cursor: default; }
+.ed-sect { display: block; margin: 16px 0 6px; }
+.ed-rows { display: grid; gap: 2px; }
+.ed-rows .ed-row {
+  display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: baseline; padding: 7px 0;
+  border-top: 1px solid var(--hair); font-size: 0.8rem; color: var(--graphite);
+}
+.ed-rows .ed-row:first-child { border-top: 0; }
+.ed-rows .ed-row b { color: var(--ink); font-weight: 600; }
+.ed-rows .ed-row a { color: var(--ink-soft); font-size: 0.72rem; }
+.ed-table { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 0.78rem; }
+.ed-table th, .ed-table td { padding: 7px 0; text-align: right; border-top: 1px solid var(--hair); font-weight: 400; }
+.ed-table thead th { border-top: 0; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; }
+.ed-table th[scope="row"], .ed-table thead th:first-child { text-align: left; color: var(--graphite); padding-right: 10px; }
+.ed-table td, .ed-table thead th + th { padding-left: 12px; }
+.ed-table td { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 500; }
+.ed-table .u { display: block; font-size: 0.68rem; font-weight: 400; color: var(--ink-soft); }
+.ed-flag { margin-top: 12px !important; padding: 9px 12px; border-radius: 12px; background: var(--surface); font-size: 0.76rem !important; color: var(--graphite); }
+
+/* ---------------------------------------------------------------- map popups */
+.ed-pop { pointer-events: none; }
+.ed-pop .maplibregl-popup-content { max-width: 280px; white-space: normal; line-height: 1.4; }
+.ed-pop .maplibregl-popup-content b { font-weight: 600; }
+.ed-pop .maplibregl-popup-content span { display: block; font-weight: 400; color: var(--graphite); font-size: 0.72rem; }
+
+/* ---------------------------------------------------------------- status pill */
+.ed-status {
+  position: fixed; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 23; display: grid; gap: 2px;
+  /* max-content: at left 50% the pill would otherwise wrap at half the viewport (422px on a landscape phone). */
+  width: max-content; max-width: min(560px, calc(100vw - 180px)); padding: 8px 16px; border-radius: 20px; font-size: 0.78rem; color: var(--graphite);
+  background: rgba(255, 255, 255, 0.9); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: var(--shadow-float), inset 0 0 0 1px rgba(20, 20, 20, 0.06);
+  animation: ed-in 180ms var(--ease-out-soft);
+  /* earthdata.js lifts the pill (--ed-lift) above a time bar, measure sheet, hint or story
+     sheet at the foot of the map (`translate` leaves this bottom readable), and beside an
+     open dock or card sets its left and max-width to the open map between them. */
+  translate: 0 calc(-1 * var(--ed-lift, 0px)); transition: translate 220ms var(--ease-out-soft);
+}
+#timebar:not([hidden]) ~ .ed-status { bottom: 116px; }
+.ed-status.is-over { z-index: 27; } /* no room beside the dock and card: over their edge, like the measure sheet */
+.ed-status-row { display: flex; align-items: center; gap: 10px; min-height: 22px; }
+.ed-status-row.is-warn { color: #8a3b12; }
+.ed-status-row button { margin-left: auto; }
+.ed-spin {
+  flex: none; width: 14px; height: 14px; border-radius: 999px; border: 2px solid rgba(20, 20, 20, 0.14); border-top-color: var(--ink);
+  animation: ed-spin 800ms linear infinite;
+}
+@keyframes ed-spin { to { transform: rotate(360deg); } }
+@keyframes ed-in { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes ed-in-phone { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+body.ed-probing #map .maplibregl-canvas { cursor: crosshair !important; }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  /* Left of the map-control column, above the tab bar and clear of the credits (i) that
+     sits over the tab bar's left end (world.css: 32px tall at 76px, at 176px over the time bar). */
+  .ed-status { left: 12px; right: 64px; bottom: calc(116px + env(safe-area-inset-bottom, 0px)); width: auto; max-width: none; transform: none; animation-name: ed-in-phone; }
+  #timebar:not([hidden]) ~ .ed-status { bottom: calc(216px + env(safe-area-inset-bottom, 0px)); }
+  .ed-badge { min-width: 50px; height: 50px; padding: 0 6px 5px; border-radius: 14px; }
+  .ed-badge small { margin-top: 2px; }
+  .ed-badge svg { margin-bottom: 1px; }
+  .ed-rows .ed-row { grid-template-columns: 56px 1fr auto; }
+}
+
+/* Touch: 40px targets for the pill's Cancel, the card actions and the legend's probe chip. The small
+   text links (an event row's Record, a source's doi) get padding above and below that grows their tap
+   area to 40px without moving any text: the row's link cancels it with a negative margin, and an
+   inline link's padding never changes its line (position: relative keeps that padding over the
+   note's next line of text, which would otherwise take the taps there). */
+@media (pointer: coarse) {
+  .ed-status-row button, .ed-card .card-actions .btn, .ed-legend .ed-probe { min-height: 40px; }
+  .ed-rows .ed-row a { padding: 11px 0; margin: -11px 0; }
+  .ed-card .note a { position: relative; padding: 12px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-status { animation: none; transition: none; }
+  .ed-spin { animation-duration: 2.4s; }
+}

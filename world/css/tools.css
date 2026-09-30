@@ -1,0 +1,338 @@
+/* World Model — tools: measure, elevation profile, my places, import, share, screenshot,
+   full screen and keyboard shortcuts. Tokens from /assets/baryon.css. */
+
+/* ---------------------------------------------------------------- toolbar */
+.tl-group button svg { display: block; }
+.tl-group button:focus-visible { outline-offset: -4px; border-radius: 12px; }
+.tl-group button[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.tl-group button[hidden] { display: none; }
+
+.tl-tip {
+  position: fixed; z-index: 70; display: flex; align-items: center; gap: 8px; padding: 6px 7px 6px 12px;
+  border-radius: 999px; background: var(--ink); color: var(--paper); font: 500 0.75rem var(--font-sans); white-space: nowrap;
+  pointer-events: none; opacity: 0; transform: translate(4px, -50%); transition: opacity 140ms, transform 160ms var(--ease-out-soft);
+}
+.tl-tip.on { opacity: 1; transform: translate(0, -50%); }
+.tl-tip span:only-child { padding-right: 5px; }
+.tl-tip kbd {
+  display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 6px;
+  background: rgba(255, 255, 255, 0.16); font: 600 0.68rem var(--font-sans); color: var(--paper);
+}
+.tl-tip kbd + kbd { margin-left: -4px; }
+
+.tl-reticle { position: fixed; left: 50%; top: 50%; z-index: 21; margin: -16px 0 0 -16px; pointer-events: none; display: none; }
+.tl-reticle svg { display: block; }
+body.tl-drawing.tl-keynav .tl-reticle { display: block; }
+body.tl-drawing #map .maplibregl-canvas { cursor: crosshair !important; }
+body.tl-drawing.tl-grab #map .maplibregl-canvas { cursor: grab !important; }
+body.tl-drawing.tl-grabbing #map .maplibregl-canvas { cursor: grabbing !important; }
+
+/* ---------------------------------------------------------------- bottom sheet (measure) + pin hint */
+.tl-sheet, .tl-hintpill {
+  position: fixed; z-index: 23; left: 14px; right: 70px; bottom: 58px; margin-inline: auto;
+  animation: tl-rise 220ms var(--ease-out-soft);
+}
+.tl-sheet {
+  max-width: 640px; border-radius: 20px; padding: 16px 16px 14px 20px;
+  display: flex; flex-direction: column; max-height: calc(100vh - 200px); overflow-y: auto;
+}
+.tl-sheet-top, .tl-sheet-foot { flex: none; }
+/* Controls stay put; on a short screen the profile scrolls between them. */
+.tl-sheet .tl-profile { min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-inline: -4px; padding-inline: 4px; }
+body:has(#dock:not([hidden])) :is(.tl-sheet, .tl-hintpill) { left: 468px; }
+body:has(#card:not([hidden])) .tl-sheet { right: 440px; }
+/* No room beside both panels: the active tool rides over the card rather than shrinking. */
+@media (max-width: 1379px) {
+  body:has(#dock:not([hidden])):has(#card:not([hidden])) .tl-sheet { right: 70px; z-index: 27; }
+}
+@media (max-width: 939px) {
+  body:has(#card:not([hidden])) .tl-sheet { right: 70px; z-index: 27; }
+}
+body:has(#timebar:not([hidden])) :is(.tl-sheet, .tl-hintpill) { bottom: 126px; }
+@keyframes tl-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.tl-sheet-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.tl-readout { min-width: 0; }
+.tl-readout .eyebrow { display: block; }
+.tl-total { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; min-height: 2.1rem; }
+.tl-total b { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.tl-total span { font-size: 0.95rem; font-weight: 500; color: var(--graphite); }
+.tl-total.is-empty b, .tl-total.is-empty span { color: rgba(20, 20, 20, 0.28); }
+.tl-subline { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4; }
+.tl-sheet-ctl { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.tl-sheet-ctl .seg button { padding: 6px 11px; }
+.tl-sheet-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--hair); min-height: 49px;
+}
+.tl-hint { margin: 0; flex: 1; min-width: 0; font-size: 0.75rem; line-height: 1.45; color: var(--ink-soft); }
+.tl-sheet-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.tl-sheet-actions .btn { gap: 6px; }
+.tl-sheet-actions .btn svg { margin-left: -3px; }
+.tl-prof-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tl-prof-btn .tl-short, .tl-sheet-actions .tl-expand { display: none; }
+
+.tl-hintpill {
+  width: max-content; max-width: calc(100vw - 100px); display: flex; align-items: center; gap: 10px;
+  padding: 6px 6px 6px 16px; border-radius: 999px; font-size: 0.85rem; font-weight: 500; color: var(--ink);
+}
+.tl-hintpill svg { flex: none; color: var(--graphite); }
+.tl-hintpill .btn { min-height: 2.1rem; }
+
+/* ---------------------------------------------------------------- elevation profile */
+.tl-profile { margin-top: 14px; }
+.tl-pstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tl-pstat { border-radius: 12px; background: var(--surface); padding: 7px 11px; min-width: 0; }
+.tl-pstat span { display: block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.tl-pstat b { display: block; font-size: 0.92rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-skel { width: 70%; height: 1.1em; margin-top: 3px; border-radius: 6px; background: linear-gradient(90deg, rgba(20, 20, 20, 0.07), rgba(20, 20, 20, 0.13), rgba(20, 20, 20, 0.07)); background-size: 200% 100%; animation: tl-shimmer 1.2s linear infinite; }
+@keyframes tl-shimmer { to { background-position: -200% 0; } }
+.tl-chart { position: relative; height: 168px; margin-top: 10px; border-radius: 12px; touch-action: pan-y; cursor: crosshair; scroll-margin: 6px; }
+.tl-chart:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tl-chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.tl-chart .tl-ax { font: 400 0.68rem var(--font-sans); fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.tl-chart .tl-grid { stroke: rgba(20, 20, 20, 0.08); stroke-width: 1; }
+.tl-chart .tl-sea { stroke: rgba(20, 20, 20, 0.28); stroke-width: 1; stroke-dasharray: 3 3; }
+.tl-chart .tl-cross line { stroke: var(--ink); stroke-width: 1; }
+.tl-chart .tl-cross circle { fill: var(--ink); stroke: var(--paper); stroke-width: 2; }
+.tl-ch-tip {
+  position: absolute; top: 2px; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: var(--ink);
+  color: var(--paper); font: 500 0.72rem var(--font-sans); white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums;
+}
+.tl-chart-loading, .tl-chart-error {
+  display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--surface); font-size: 0.8rem; color: var(--ink-soft);
+  cursor: default; text-align: center; padding: 0 16px;
+}
+.tl-chart-loading span { animation: tl-pulse 1.4s ease-in-out infinite; }
+@keyframes tl-pulse { 50% { opacity: 0.45; } }
+.tl-src { margin: 8px 0 0; font-size: 0.68rem; line-height: 1.45; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- my places panel */
+.tl-export { display: flex; flex-wrap: wrap; gap: 8px; }
+.tl-export .btn { gap: 6px; }
+.tl-export .btn svg { margin-left: -4px; }
+.tl-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 4px; }
+.tl-qbtn {
+  display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; border: 0; border-radius: 16px; background: var(--surface);
+  cursor: pointer; font: 500 0.78rem var(--font-sans); color: var(--ink); transition: background-color 140ms, transform 120ms var(--ease-out-soft);
+}
+.tl-qbtn svg { color: var(--graphite); }
+.tl-qbtn:hover { background: color-mix(in srgb, var(--ink) 7%, var(--surface)); }
+.tl-qbtn:active { transform: scale(0.97); }
+.tl-qbtn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.tl-qbtn[aria-pressed="true"] svg { color: var(--paper); }
+.card-actions .tl-iconbtn { width: 2.25rem; padding: 0; }
+.panel .tl-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 0 6px; min-height: 30px; }
+.panel .tl-head .eyebrow { margin: 0; }
+.tl-list { display: grid; gap: 2px; margin: 0 -10px; }
+.tl-row { position: relative; display: flex; align-items: center; gap: 2px; padding-right: 6px; border-radius: 14px; transition: background-color 140ms; }
+.tl-row:hover, .tl-row:focus-within { background: var(--surface); }
+.tl-row .row-btn { flex: 1; min-width: 0; }
+.tl-row .row-btn:hover { background: transparent; }
+.tl-row .grow { display: grid; }
+.tl-row .t, .tl-row .s { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-row .icon-btn { flex: none; width: 30px; height: 30px; background: transparent; opacity: 0; transition: opacity 140ms, background-color 140ms; }
+.tl-row .icon-btn:hover { background: var(--paper); }
+.tl-row:hover .icon-btn, .tl-row:focus-within .icon-btn { opacity: 1; }
+@media (hover: none) { .tl-row .icon-btn { opacity: 1; } }
+.tl-ico {
+  flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: var(--surface);
+  color: var(--graphite); transition: background-color 140ms;
+}
+.tl-row:hover .tl-ico, .tl-row:focus-within .tl-ico { background: var(--paper); }
+.tl-swatch { width: 14px; height: 14px; border-radius: 999px; background: var(--c, var(--ink)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c, #000) 22%, transparent), inset 0 0 0 1px rgba(20, 20, 20, 0.2); }
+.tl-switchbtn {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px; border: 0; border-radius: 999px; background: transparent;
+  cursor: pointer; font: 500 0.72rem var(--font-sans); color: var(--ink-soft);
+}
+.tl-switchbtn:hover { color: var(--ink); }
+.tl-switchbtn[hidden] { display: none; }
+.tl-empty {
+  display: flex; align-items: center; gap: 12px; margin: 0 10px; padding: 14px; border: 1px dashed var(--hair-2); border-radius: 16px;
+}
+.tl-empty .t { font-size: 0.88rem; font-weight: 500; }
+.tl-empty .s { font-size: 0.75rem; line-height: 1.45; color: var(--ink-soft); }
+.tl-edit { display: grid; gap: 10px; margin: 2px 10px 6px; padding: 12px; border-radius: 16px; background: var(--surface); }
+.tl-edit .input, .tl-form .input { min-height: 2.5rem; font-size: 0.9rem; background: var(--paper); }
+.tl-edit textarea.input, .tl-form textarea.input { min-height: 4.6rem; font-size: 0.86rem; }
+.tl-edit-actions { display: flex; gap: 8px; }
+.tl-field { display: grid; gap: 5px; }
+.tl-field > span { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.tl-dropzone {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 8px; padding: 12px 14px 12px 12px; text-align: left;
+  border: 1px dashed var(--hair-2); border-radius: 16px; background: transparent; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background-color 140ms, border-color 140ms;
+}
+.tl-dropzone:hover { background: var(--surface); border-color: color-mix(in srgb, var(--ink) 32%, transparent); }
+.tl-dropzone .grow { display: grid; flex: 1; min-width: 0; }
+.tl-dropzone .t { font-size: 0.9rem; font-weight: 500; }
+.tl-dropzone .s { font-size: 0.75rem; line-height: 1.4; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- cards */
+.tl-card .tl-form { display: grid; gap: 12px; margin: 12px 0 12px; }
+.tl-card .eyebrow + .tl-form { margin-top: 10px; }
+.card-body .tl-notes { margin-top: 12px; white-space: pre-line; overflow-wrap: anywhere; }
+.tl-card .kv dd { overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------- share popover */
+.tl-pop {
+  position: fixed; z-index: 40; right: 70px; bottom: 58px; width: 368px; max-height: calc(100vh - 28px); overflow-y: auto;
+  border-radius: 20px; padding: 18px 20px 20px; animation: tl-pop 180ms var(--ease-out-soft); transform-origin: right bottom;
+}
+@keyframes tl-pop { from { opacity: 0; transform: scale(0.98) translateX(6px); } to { opacity: 1; transform: none; } }
+.tl-pop-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.tl-pop-head .eyebrow { display: block; }
+.tl-pop-head h2 { margin: 2px 0 0; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
+.tl-pop-sub { margin: 4px 0 0; font-size: 0.78rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.tl-label { display: block; margin: 16px 0 6px; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.tl-copyrow { display: flex; gap: 8px; }
+.tl-copyrow .input { flex: 1; min-width: 0; min-height: 2.25rem; padding: 0.4rem 0.9rem; font-size: 0.8rem; color: var(--graphite); text-overflow: ellipsis; }
+.tl-copyrow .btn { min-width: 76px; }
+.tl-pop-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tl-pop-actions .btn { gap: 6px; }
+.tl-pop-actions .btn svg { margin-left: -3px; }
+.tl-embed.input { min-height: 4.8rem; padding: 0.6rem 0.8rem; border-radius: 14px; resize: none; font: 400 0.7rem/1.5 var(--font-mono); color: var(--graphite); }
+.tl-pop .note { margin: 14px 0 0; font-size: 0.72rem; line-height: 1.5; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- shortcuts dialog */
+.tl-modal {
+  position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(5, 5, 7, 0.45);
+  animation: tl-fade 160ms ease-out;
+}
+@keyframes tl-fade { from { opacity: 0; } }
+.tl-modal-card {
+  width: min(680px, 100%); max-height: min(88vh, 720px); overflow-y: auto; border-radius: 20px; padding: 22px 24px 24px;
+  animation: tl-pop-in 200ms var(--ease-out-soft);
+}
+@keyframes tl-pop-in { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+.tl-keys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 32px; margin-top: 8px; }
+.tl-keys section { min-width: 0; }
+.tl-keys .eyebrow { display: block; margin: 16px 0 4px; }
+.tl-key-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--hair);
+  font-size: 0.84rem; color: var(--graphite);
+}
+.tl-key-row:last-child { border-bottom: 0; }
+.tl-kbds { display: inline-flex; gap: 4px; flex: none; }
+.tl-kbd {
+  display: inline-grid; place-items: center; min-width: 28px; height: 26px; padding: 0 8px; border-radius: 8px; background: var(--paper);
+  border: 1px solid var(--hair-2); box-shadow: 0 1px 0 var(--hair-2); font: 600 0.72rem var(--font-sans); color: var(--ink); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- drop target */
+.tl-drop { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; background: rgba(5, 5, 7, 0.4); pointer-events: none; animation: tl-fade 140ms ease-out; }
+.tl-drop::before { content: ""; position: absolute; inset: 14px; border: 2px dashed rgba(255, 255, 255, 0.75); border-radius: 26px; }
+.tl-drop-card { display: grid; justify-items: center; gap: 6px; padding: 24px 32px; border-radius: 20px; text-align: center; }
+.tl-drop-card .tl-ico { width: 44px; height: 44px; margin-bottom: 4px; color: var(--ink); }
+.tl-drop-card .t { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.015em; }
+.tl-drop-card .s { font-size: 0.8rem; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- toasts + shutter */
+.toast.tl-undo { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; }
+.toast.tl-undo button {
+  border: 0; border-radius: 999px; padding: 6px 14px; background: rgba(255, 255, 255, 0.16); color: #fff; cursor: pointer;
+  font: 600 0.8rem var(--font-sans);
+}
+.toast.tl-undo button:hover { background: rgba(255, 255, 255, 0.26); }
+.toast.tl-undo button:focus-visible { outline-color: #fff; }
+.tl-flash { position: fixed; inset: 0; z-index: 95; background: #fff; pointer-events: none; animation: tl-flash 480ms ease-out forwards; }
+@keyframes tl-flash { from { opacity: 0.55; } to { opacity: 0; } }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  /* One thing at the foot of a phone at a time: the time bar steps aside while a tool is on. */
+  body.tl-drawing :is(#timebar, .cat-timebar) { display: none; }
+  .tl-sheet, .tl-hintpill, body:has(#dock:not([hidden])) :is(.tl-sheet, .tl-hintpill), body:has(#card:not([hidden])) .tl-sheet,
+  body:has(#timebar:not([hidden])) :is(.tl-sheet, .tl-hintpill) {
+    left: max(10px, env(safe-area-inset-left)); right: var(--tl-right, max(10px, env(safe-area-inset-right))); bottom: 76px;
+  }
+  .tl-sheet { max-width: none; padding: 14px 14px 12px 16px; max-height: 45vh; }
+  .tl-sheet-top { flex-wrap: wrap; gap: 10px; }
+  .tl-readout { flex: 1; }
+  .tl-sheet-ctl { width: 100%; justify-content: flex-start; order: 2; }
+  .tl-sheet-ctl .icon-btn { position: absolute; top: 12px; right: 12px; }
+  .tl-total b { font-size: 1.5rem; }
+  .tl-sheet-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  .tl-sheet-actions { justify-content: flex-start; }
+  /* The profile shares a phone screen with the path it describes: one row of stats, a
+     shorter chart, no drawing hint or subline while it is open, and a one-row foot. */
+  .tl-pstats { gap: 4px; }
+  .tl-pstat { padding: 6px 7px; border-radius: 10px; }
+  .tl-pstat b { font-size: 0.78rem; }
+  .tl-chart { height: 116px; }
+  .tl-sheet.tl-prof-open :is(.tl-hint, .tl-subline) { display: none; }
+  /* Opened out, the sheet takes what the profile needs (to about 300px from the top), so the
+     distance axis and the source line sit whole above the actions instead of scrolling;
+     the source line keeps its credit and sample count and drops the method note. */
+  .tl-sheet.tl-prof-open { max-height: max(45vh, calc(100vh - 300px)); }
+  .tl-src-more { display: none; }
+  .tl-prof-btn .tl-long { display: none; }
+  .tl-prof-btn .tl-short { display: inline; }
+  /* A panel or card sheet is open: the measurement folds into a pill just above it
+     (tools.js sets its bottom from that sheet's top). */
+  .tl-sheet.is-min {
+    flex-direction: row; align-items: center; gap: 10px; max-height: 52px; overflow: hidden;
+    padding: 6px 6px 6px 18px; border-radius: 999px;
+  }
+  .tl-sheet.is-min .tl-sheet-top { flex: 1; min-width: 0; }
+  .tl-sheet.is-min :is(.tl-sheet-ctl, .tl-subline, .tl-profile, .tl-hint) { display: none; }
+  .tl-sheet.is-min .tl-readout { display: flex; align-items: baseline; gap: 10px; min-width: 0; white-space: nowrap; }
+  .tl-sheet.is-min .tl-total { margin: 0; min-height: 0; }
+  .tl-sheet.is-min .tl-total b { font-size: 1.1rem; }
+  .tl-sheet.is-min .tl-total span { font-size: 0.8rem; }
+  .tl-sheet.is-min .tl-sheet-foot { flex-direction: row; margin: 0; padding: 0; border: 0; min-height: 0; }
+  .tl-sheet.is-min .tl-sheet-actions { flex-wrap: nowrap; }
+  .tl-sheet.is-min .tl-sheet-actions > :not([data-act="done"], [data-act="save"]) { display: none; }
+  .tl-sheet.is-min .tl-sheet-actions .tl-expand { display: inline-grid; place-items: center; }
+  .tl-hintpill { width: auto; max-width: none; }
+  .tl-hintpill span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tl-pop {
+    left: 0; right: 0; bottom: 0 !important; width: auto; max-height: 82vh; z-index: 45; border-radius: 22px 22px 0 0;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)); transform-origin: center bottom; animation-name: tl-rise;
+  }
+  .tl-keys { grid-template-columns: 1fr; }
+  .tl-modal { align-items: end; padding: 0; }
+  .tl-modal-card { border-radius: 22px 22px 0 0; max-height: 86vh; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  .tl-tip { display: none; }
+}
+
+/* Portrait phone: the map controls stand in a column at the right edge. The sheet and the pin
+   hint take the time bar's place and, like it, leave that column clear, so pin, share and
+   screenshot stay in reach while a tool is on. Opened out for the elevation profile, or folded
+   into a pill on a dock or card sheet (which covers the column anyway), the sheet spans the width. */
+@media (max-width: 720px) and (min-height: 521px) {
+  .tl-sheet, .tl-hintpill { --tl-right: calc(max(10px, env(safe-area-inset-right)) + 60px); }
+  .tl-sheet.tl-prof-open, .tl-sheet.is-min { --tl-right: max(10px, env(safe-area-inset-right)); }
+  /* Both switches share a row and fill it; on a very narrow phone each takes a row. */
+  .tl-sheet-ctl .seg { flex: 1 1 auto; }
+  .tl-sheet-ctl .seg button { flex: 1; padding-inline: 9px; }
+  .tl-sheet-actions .btn { flex: 1 1 auto; padding-inline: 0.7rem; }
+}
+
+/* Phone landscape / short window: under 200px of sheet the profile's own scroller shrank to
+   a sliver. The sheet takes the height between the search bar and the control row and scrolls
+   as one; with the profile open it drops the drawing hint and subline, as on a portrait phone. */
+@media (max-height: 520px) and (min-width: 721px) {
+  .tl-sheet { max-height: calc(100vh - 124px); }
+  .tl-sheet .tl-profile { flex: none; overflow: visible; }
+  .tl-sheet.tl-prof-open :is(.tl-hint, .tl-subline) { display: none; }
+  .tl-sheet.tl-prof-open .tl-sheet-foot { justify-content: flex-end; }
+  .tl-chart { height: 116px; }
+  .tl-src-more { display: none; }
+}
+
+/* The map credits (i) sits at the foot of a phone's map, where the measure sheet and the pin
+   hint go: tools.js lifts it just above whichever is showing (--tl-foot); its list stays on screen. */
+body.tl-credits-up #status { bottom: var(--tl-foot); }
+body.tl-credits-up #attr-full { max-height: min(50vh, calc(100vh - var(--tl-foot) - 60px)); }
+
+@media (pointer: coarse) {
+  .tl-hintpill .btn { min-height: 40px; }
+  .tl-row .icon-btn { width: 40px; height: 40px; }
+  .tl-switchbtn { min-height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tl-flash { display: none; }
+  .tl-skel, .tl-chart-loading span, .tl-drop { animation: none; }
+}

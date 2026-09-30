@@ -1,0 +1,248 @@
+/* World Model — catalog module styles: the Layers panel and the time machine.
+   Tokens from /assets/baryon.css; components from world.css (.row-btn, .switch, .seg, .kv). */
+
+/* ---------------------------------------------------------------- search */
+.cat-top {
+  position: sticky; top: -4px; z-index: 3; margin: -4px -20px 0; padding: 6px 20px 10px;
+  transition: background-color 160ms, box-shadow 160ms;
+}
+/* Material and a hairline only once content scrolls underneath. */
+.cat-top.is-stuck {
+  background: rgba(255, 255, 255, 0.82); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 var(--hair);
+}
+.cat-search {
+  position: relative; display: flex; align-items: center; height: 42px; border-radius: 999px;
+  background: var(--surface); border: 1px solid transparent; transition: background-color 140ms, border-color 140ms;
+}
+.cat-search:hover { border-color: var(--hair); }
+.cat-search:focus-within { background: var(--paper); border-color: var(--hair-2); outline: 2px solid var(--ink); outline-offset: 2px; }
+.cat-search > svg { position: absolute; left: 15px; color: var(--ink-soft); pointer-events: none; }
+.cat-q {
+  width: 100%; height: 100%; padding: 0 44px 0 42px; border: 0; border-radius: 999px; background: transparent; outline: none;
+  font: 400 0.9rem var(--font-sans); color: var(--ink);
+}
+.cat-q::placeholder { color: var(--ink-soft); }
+.cat-q::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+.cat-clear {
+  position: absolute; right: 6px; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 999px;
+  display: grid; place-items: center; background: transparent; color: var(--graphite); cursor: pointer;
+  transition: background-color 140ms;
+}
+.cat-clear[hidden] { display: none; }
+.cat-clear:hover { background: var(--hair); color: var(--ink); }
+.cat-clear:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (pointer: coarse) {
+  .cat-clear { right: 0; width: 40px; height: 40px; }
+  .cat-q { padding-right: 46px; }
+}
+.cat-main > .eyebrow:first-child { margin-top: 12px; }
+
+/* ---------------------------------------------------------------- shared bits */
+.cat-count {
+  flex: none; min-width: 26px; padding: 2px 8px; border-radius: 999px; background: var(--surface);
+  font: 500 0.7rem/1.5 var(--font-sans); color: var(--graphite); text-align: center; font-variant-numeric: tabular-nums;
+}
+.cat-count.is-on { background: var(--ink); color: var(--paper); }
+.cat-chev { flex: none; display: grid; color: var(--ink-soft); transition: transform 180ms var(--ease-out-soft); }
+.cat-coll-ic {
+  flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--surface); color: var(--ink);
+  display: grid; place-items: center;
+}
+.cat-spin {
+  flex: none; width: 16px; height: 16px; border-radius: 999px; border: 1.8px solid rgba(20, 20, 20, 0.14);
+  border-top-color: var(--ink); animation: cat-spin 800ms linear infinite;
+}
+@keyframes cat-spin { to { transform: rotate(360deg); } }
+.panel .cat-empty {
+  margin: 0; padding: 12px 14px; border-radius: 16px; background: var(--surface);
+  font-size: 0.8rem; line-height: 1.5; color: var(--ink-soft);
+}
+.cat-empty .btn { margin-top: 8px; }
+.cat-sugg {
+  border: 0; background: none; padding: 0; font: inherit; color: var(--ink); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 3px;
+}
+.cat-sugg:hover { text-decoration-color: var(--ink); }
+.cat-skel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cat-skel i {
+  display: block; height: 46px; border-radius: 14px;
+  background: linear-gradient(90deg, var(--surface) 0%, #fcfbf9 50%, var(--surface) 100%) 0 0 / 200% 100%;
+  animation: cat-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes cat-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* layer rows (switch on the right) */
+.cat-row { padding: 9px 10px; }
+.cat-row .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cat-row .s { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-row .cat-spin { margin-right: 2px; }
+
+/* sliders: opacity and time */
+.cat-range {
+  --p: 50%;
+  -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 24px; margin: 0;
+  background: transparent; cursor: pointer; accent-color: var(--ink);
+}
+.cat-range::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 999px;
+  background: linear-gradient(to right, var(--ink) 0 var(--p), rgba(20, 20, 20, 0.14) var(--p) 100%);
+}
+.cat-range::-moz-range-track { height: 4px; border-radius: 999px; background: rgba(20, 20, 20, 0.14); }
+.cat-range::-moz-range-progress { height: 4px; border-radius: 999px; background: var(--ink); }
+.cat-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 999px;
+  background: #fff; border: 1px solid var(--hair-2); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 120ms var(--ease-out-soft);
+}
+.cat-range::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 999px; background: #fff; border: 1px solid var(--hair-2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.cat-range:active::-webkit-slider-thumb { transform: scale(1.12); }
+.cat-range:focus { outline: none; }
+.cat-range:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 999px; }
+
+/* ---------------------------------------------------------------- On the map */
+.cat-active { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cat-live {
+  padding: 10px 8px 12px 14px; border: 1px solid var(--hair); border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72); transition: border-color 160ms;
+}
+.cat-live:hover { border-color: var(--hair-2); }
+.cat-live-head { display: flex; align-items: center; gap: 4px; }
+.cat-live-head .grow { flex: 1; min-width: 0; padding-right: 4px; }
+.cat-live .t { font-size: 0.88rem; font-weight: 500; line-height: 1.3; }
+.cat-live .s { font-size: 0.72rem; color: var(--ink-soft); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-ic { width: 30px; height: 30px; background: transparent; color: var(--graphite); }
+.cat-ic:hover { background: var(--surface); }
+.cat-ic[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+@media (pointer: coarse) { .cat-ic { width: 40px; height: 40px; } }
+.cat-live-ctl { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; padding-right: 6px; }
+.cat-date { gap: 6px; padding: 0.42rem 0.75rem; font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+.cat-date svg { color: var(--graphite); }
+.cat-date.is-missing { background: transparent; border-color: var(--hair-2); border-style: dashed; }
+.cat-op { flex: 1 1 150px; display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--ink-soft); }
+.cat-op output { flex: none; min-width: 34px; text-align: right; font: 500 0.72rem var(--font-sans); color: var(--graphite); font-variant-numeric: tabular-nums; }
+.panel .cat-flag { margin: 8px 0 0; font-size: 0.74rem; line-height: 1.45; color: var(--graphite); }
+.panel .cat-flag.soft { color: var(--ink-soft); }
+.cat-legend {
+  min-height: 44px; margin: 10px 6px 0 0; padding: 6px 8px; border-radius: 12px; background: #fff; border: 1px solid var(--hair);
+}
+.cat-legend img { display: block; width: 100%; height: auto; max-height: 132px; object-fit: contain; object-position: left center; }
+.cat-key { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 6px 0 0; font-size: 0.72rem; line-height: 1.4; color: var(--graphite); }
+.cat-key span { display: inline-flex; align-items: center; gap: 6px; }
+.cat-key i { flex: none; width: 12px; height: 12px; border-radius: 3px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.18); }
+.cat-key i.dot { width: 9px; height: 9px; border-radius: 999px; }
+.cat-key i.line { width: 16px; height: 4px; border-radius: 999px; }
+.cat-info { margin: 12px 6px 0 0; padding-top: 12px; border-top: 1px solid var(--hair); }
+.panel .cat-info p { font-size: 0.8rem; line-height: 1.55; }
+.cat-info .kv { gap: 6px 12px; font-size: 0.75rem; }
+.cat-info .kv dd { font-weight: 400; color: var(--ink); overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------- base map */
+.cat-bases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; }
+.cat-base {
+  display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; background: transparent;
+  font: inherit; color: var(--ink); text-align: center; cursor: pointer;
+}
+.cat-base-img {
+  position: relative; display: block; aspect-ratio: 4 / 3; border-radius: 12px; border: 1px solid var(--hair);
+  background: #0b0d12 center / cover no-repeat; transition: transform 180ms var(--ease-out-soft), box-shadow 180ms;
+}
+.cat-base:hover .cat-base-img { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+.cat-base:active .cat-base-img { transform: scale(0.98); }
+.cat-base-t {
+  align-self: center; max-width: 100%; padding: 3px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 500; line-height: 1.35;
+  color: var(--graphite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cat-base[aria-pressed="true"] .cat-base-t { background: var(--ink); color: var(--paper); }
+.cat-base-check {
+  position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--ink); color: var(--paper); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.cat-base:focus-visible { outline: none; }
+.cat-base:focus-visible .cat-base-img { outline: 2px solid var(--ink); outline-offset: 2px; }
+.cat-baselayers { margin-top: 10px; }
+
+/* ---------------------------------------------------------------- collections */
+.cat-colls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.cat-coll { border-radius: 16px; transition: background-color 160ms; }
+.cat-coll.is-open { background: rgba(246, 245, 242, 0.7); }
+.cat-coll-head {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border: 0; border-radius: 16px;
+  background: transparent; font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+}
+.cat-coll-head:hover { background: var(--surface); }
+.cat-coll-head .grow { flex: 1; min-width: 0; }
+.cat-coll-head .t { font-size: 0.9rem; font-weight: 500; line-height: 1.3; }
+.cat-coll-head .s { font-size: 0.72rem; line-height: 1.4; color: var(--ink-soft); }
+.cat-coll-head[aria-expanded="true"] .cat-chev { transform: rotate(90deg); }
+.cat-coll.is-open .cat-coll-ic { background: var(--paper); box-shadow: inset 0 0 0 1px var(--hair); }
+.cat-coll-body { padding: 0 4px 6px; }
+.cat-coll-body .row-btn:hover { background: rgba(255, 255, 255, 0.85); }
+
+/* ---------------------------------------------------------------- NASA catalogue */
+.panel .cat-lede { font-size: 0.8rem; line-height: 1.5; }
+.cat-cats { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.cat-catrow { gap: 12px; padding: 8px 10px; }
+.cat-catrow .cat-coll-ic { width: 32px; height: 32px; border-radius: 10px; }
+.cat-catrow .t { font-size: 0.86rem; }
+.cat-back { gap: 4px; margin-top: 8px; padding-left: 0.65rem; }
+.cat-cathead { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
+.panel .cat-cathead h3 { margin: 0; font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
+.cat-seg { margin-bottom: 8px; }
+.cat-list { display: grid; grid-template-columns: minmax(0, 1fr); }
+.panel .cat-resn { margin: 12px 0 0; font-size: 0.75rem; color: var(--ink-soft); }
+.cat-more { margin-top: 12px; }
+
+/* ---------------------------------------------------------------- time machine */
+.cat-timebar { width: min(700px, calc(100vw - 140px)); gap: 10px; padding: 8px 10px 8px 18px; }
+.cat-timebar > div:first-child { flex: 0 1 auto; min-width: 128px; max-width: 250px; }
+.cat-timebar .lbl { min-width: 0; font-size: 0.86rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cat-timebar .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+.cat-timebar.is-missing .sub { color: var(--graphite); }
+.tb-steps { flex: 1; min-width: 172px; display: flex; align-items: center; gap: 4px; } /* buttons + a 60px slider: the label gives way first */
+.tb-btn { flex: none; width: 32px; height: 32px; background: transparent; color: var(--ink); }
+.tb-btn:hover { background: var(--surface); }
+.tb-btn:disabled { opacity: 0.32; cursor: default; background: transparent; }
+.tb-play { margin-left: 4px; background: var(--ink); color: var(--paper); }
+.tb-play:hover, .tb-play[aria-pressed="true"] { background: #2c2c2c; color: var(--paper); }
+.tb-play:disabled { background: var(--ink); }
+.cat-timebar #time-close { flex: none; background: transparent; }
+.cat-timebar #time-close:hover { background: var(--surface); }
+/* catalog.js centres the bar in the open map between the dock, the place card and the map
+   controls (inline left/width). Short windows fold it onto two rows (is-compact) to fit
+   beside the dock; when there is still no room (tablet portrait) it spans the map below
+   the dock and body.tb-over ends the dock above it (--tb-clear), so the dock's last rows
+   and the Ask box stay in view. */
+@media (min-width: 721px) {
+  .cat-timebar { transition: left 220ms var(--ease-out-soft), width 220ms var(--ease-out-soft); }
+  .cat-timebar.is-over { z-index: 25; }
+  .cat-timebar.is-compact { flex-wrap: wrap; row-gap: 2px; padding: 8px 6px 6px 14px; }
+  .cat-timebar.is-compact > div:first-child { flex: 1; max-width: none; }
+  .cat-timebar.is-compact .tb-steps { order: 3; flex-basis: 100%; }
+  body.tb-over.has-timebar #dock.dock { bottom: var(--tb-clear, 58px); }
+}
+@media (pointer: coarse) { .tb-btn { width: 40px; height: 40px; } .tb-steps { min-width: 196px; } }
+
+/* ---------------------------------------------------------------- place card photo credit
+   The card is styled in world.css; this only gives its small inline credit links a 40 px
+   tall touch area. Inline padding with a matching negative side margin leaves the line as it is. */
+@media (pointer: coarse) { .card-body .hero-credit a { padding: 13px 6px; margin: 0 -6px; } }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  .cat-bases { gap: 10px 8px; }
+  .cat-timebar { width: calc(100vw - 80px); flex-wrap: wrap; row-gap: 2px; padding: 8px 6px 6px 14px; }
+  .cat-timebar > div:first-child { flex: 1; max-width: none; }
+  .tb-steps { order: 3; flex-basis: 100%; }
+  .cat-q { font-size: 16px; } /* no zoom-on-focus in iOS Safari */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-skel i { animation: none; }
+  .cat-spin { animation-duration: 2400ms; }
+  .cat-chev, .cat-base-img, .cat-timebar, .cat-top { transition: none; }
+  .cat-range::-webkit-slider-thumb { transition: none; }
+}

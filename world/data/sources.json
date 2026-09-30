@@ -1,0 +1,645 @@
+{
+ "updated": "2026-09-29",
+ "groups": [
+  {
+   "title": "Imagery, terrain & base map",
+   "items": [
+    {
+     "name": "VersaTiles satellite imagery",
+     "url": "https://versatiles.org/sources/",
+     "license": "CC BY 4.0, DL-DE and CC0 (per source)",
+     "attribution": "Sentinel-2 Global Mosaic (CC BY 4.0) and national orthophotos via VersaTiles",
+     "used_for": "Default satellite imagery worldwide, with aerial photos across much of Europe"
+    },
+    {
+     "name": "USGS The National Map imagery",
+     "url": "https://www.usgs.gov/programs/national-geospatial-program/national-map",
+     "license": "US public domain",
+     "attribution": "USDA, USGS The National Map: Orthoimagery",
+     "used_for": "High-resolution aerial imagery across the United States",
+     "notes": "Tiles: basemap.nationalmap.gov USGSImageryOnly MapServer."
+    },
+    {
+     "name": "EOX Sentinel-2 cloudless 2016",
+     "url": "https://s2maps.eu",
+     "license": "CC BY 4.0",
+     "attribution": "Sentinel-2 cloudless – https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016)",
+     "used_for": "Alternative cloud-free global imagery"
+    },
+    {
+     "name": "NASA Blue Marble & Black Marble",
+     "url": "https://earthdata.nasa.gov/gibs",
+     "license": "NASA open data, no restrictions (credit requested)",
+     "attribution": "NASA EOSDIS GIBS",
+     "used_for": "Blue Marble relief and Earth-at-night base maps"
+    },
+    {
+     "name": "OpenTopoMap",
+     "url": "https://opentopomap.org/about",
+     "license": "CC BY-SA 3.0",
+     "attribution": "Map data © OpenStreetMap contributors, SRTM · Style © OpenTopoMap (CC BY-SA)",
+     "used_for": "Topographic base map"
+    },
+    {
+     "name": "Terrain Tiles (Mapzen, on AWS Open Data)",
+     "url": "https://registry.opendata.aws/terrain-tiles/",
+     "license": "Open data; each source credited",
+     "attribution": "Terrain Tiles: 3DEP, SRTM, GMTED2010, ETOPO1 and others; full list at github.com/tilezen/joerd/blob/master/docs/attribution.md",
+     "used_for": "3D terrain, hillshade, ocean depths and every elevation reading"
+    },
+    {
+     "name": "OpenFreeMap",
+     "url": "https://openfreemap.org",
+     "license": "ODbL (OpenStreetMap data)",
+     "attribution": "© OpenStreetMap contributors · OpenFreeMap · OpenMapTiles",
+     "used_for": "Place names, roads, borders and 3D buildings"
+    },
+    {
+     "name": "Esri World Imagery (optional)",
+     "url": "https://location.arcgis.com",
+     "license": "ArcGIS Location Platform terms",
+     "attribution": "Powered by Esri: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+     "used_for": "Sub-metre global imagery, used only when the site owner adds an ArcGIS Location Platform key"
+    }
+   ]
+  },
+  {
+   "title": "Places & knowledge",
+   "items": [
+    {
+     "name": "Photon geocoder (komoot)",
+     "url": "https://photon.komoot.io",
+     "license": "ODbL (OpenStreetMap data)",
+     "attribution": "© OpenStreetMap contributors",
+     "used_for": "The search box and the place name for any clicked point"
+    },
+    {
+     "name": "Wikipedia",
+     "url": "https://www.wikipedia.org",
+     "license": "CC BY-SA 4.0",
+     "attribution": "Text from Wikipedia, CC BY-SA",
+     "used_for": "Place summaries, nearby articles and tour text"
+    },
+    {
+     "name": "Wikidata",
+     "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+     "license": "CC0 1.0",
+     "attribution": "Summit height: Wikidata (CC0)",
+     "used_for": "Surveyed summit heights on peak and volcano place cards",
+     "notes": "Elevation above sea level (property P2044) read with the wbgetclaims API for the item linked to the place's Wikipedia article; used only when that article is about a peak at the clicked point."
+    },
+    {
+     "name": "Wikimedia Commons images",
+     "url": "https://commons.wikimedia.org",
+     "license": "Per image: public domain, CC0, CC BY, CC BY-SA or Free Art License",
+     "attribution": "Author and licence shown with each image, linked to its file page",
+     "used_for": "Photos on guided-tour stops; non-free and GFDL-only images are never shown",
+     "notes": "Licence read per file from the MediaWiki imageinfo/extmetadata API (Artist, Attribution, LicenseShortName, LicenseUrl, NonFree). CORS preflight with Api-User-Agent checked and allowed."
+    },
+    {
+     "name": "MET Norway Locationforecast",
+     "url": "https://api.met.no/doc/License",
+     "license": "CC BY 4.0 / NLOD 2.0",
+     "attribution": "Weather data from MET Norway",
+     "used_for": "Current weather on place cards"
+    },
+    {
+     "name": "Macrostrat",
+     "url": "https://macrostrat.org",
+     "license": "CC BY 4.0",
+     "attribution": "Geologic map data: Macrostrat",
+     "used_for": "Bedrock geology under any clicked point"
+    }
+   ]
+  },
+  {
+   "title": "Resource data",
+   "items": [
+    {
+     "name": "Baryon resource world model",
+     "url": "https://baryon.industries/resource-intelligence",
+     "license": "Compiled by Baryon; each record keeps its original source",
+     "attribution": "Compiled by Baryon from the datasets below and the sources named on each record",
+     "used_for": "Resource sites, key assets, commodity balances, product chains and trade routes"
+    },
+    {
+     "name": "USGS Mineral Resources Data System (MRDS)",
+     "url": "https://mrdata.usgs.gov/mrds/",
+     "license": "US public domain",
+     "attribution": "U.S. Geological Survey, Mineral Resources Data System",
+     "used_for": "Mines, prospects and processing plants in the resource-site layer"
+    },
+    {
+     "name": "Global Energy Monitor trackers",
+     "url": "https://globalenergymonitor.org/projects/",
+     "license": "CC BY 4.0",
+     "attribution": "Global Energy Monitor: coal, steel, oil and gas, and LNG trackers, licensed CC BY 4.0; filtered to site points by Baryon",
+     "used_for": "Coal, steel, oil and gas, and LNG sites in the resource-site layer",
+     "notes": "GEM states that all tracker data are available under CC BY 4.0 unless otherwise noted; its recommended citation form is '<Tracker>, Global Energy Monitor, <Month Year> release'. The release months of the extracts in data/sites.geojson are not recorded in the file."
+    },
+    {
+     "name": "NGA World Port Index (Pub. 150)",
+     "url": "https://msi.nga.mil/Publications/WPI",
+     "license": "US public domain",
+     "attribution": "World Port Index, U.S. National Geospatial-Intelligence Agency",
+     "used_for": "Ports in the resource-site layer"
+    },
+    {
+     "name": "IMF PortWatch",
+     "url": "https://portwatch.imf.org/pages/data-and-methodology",
+     "license": "IMF terms for data: reuse allowed with accurate attribution to the IMF",
+     "attribution": "Chokepoint transits: IMF PortWatch (AIS data from the UN Global Platform)",
+     "used_for": "Average daily ship transits at the 28 maritime chokepoints in Key assets",
+     "notes": "IMF copyright and usage page (imf.org/external/terms.htm) allows downloading, derivative works and distribution of Data if it is reproduced accurately and attributed to the IMF; publications and site content are separately restricted. AIS inputs are third-party (UN Global Platform)."
+    },
+    {
+     "name": "Eurostat searoute (marnet shipping lanes)",
+     "url": "https://github.com/eurostat/searoute",
+     "license": "EUPL-1.2",
+     "attribution": "Sea routes: searoute by Eurostat (EUPL-1.2)",
+     "used_for": "Sea legs of the commodity trade routes"
+    },
+    {
+     "name": "OSRM routing on OpenStreetMap",
+     "url": "https://project-osrm.org",
+     "license": "OSRM software BSD 2-Clause; road data ODbL",
+     "attribution": "Routes © OpenStreetMap contributors, via OSRM",
+     "used_for": "Approximate overland legs of the trade routes: road paths, not the actual rail or pipeline line"
+    },
+    {
+     "name": "USGS Mineral Commodity Summaries",
+     "url": "https://www.usgs.gov/centers/national-minerals-information-center/mineral-commodity-summaries",
+     "license": "US public domain",
+     "attribution": "U.S. Geological Survey, Mineral Commodity Summaries 2025",
+     "used_for": "Production, reserves and country shares behind most commodity baselines"
+    },
+    {
+     "name": "IEA, with the Statistical Review of World Energy and OPEC",
+     "url": "https://www.iea.org/data-and-statistics",
+     "license": "Published figures, cited with attribution (© IEA)",
+     "attribution": "Figures from IEA reports, the Statistical Review of World Energy and OPEC, as named on each baseline",
+     "used_for": "Oil, gas and coal baselines and country shares"
+    },
+    {
+     "name": "International Copper Study Group (ICSG)",
+     "url": "https://icsg.org",
+     "license": "Published estimates, cited with attribution",
+     "attribution": "ICSG estimates",
+     "used_for": "Copper country-share estimates"
+    },
+    {
+     "name": "World Steel Association (worldsteel)",
+     "url": "https://worldsteel.org",
+     "license": "Published statistics, cited with attribution",
+     "attribution": "worldsteel",
+     "used_for": "Steel baseline and country shares"
+    },
+    {
+     "name": "World Nuclear Association and the OECD Red Book",
+     "url": "https://world-nuclear.org",
+     "license": "Published figures, cited with attribution",
+     "attribution": "World Nuclear Association; OECD NEA/IAEA Uranium Red Book",
+     "used_for": "Uranium resources and reactor requirements"
+    },
+    {
+     "name": "FAO fertilizer outlook",
+     "url": "https://www.fao.org",
+     "license": "Published shares, cited with attribution",
+     "attribution": "FAO, world fertilizer outlook",
+     "used_for": "Material shares in the fertilizer product chain"
+    }
+   ]
+  },
+  {
+   "title": "The agent",
+   "items": [
+    {
+     "name": "Claude by Anthropic",
+     "url": "https://docs.anthropic.com",
+     "license": "Anthropic Commercial Terms of Service",
+     "attribution": "",
+     "used_for": "Open questions in the Ask panel, only when a visitor adds their own API key or the site owner connects a hosted endpoint; usage is billed to that key or endpoint"
+    },
+    {
+     "name": "Claude web search",
+     "url": "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool",
+     "license": "Anthropic Commercial Terms of Service; results credited to their publishers",
+     "attribution": "",
+     "used_for": "Recent facts in agent answers, shown with numbered citations and source links",
+     "notes": "Server tool web_search_20250305."
+    }
+   ]
+  },
+  {
+   "title": "Earth observation & reference layers",
+   "items": [
+    {
+     "name": "NASA Global Imagery Browse Services (GIBS)",
+     "url": "https://earthdata.nasa.gov/gibs",
+     "license": "NASA open data, no restrictions on reuse (credit requested)",
+     "attribution": "NASA EOSDIS GIBS",
+     "used_for": "The catalogue of 1,172 satellite layers, the time bar and the layer legends",
+     "notes": "Per-date availability from a z0 HEAD request (404, or 200 without Layer-Time-Actual, means no data)."
+    },
+    {
+     "name": "NASA FIRMS active fires (VIIRS, NOAA-20)",
+     "url": "https://firms.modaps.eosdis.nasa.gov",
+     "license": "NASA open data (credit requested)",
+     "attribution": "NASA FIRMS · NASA EOSDIS GIBS",
+     "used_for": "Active fires layer, daily from 1 January 2020",
+     "notes": "Served through the GIBS WMS. 2019-12-31 and the current UTC day answer with a ServiceException; 2020-01-01 returns an image."
+    },
+    {
+     "name": "Gridded Population of the World v4 (CIESIN)",
+     "url": "https://www.earthdata.nasa.gov/data/projects/gpw",
+     "license": "CC BY 4.0",
+     "attribution": "CIESIN, Columbia University: Gridded Population of the World v4 · NASA GIBS",
+     "used_for": "Population density 2020; other population layers in the catalogue follow each dataset's own terms"
+    },
+    {
+     "name": "GEBCO bathymetry basemap (NOAA NCEI)",
+     "url": "https://www.gebco.net",
+     "license": "GEBCO Grid: public domain, attribution requested; not for navigation",
+     "attribution": "GEBCO Compilation Group; NOAA NCEI",
+     "used_for": "Ocean-floor depth map to zoom 10",
+     "notes": "Tiles from the NOAA NCEI-owned GEBCO_basemap_NCEI item on tiles.arcgis.com (not an Esri basemap)."
+    },
+    {
+     "name": "GEBCO colour-shaded grid",
+     "url": "https://www.gebco.net",
+     "license": "GEBCO Grid: public domain, attribution requested; not for navigation",
+     "attribution": "Imagery reproduced from the GEBCO Grid, GEBCO Compilation Group",
+     "used_for": "Colour-shaded ocean depth layer",
+     "notes": "Served from wms.gebco.net; tiles can be slow, which the provider-health warning reports."
+    },
+    {
+     "name": "EMODnet Bathymetry",
+     "url": "https://emodnet.ec.europa.eu/en/bathymetry",
+     "license": "EMODnet data policy: free and open, attribution required",
+     "attribution": "EMODnet Bathymetry Consortium (emodnet-bathymetry.eu)",
+     "used_for": "Seabed relief to zoom 12"
+    },
+    {
+     "name": "ESA WorldCover 2021",
+     "url": "https://planetarycomputer.microsoft.com/dataset/esa-worldcover",
+     "license": "CC BY 4.0",
+     "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium",
+     "used_for": "10 m land cover from zoom 6, served by Microsoft Planetary Computer"
+    },
+    {
+     "name": "Macrostrat geologic map tiles",
+     "url": "https://macrostrat.org",
+     "license": "CC BY 4.0",
+     "attribution": "Macrostrat (macrostrat.org) and the original map sources",
+     "used_for": "Bedrock geology map layer"
+    },
+    {
+     "name": "USGS US Topo",
+     "url": "https://www.usgs.gov/programs/national-geospatial-program/us-topo-maps-america",
+     "license": "US public domain",
+     "attribution": "USGS The National Map",
+     "used_for": "US topographic map"
+    },
+    {
+     "name": "OpenSeaMap sea marks",
+     "url": "https://www.openseamap.org",
+     "license": "Chart tiles CC BY-SA; sea-mark data ODbL (OpenStreetMap)",
+     "attribution": "© OpenSeaMap contributors · data © OpenStreetMap contributors",
+     "used_for": "Sea marks from zoom 9",
+     "notes": "Licence per wiki.openstreetmap.org/wiki/OpenSeaMap, read 2026-09-28."
+    },
+    {
+     "name": "Natural Earth",
+     "url": "https://www.naturalearthdata.com",
+     "license": "Public domain",
+     "attribution": "Made with Natural Earth",
+     "used_for": "Countries, rivers, lakes, glaciers, reefs, time zones, regions and populated places",
+     "notes": "v5.1.2 from jsDelivr (nvkelso/natural-earth-vector); admin-1 10m simplified into world/data/catalog-admin1.json."
+    }
+   ]
+  },
+  {
+   "title": "Live Earth feeds",
+   "items": [
+    {
+     "name": "USGS earthquake feeds",
+     "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php",
+     "license": "US public domain",
+     "attribution": "Earthquakes: U.S. Geological Survey",
+     "used_for": "Live earthquakes, updated every minute, and the agent's earthquake answers"
+    },
+    {
+     "name": "NASA EONET natural events",
+     "url": "https://eonet.gsfc.nasa.gov",
+     "license": "NASA open data (credit requested)",
+     "attribution": "Natural events: NASA EONET",
+     "used_for": "Wildfires, storms, volcanoes and other natural events, updated every 15 minutes"
+    },
+    {
+     "name": "NOAA NEXRAD radar via Iowa Environmental Mesonet",
+     "url": "https://mesonet.agron.iastate.edu/ogc/",
+     "license": "NEXRAD data: US public domain; tiles courtesy of Iowa State University",
+     "attribution": "NEXRAD via Iowa Environmental Mesonet",
+     "used_for": "US weather radar, updated every 5 minutes"
+    },
+    {
+     "name": "NASA GPM IMERG precipitation",
+     "url": "https://gpm.nasa.gov/data/imerg",
+     "license": "NASA open data (credit requested)",
+     "attribution": "Precipitation: NASA GPM IMERG via NASA EOSDIS GIBS",
+     "used_for": "Global precipitation rate in 30-minute steps"
+    },
+    {
+     "name": "NOAA Space Weather Prediction Center aurora forecast",
+     "url": "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast",
+     "license": "US public domain",
+     "attribution": "Aurora: NOAA Space Weather Prediction Center",
+     "used_for": "Aurora forecast and planetary K-index, updated every 10 minutes"
+    },
+    {
+     "name": "NOAA National Weather Service alerts",
+     "url": "https://www.weather.gov/documentation/services-web-api",
+     "license": "US public domain",
+     "attribution": "Alerts: NOAA National Weather Service",
+     "used_for": "US weather warnings and watches, updated every 5 minutes"
+    },
+    {
+     "name": "USGS Volcano Hazards Program",
+     "url": "https://www.usgs.gov/programs/VHP",
+     "license": "US public domain",
+     "attribution": "Volcanoes: USGS Volcano Hazards Program",
+     "used_for": "US volcanoes at an elevated alert level, updated every 30 minutes"
+    },
+    {
+     "name": "NOAA National Hurricane Center",
+     "url": "https://www.nhc.noaa.gov",
+     "license": "US public domain",
+     "attribution": "Tropical cyclones: NOAA National Hurricane Center",
+     "used_for": "Active tropical cyclones with forecast tracks and cones"
+    },
+    {
+     "name": "CelesTrak orbital elements",
+     "url": "https://celestrak.org",
+     "license": "Free public orbital data, with attribution",
+     "attribution": "Orbital data: CelesTrak (celestrak.org)",
+     "used_for": "Satellite positions, Starlink and the ISS tracker"
+    },
+    {
+     "name": "Fintraffic Digitraffic ship positions (AIS)",
+     "url": "https://www.digitraffic.fi/en/marine-traffic/",
+     "license": "CC BY 4.0",
+     "attribution": "Source: Fintraffic / digitraffic.fi, licence CC BY 4.0",
+     "used_for": "Live ships in the Baltic Sea, updated every minute"
+    },
+    {
+     "name": "Fintraffic Digitraffic road weather cameras",
+     "url": "https://www.digitraffic.fi/en/road-traffic/",
+     "license": "CC BY 4.0",
+     "attribution": "Source: Fintraffic / digitraffic.fi, CC BY 4.0",
+     "used_for": "Road weather cameras across Finland"
+    },
+    {
+     "name": "TfL JamCams",
+     "url": "https://api-portal.tfl.gov.uk/",
+     "license": "TfL Open Data licence (attribution required)",
+     "attribution": "Powered by TfL Open Data",
+     "used_for": "Traffic cameras across London, as stills and short clips"
+    },
+    {
+     "name": "The Space Devs Launch Library 2",
+     "url": "https://thespacedevs.com/llapi",
+     "license": "Free tier, with attribution",
+     "attribution": "The Space Devs, Launch Library 2",
+     "used_for": "Upcoming rocket launches",
+     "notes": "Free tier is 15 requests per hour per IP; answers are cached for 10 minutes."
+    },
+    {
+     "name": "adsb.lol",
+     "url": "https://adsb.lol",
+     "license": "ODbL 1.0",
+     "attribution": "ADS-B data © adsb.lol contributors (ODbL)",
+     "used_for": "Live aircraft, only when the Baryon relay is switched on",
+     "notes": "Licence per the adsb.lol API docs ('License: ODbL 1.0'). Called only through the relay (app.config.liveRelay)."
+    }
+   ]
+  },
+  {
+   "title": "Street level",
+   "items": [
+    {
+     "name": "Panoramax street-level pictures",
+     "url": "https://panoramax.fr",
+     "license": "Open data; each picture keeps its own licence (mostly Etalab Open Licence 2.0 or CC BY-SA 4.0)",
+     "attribution": "Author, licence and host shown on every picture",
+     "used_for": "The street-level viewer, nearest-picture search and the agent's street-level answers",
+     "notes": "Meta-catalogue API api.panoramax.xyz (bbox search sorted by distance to the bbox centre per the OpenAPI docs); pictures served by federated instances such as panoramax.ign.fr and panoramax.openstreetmap.fr."
+    },
+    {
+     "name": "Panoramax coverage map",
+     "url": "https://docs.panoramax.fr",
+     "license": "Panoramax open data (derived from openly licensed pictures)",
+     "attribution": "Street-level imagery: Panoramax contributors",
+     "used_for": "Coverage cells, sequence lines and picture dots on the globe and the mini-map",
+     "notes": "Vector tiles api/map/{z}/{x}/{y}.mvt and api/map/2/...; a derived 0.5-degree coverage overview in world/data/streetview-coverage.json (as_of 2026-09-28) covers zooms below 5."
+    }
+   ]
+  },
+  {
+   "title": "Geoscience & historical hazards",
+   "items": [
+    {
+     "name": "PB2002 plate boundary model (Bird 2003)",
+     "url": "https://github.com/fraxen/tectonicplates",
+     "license": "ODC-By 1.0",
+     "attribution": "Bird, P. (2003) An updated digital model of plate boundaries, G-Cubed 4(3):1027, doi:10.1029/2001GC000252; data conversion Hugo Ahlenius, Nordpil",
+     "used_for": "Plate boundaries, plate motion and mountain belts, and the agent's tectonic-setting answers",
+     "notes": "Pinned commit 339b0c56563c118307b1f4542703047f5f698fae; licence confirmed in its README; pre-trimmed to world/data/earthdata-pb2002.json (52 plates, 1,683 segments, 13 orogens)."
+    },
+    {
+     "name": "NOAA NCEI volcano databases",
+     "url": "https://www.ngdc.noaa.gov/hazard/volcano.shtml",
+     "license": "US public domain",
+     "attribution": "NOAA NCEI/WDS Volcano Location Database and Significant Volcanic Eruption Database (doi:10.7289/V5JW8BSH)",
+     "used_for": "Holocene volcanoes and significant eruptions"
+    },
+    {
+     "name": "NOAA NCEI Global Historical Tsunami Database",
+     "url": "https://www.ngdc.noaa.gov/hazard/tsu_db.shtml",
+     "license": "US public domain",
+     "attribution": "NOAA NCEI/WDS Global Historical Tsunami Database (doi:10.7289/V5PN93H7)",
+     "used_for": "Historical tsunamis"
+    },
+    {
+     "name": "NOAA NCEI Global Significant Earthquake Database",
+     "url": "https://www.ngdc.noaa.gov/hazard/earthqk.shtml",
+     "license": "US public domain",
+     "attribution": "NOAA NCEI/WDS Global Significant Earthquake Database (doi:10.7289/V5TD9V7K)",
+     "used_for": "Significant historical earthquakes"
+    },
+    {
+     "name": "NOAA NCEI EMAG2v3 magnetic anomalies",
+     "url": "https://www.ncei.noaa.gov/products/earth-magnetic-model-anomaly-grid-2",
+     "license": "US public domain",
+     "attribution": "Magnetic anomalies: NOAA NCEI EMAG2v3",
+     "used_for": "Magnetic anomaly layer and magnetic readings for a point"
+    },
+    {
+     "name": "NOAA NCEI multibeam bathymetry",
+     "url": "https://www.ncei.noaa.gov/maps/bathymetry/",
+     "license": "US public domain",
+     "attribution": "Seafloor: NOAA NCEI multibeam bathymetry mosaic",
+     "used_for": "Surveyed-seafloor layer"
+    },
+    {
+     "name": "ISRIC SoilGrids 2.0",
+     "url": "https://soilgrids.org",
+     "license": "CC BY 4.0",
+     "attribution": "Soil: ISRIC SoilGrids 2.0 (Poggio et al. 2021), CC BY 4.0",
+     "used_for": "Soil pH, organic carbon, clay and sand layers, and soil readings for a point",
+     "notes": "WMS maps.isric.org; REST point query rest.isric.org (beta, 5 calls/min fair use)."
+    },
+    {
+     "name": "Tree cover loss (Hansen/UMD, Global Forest Watch)",
+     "url": "https://data.globalforestwatch.org/datasets/gfw::tree-cover-loss/about",
+     "license": "CC BY 4.0",
+     "attribution": "Hansen, M. C. et al. 2013, Science 342; UMD/GLAD, Google, USGS, NASA; via Global Forest Watch",
+     "used_for": "Tree cover loss 2001–2025, with a year control",
+     "notes": "v1.13 tiles from tiles.globalforestwatch.org; licence per the GFW data-api dataset metadata."
+    },
+    {
+     "name": "Randolph Glacier Inventory 7.0",
+     "url": "https://www.glims.org/RGI/",
+     "license": "CC BY 4.0",
+     "attribution": "RGI 7.0 Consortium (2023), Randolph Glacier Inventory v7.0, doi:10.5067/F6JMOVY5NAVZ, via GLIMS/NSIDC",
+     "used_for": "Glacier outlines and glacier cards",
+     "notes": "Served by the GLIMS GeoServer (WMS, vector tiles, GetFeatureInfo)."
+    },
+    {
+     "name": "USGS MRDS mineral deposits",
+     "url": "https://mrdata.usgs.gov/mrds/",
+     "license": "US public domain",
+     "attribution": "Mineral deposits: USGS MRDS (historical, US-focused, not maintained since 2011)",
+     "used_for": "Mineral deposits layer and cards",
+     "notes": "WFS 1.0.0 at mrdata.usgs.gov/services/wfs/mrds; commodity codes in world/data/earthdata-mrds-codes.json."
+    },
+    {
+     "name": "USGS Elevation Point Query Service (3DEP)",
+     "url": "https://apps.nationalmap.gov/epqs/",
+     "license": "US public domain",
+     "attribution": "USGS 3D Elevation Program",
+     "used_for": "Precise elevations for US points in agent answers"
+    }
+   ]
+  },
+  {
+   "title": "Software",
+   "items": [
+    {
+     "name": "God's Eye View",
+     "url": "https://github.com/bilawalsidhu/gods-eye-view",
+     "license": "MIT",
+     "attribution": "© 2026 Bilawal Sidhu",
+     "used_for": "Visual modes (thermal, night vision, CRT, noir), the HUD and the live-layer design, adapted"
+    },
+    {
+     "name": "MapLibre GL JS 6.4.0",
+     "url": "https://maplibre.org",
+     "license": "BSD 3-Clause",
+     "attribution": "© MapLibre contributors",
+     "used_for": "The 3D globe and map renderer"
+    },
+    {
+     "name": "satellite.js 7.1.0",
+     "url": "https://github.com/shashwatak/satellite-js",
+     "license": "MIT",
+     "attribution": "",
+     "used_for": "Satellite orbit calculation"
+    },
+    {
+     "name": "Anthropic TypeScript SDK 0.128.0",
+     "url": "https://github.com/anthropics/anthropic-sdk-typescript",
+     "license": "MIT",
+     "attribution": "",
+     "used_for": "The Claude agent"
+    },
+    {
+     "name": "Poppins & Noto Sans",
+     "url": "https://fonts.google.com",
+     "license": "SIL Open Font License 1.1",
+     "attribution": "",
+     "used_for": "Interface and map label typefaces"
+    },
+    {
+     "name": "tz-lookup 6.1.25",
+     "url": "https://github.com/darkskyapp/tz-lookup-oss",
+     "license": "CC0 1.0",
+     "attribution": "",
+     "used_for": "Local time on earthquake cards"
+    },
+    {
+     "name": "fflate 0.8.2",
+     "url": "https://github.com/101arrowz/fflate",
+     "license": "MIT",
+     "attribution": "fflate by 101arrowz",
+     "used_for": "Opening KMZ files"
+    },
+    {
+     "name": "Photo Sphere Viewer 5.15.1",
+     "url": "https://photo-sphere-viewer.js.org",
+     "license": "MIT",
+     "attribution": "Photo Sphere Viewer by Damien Sorel",
+     "used_for": "The 360° street-level viewer"
+    },
+    {
+     "name": "three.js 0.185.1",
+     "url": "https://threejs.org",
+     "license": "MIT",
+     "attribution": "three.js authors",
+     "used_for": "The WebGL engine behind the 360° viewer"
+    }
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "name": "Esri basemaps without a key",
+   "why": "Esri's terms require an ArcGIS account or Location Platform key, so they are only used when one is configured."
+  },
+  {
+   "name": "Open-Meteo",
+   "why": "its free API is for non-commercial use only."
+  },
+  {
+   "name": "OpenSky Network",
+   "why": "non-commercial licence."
+  },
+  {
+   "name": "RainViewer",
+   "why": "limited to personal and small community use."
+  },
+  {
+   "name": "EOX Sentinel-2 cloudless 2017–2025",
+   "why": "CC BY-NC-SA (non-commercial)."
+  },
+  {
+   "name": "Protected Planet / WDPA",
+   "why": "no commercial use without a licence."
+  },
+  {
+   "name": "TeleGeography submarine cables",
+   "why": "CC BY-NC-SA (non-commercial)."
+  },
+  {
+   "name": "CARTO and Stadia basemaps",
+   "why": "require API keys and accounts."
+  },
+  {
+   "name": "tile.openstreetmap.org and Wikimedia maps",
+   "why": "their usage policies do not allow heavy third-party app use."
+  },
+  {
+   "name": "Nominatim",
+   "why": "its policy forbids client-side autocomplete."
+  }
+ ]
+}

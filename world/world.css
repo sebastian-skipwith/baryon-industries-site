@@ -1,0 +1,454 @@
+/* Baryon World Model — app chrome. Tokens come from /assets/baryon.css (CINQ system).
+   Floating panels are white glass over the dark globe, 20px corners, shadow-float. */
+
+html, body.world { height: 100%; overflow: hidden; background: #050507; }
+body.world { color: var(--ink); }
+#map { position: fixed; inset: 0; }
+#map .maplibregl-canvas:focus { outline: none; }
+#map .maplibregl-canvas:focus-visible { outline: 2px solid #fff; outline-offset: -4px; box-shadow: inset 0 0 0 4px var(--ink); }
+.w-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* glass used over imagery: a touch more opaque than page glass for legibility */
+.rail:empty, .modebar:empty, .status-pill:empty { display: none; }
+.wglass {
+  /* Tertiary text over glass on the dark globe: the page's #6f6c67 would fall to 4:1. */
+  --ink-soft: #5f5c58;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: var(--shadow-float), inset 0 0 0 1px rgba(20, 20, 20, 0.06);
+}
+
+/* ---------------------------------------------------------------- top bar */
+.w-top { position: fixed; top: 14px; left: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 10px; }
+.w-brand {
+  display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 999px;
+  color: var(--ink); text-decoration: none; flex: none;
+}
+.omni { position: relative; width: min(480px, calc(100vw - 96px)); }
+@media (min-width: 921px) { .omni { width: min(480px, calc(100vw - 490px)); } } /* clear of the mode bar */
+.omnibox { display: flex; align-items: center; gap: 6px; height: 46px; padding: 0 6px 0 16px; border-radius: 999px; }
+.omnibox svg { flex: none; color: var(--ink-soft); }
+.omnibox input {
+  flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; outline: none;
+  font: 400 0.95rem var(--font-sans); color: var(--ink);
+}
+.omnibox input::placeholder { color: var(--ink-soft); }
+.omnibox:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
+#q::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+.omni-clear {
+  flex: none; display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 999px;
+  background: var(--surface); color: var(--graphite); cursor: pointer;
+}
+.omni-clear:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, var(--surface)); }
+.omni-clear svg { color: inherit; }
+.omni-ask {
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 999px;
+  border: 0; background: var(--ink); color: var(--paper); font: 500 0.8rem var(--font-sans); cursor: pointer;
+}
+.omni-ask:hover { background: #2c2c2c; }
+.omni-lucky { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); cursor: pointer; transition: background 160ms, color 160ms; }
+.omni-lucky:hover { background: var(--surface); color: var(--ink); }
+.omni-lucky svg { color: inherit; }
+.omni-lucky:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.omni-results {
+  position: absolute; top: 54px; left: 0; right: 0; max-height: min(62vh, 560px); overflow-y: auto; border-radius: 20px; padding: 6px;
+}
+.dock-body, .card-body, .omni-results { scroll-padding-block: 8px; }
+.omni-group { padding: 8px 10px 4px; }
+.omni-item {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 10px; border: 0; background: transparent;
+  border-radius: 12px; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+}
+.omni-item:hover, .omni-item[aria-selected="true"] { background: var(--surface); }
+.omni-item .ic {
+  flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--surface); display: grid; place-items: center;
+  color: var(--graphite); font-size: 0.8rem;
+}
+.omni-item .t { font-size: 0.9rem; font-weight: 500; line-height: 1.3; }
+.omni-item .s { font-size: 0.75rem; color: var(--ink-soft); line-height: 1.35; }
+.omni-empty { display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 0.8rem; color: var(--ink-soft); }
+.omni-spin {
+  flex: none; width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--hair-2); border-top-color: var(--ink);
+  animation: omni-spin 800ms linear infinite;
+}
+@keyframes omni-spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------------- rail + dock */
+.rail {
+  position: fixed; top: 74px; left: 14px; z-index: 25; display: flex; flex-direction: column; gap: 4px;
+  padding: 6px; border-radius: 26px;
+}
+.rail-btn {
+  position: relative; width: 44px; height: 44px; border-radius: 16px; border: 0; background: transparent; cursor: pointer;
+  display: grid; place-items: center; color: var(--graphite); transition: background-color 140ms, color 140ms;
+}
+.rail-btn:hover { background: var(--surface); color: var(--ink); }
+.rail-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.rail-btn .tip {
+  position: absolute; left: 54px; top: 50%; transform: translateY(-50%); white-space: nowrap; pointer-events: none;
+  padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--paper); font-size: 0.75rem; font-weight: 500;
+  opacity: 0; transition: opacity 140ms;
+}
+@media (hover: hover) { .rail-btn:hover .tip { opacity: 1; } }
+.rail-btn:focus-visible .tip { opacity: 1; }
+/* An open panel sits where the tip would land; the pressed button already names it. */
+body:has(#dock:not([hidden])) .rail-btn .tip, .rail-btn[aria-pressed="true"] .tip { display: none; }
+.rail .sep { height: 1px; margin: 4px 6px; background: var(--hair); }
+
+.dock {
+  position: fixed; top: 74px; left: 76px; bottom: 58px; z-index: 24; width: 380px; max-width: calc(100vw - 96px);
+  display: flex; flex-direction: column; border-radius: 20px; overflow: hidden;
+}
+.dock-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 16px 10px 20px; }
+.dock-head h2 { margin: 0; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.015em; }
+.dock-body { flex: 1; overflow-y: auto; padding: 4px 20px 24px; overscroll-behavior: contain; }
+.icon-btn {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--surface); color: var(--graphite);
+}
+.icon-btn:hover { background: color-mix(in srgb, var(--ink) 8%, var(--surface)); color: var(--ink); }
+
+/* ---------------------------------------------------------------- panel content kit */
+.panel h3 { margin: 18px 0 8px; }
+.panel .eyebrow { display: block; margin: 20px 0 8px; }
+.panel .eyebrow:first-child { margin-top: 4px; }
+.panel p { margin: 0 0 10px; font-size: 0.88rem; line-height: 1.55; color: var(--graphite); }
+.panel .note { font-size: 0.75rem; color: var(--ink-soft); line-height: 1.5; margin-top: 12px; }
+.panel .src { font-size: 0.7rem; color: var(--ink-soft); margin-top: 4px; }
+.row-btn {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 10px; border: 0; background: transparent;
+  border-radius: 14px; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+}
+.row-btn:hover { background: var(--surface); }
+.row-btn .grow { flex: 1; min-width: 0; }
+.row-btn .t { font-size: 0.9rem; font-weight: 500; line-height: 1.3; }
+.row-btn .s { font-size: 0.75rem; color: var(--ink-soft); line-height: 1.4; }
+.row-btn .thumb {
+  flex: none; width: 44px; height: 44px; border-radius: 10px; background: var(--surface) center/cover no-repeat;
+  border: 1px solid var(--hair);
+}
+.switch {
+  flex: none; position: relative; width: 38px; height: 22px; border-radius: 999px; background: rgba(20, 20, 20, 0.16);
+  transition: background-color 160ms;
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 999px; background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 180ms var(--ease-out-soft);
+}
+[aria-pressed="true"] > .switch, .switch.on { background: var(--ink); }
+[aria-pressed="true"] > .switch::after, .switch.on::after { transform: translateX(16px); }
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.tile { border-radius: 16px; background: var(--surface); padding: 12px 14px; }
+.tile .v { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+.tile .k { font-size: 0.7rem; color: var(--ink-soft); margin-top: 2px; }
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface); gap: 2px; }
+.seg button {
+  border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; font: 500 0.78rem var(--font-sans);
+  color: var(--graphite); cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+.bar-track { height: 6px; border-radius: 999px; background: rgba(20, 20, 20, 0.08); overflow: hidden; }
+.bar-track > i { display: block; height: 100%; background: var(--ink); border-radius: 999px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 0.85rem; }
+.kv dt { color: var(--ink-soft); }
+.kv dd { margin: 0; font-weight: 500; }
+
+.here-pin {
+  width: 22px; height: 30px; background: var(--ink); border: 2px solid #fff; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg) translate(-2px, -6px); box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.7);
+}
+.here-pin::after { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 999px; background: #fff; }
+
+/* years-of-reserves data encoding (data colour, not chrome) */
+.yrs { flex: none; min-width: 52px; text-align: right; font: 600 0.78rem var(--font-mono); }
+.red { color: #b3372a; } .amber { color: #9a6b00; } .green { color: #1e7a4f; }
+.bar-track > i.red { background: #c0392b; } .bar-track > i.amber { background: #d99000; } .bar-track > i.green { background: #1e8e5a; }
+.pm-num {
+  flex: none; width: 24px; height: 24px; border-radius: 999px; background: var(--ink); color: var(--paper);
+  display: grid; place-items: center; font: 600 0.72rem var(--font-sans); margin-top: 1px;
+}
+/* Chain stops: white discs with an ink ring, unlike the grey archive clusters. */
+.pm-marker {
+  width: 28px; height: 28px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer;
+  font: 600 0.78rem var(--font-sans); box-shadow: 0 0 0 2px #fff, 0 6px 18px -6px rgba(0, 0, 0, 0.7); display: grid; place-items: center; padding: 0;
+}
+.pm-marker:hover { transform: scale(1.08); }
+
+/* ---------------------------------------------------------------- place card */
+.card-float {
+  position: fixed; top: 74px; right: 68px; z-index: 26; width: 360px; max-width: calc(100vw - 96px);
+  max-height: calc(100vh - 146px); display: flex; flex-direction: column; border-radius: 20px; overflow: hidden;
+}
+.card-body p { margin: 0; font-size: 0.86rem; line-height: 1.58; font-weight: 400; color: var(--graphite); }
+.card-body .kv { font-size: 0.82rem; }
+.card-body .note { font-size: 0.72rem; color: var(--ink-soft); margin-top: 14px; }
+.card-body .kv dd .src { font-size: 0.7rem; font-weight: 400; color: var(--ink-soft); margin-top: 2px; }
+.card-float .card-close { position: absolute; top: 12px; right: 12px; z-index: 2; }
+.card-body { overflow-y: auto; padding: 18px 20px 20px; }
+.card-body .hero-img { margin: -18px -20px 14px; height: 150px; background: var(--surface); }
+.card-body .hero-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.card-body .hero-credit { margin: -10px 0 12px; font-size: 0.68rem; color: var(--ink-soft); line-height: 1.4; }
+.card-body .hero-credit a { color: inherit; }
+.card-body h3 { margin: 0 34px 2px 0; font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
+.card-body > .eyebrow { display: block; margin-right: 34px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Titles take focus only to move a screen reader's place; they are not controls. */
+#card-title:focus, #dock-title:focus { outline: none; }
+.card-body .sub { font-size: 0.8rem; color: var(--ink-soft); }
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+
+/* ---------------------------------------------------------------- controls */
+.w-controls { position: fixed; right: 14px; bottom: 58px; z-index: 22; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.ctl-group { display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; }
+.ctl-group button {
+  width: 42px; height: 42px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center;
+  color: var(--ink); font: 600 0.72rem var(--font-sans);
+}
+.ctl-group button + button { border-top: 1px solid var(--hair); }
+.ctl-group button:hover { background: rgba(20, 20, 20, 0.05); }
+.ctl-group button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+/* The group clips its corners, so the ring is drawn inside each button. */
+.ctl-group button:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; border-radius: 12px; }
+.ctl-group button[aria-pressed="true"]:focus-visible { outline-color: var(--paper); }
+.compass svg { transition: transform 120ms linear; }
+
+.modebar { position: fixed; top: 14px; right: 14px; z-index: 22; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; }
+.modebar button {
+  border: 0; background: transparent; padding: 8px 12px; border-radius: 999px; font: 500 0.76rem var(--font-sans);
+  color: var(--graphite); cursor: pointer; white-space: nowrap;
+}
+.modebar button:hover { color: var(--ink); }
+.modebar button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* ---------------------------------------------------------------- time bar */
+.timebar {
+  position: fixed; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 23; width: min(620px, calc(100vw - 140px));
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 18px; border-radius: 20px;
+}
+.timebar .lbl { flex: none; font-size: 0.78rem; font-weight: 600; min-width: 92px; }
+.timebar input[type="range"] { flex: 1; accent-color: var(--ink); }
+.timebar .sub { font-size: 0.7rem; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- status bar */
+.statusbar {
+  position: fixed; left: 14px; right: 14px; bottom: 12px; z-index: 21; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; pointer-events: none;
+}
+.statusbar > * { pointer-events: auto; }
+.status-pill {
+  display: flex; align-items: center; gap: 14px; height: 32px; padding: 0 14px; border-radius: 999px;
+  font: 400 0.72rem var(--font-mono); color: var(--graphite); white-space: nowrap; overflow: hidden;
+}
+.status-pill b { color: var(--ink); font-weight: 600; }
+.attr-pill { gap: 8px; font: 400 0.68rem var(--font-sans); color: var(--ink-soft); max-width: 46vw; cursor: pointer; }
+.attr-pill .attr-i { flex: none; }
+.attr-pill .attr-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attr-pill:hover, .attr-pill[aria-expanded="true"] { color: var(--ink); }
+.attr-full {
+  position: absolute; right: 0; bottom: calc(100% + 8px); width: min(420px, calc(100vw - 28px)); max-height: 50vh; overflow-y: auto;
+  padding: 14px 16px; border-radius: 20px; font: 400 0.75rem/1.5 var(--font-sans); color: var(--graphite);
+}
+.statusbar:has(#attr-full:not([hidden])) { z-index: 29; } /* the open list sits above the controls and rail */
+.attr-full ul { margin: 8px 0 10px; padding: 0; list-style: none; display: grid; gap: 6px; }
+.attr-full li { padding-top: 6px; border-top: 1px solid var(--hair); }
+.attr-full li:first-child { padding-top: 0; border-top: 0; }
+.attr-full a { font-size: 0.75rem; }
+
+/* ---------------------------------------------------------------- toasts */
+.toasts { position: fixed; left: 50%; top: calc(74px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 60; display: grid; gap: 8px; justify-items: center; }
+.toast {
+  padding: 10px 16px; border-radius: 999px; background: rgba(20, 20, 20, 0.88); color: #fff; font-size: 0.85rem;
+  box-shadow: var(--shadow-float); animation: toast-in 180ms var(--ease-out-soft); transition: opacity 300ms;
+}
+.toast-error { background: rgba(120, 30, 20, 0.92); }
+.toast.out { opacity: 0; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------- map popups */
+.maplibregl-popup-content {
+  border-radius: 14px !important; padding: 8px 12px !important; font: 500 0.78rem var(--font-sans) !important;
+  color: var(--ink) !important; box-shadow: var(--shadow-card) !important;
+}
+.maplibregl-ctrl-attrib { display: none !important; } /* attribution rendered in our status bar */
+
+/* ---------------------------------------------------------------- visual modes + HUD */
+.fx { position: absolute; inset: 0; pointer-events: none; } /* lives inside the map's canvas container */
+.fx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
+.hud { position: absolute; inset: 0; display: none; font: 500 11px/1.55 var(--font-mono); letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.86); text-shadow: 0 0 6px rgba(0, 0, 0, 0.6); }
+body:not([data-mode="standard"]) .hud { display: block; }
+body[data-mode="nvg"] .hud { color: rgba(170, 255, 190, 0.92); }
+body[data-mode="thermal"] .hud { color: rgba(255, 236, 190, 0.92); }
+.hud > div { position: absolute; }
+.hud > div:not(.hud-reticle) { background: rgba(0, 0, 0, 0.35); padding: 4px 8px; border-radius: 8px; }
+.hud > div:not(.hud-reticle):empty { display: none; }
+.hud-tl { top: 78px; left: 84px; }
+.hud-tr { top: 70px; right: 18px; text-align: right; }
+.hud-bl { bottom: 56px; left: 18px; }
+.hud-br { bottom: 56px; right: 74px; text-align: right; }
+.hud-reticle { left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+.hud-reticle::before, .hud-reticle::after { content: ""; position: absolute; background: currentColor; opacity: 0.8; }
+.hud-reticle::before { left: 0; right: 0; top: 50%; height: 1px; box-shadow: 0 0 0 0; clip-path: polygon(0 0, 38% 0, 38% 100%, 0 100%, 0 0, 62% 0, 100% 0, 100% 100%, 62% 100%); }
+.hud-reticle::after { top: 0; bottom: 0; left: 50%; width: 1px; clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%, 0 62%, 100% 62%, 100% 100%, 0 100%); }
+body:not([data-mode="standard"]) .statusbar .status-pill:first-child { visibility: hidden; }
+@media (min-width: 721px) {
+  body:has(#card:not([hidden])) .hud-tr { right: 440px; }
+  /* The other corners step clear of the open dock and card too, and above the time bar. */
+  body:has(#dock:not([hidden])) :is(.hud-tl, .hud-bl) { left: 470px; }
+  body:has(#card:not([hidden])) .hud-br { right: 440px; }
+  body.has-timebar :is(.hud-bl, .hud-br) { bottom: 122px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+  .compass svg { transition: none; }
+  .omni-spin { animation: none; }
+}
+
+/* ---------------------------------------------------------------- safe areas (viewport-fit=cover) */
+.w-top { left: max(14px, env(safe-area-inset-left)); }
+.rail { left: max(14px, env(safe-area-inset-left)); }
+.dock { left: calc(max(14px, env(safe-area-inset-left)) + 62px); }
+.w-controls, .modebar { right: max(14px, env(safe-area-inset-right)); }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  .w-top { left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); }
+  .omni { width: auto; flex: 1; min-width: 0; }
+  .omnibox input { width: 0; } /* let flex size it, not the placeholder */
+  .w-brand { width: 42px; height: 42px; }
+  .omnibox { height: 42px; }
+  .rail {
+    top: auto; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); flex-direction: row; justify-content: space-around;
+    border-radius: 24px; z-index: 27; /* floats over the card and dock sheets alike */
+  }
+  .rail .sep { display: none; }
+  .rail-btn .tip { display: none; }
+  .dock, .card-float {
+    top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: none; max-height: 62vh; border-radius: 22px 22px 0 0;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  .card-float { height: auto; }
+  .dock-head::before {
+    content: ""; position: absolute; left: 50%; top: 7px; width: 38px; height: 4px; margin-left: -19px; border-radius: 999px;
+    background: rgba(20, 20, 20, 0.18);
+  }
+  /* The title bar is the sheet's drag handle (main.js sheetGrabber). */
+  .dock-head { touch-action: none; cursor: grab; }
+  .dock { transition: height 280ms var(--ease-out-soft); }
+  .dock.is-dragging { transition: none; }
+  .dock.is-dragging .dock-head { cursor: grabbing; }
+  @media (prefers-reduced-motion: reduce) { .dock { transition: none; } }
+  .modebar { top: calc(62px + env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); }
+  .modebar button { padding: 7px 9px; font-size: 0.7rem; }
+  /* The HUD's top readouts sit below the mode bar's row. */
+  .hud-tl, .hud-tr { top: calc(120px + env(safe-area-inset-top)); }
+  .hud-tl { left: max(10px, env(safe-area-inset-left)); }
+  .hud-tr { right: max(10px, env(safe-area-inset-right)); }
+  /* The bottom readouts sit above the rail, between the credits (i) and the map controls,
+     and above the time bar when it shows. */
+  .hud-bl, .hud-br { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .hud-bl { left: calc(max(10px, env(safe-area-inset-left)) + 48px); }
+  .hud-br { right: calc(max(10px, env(safe-area-inset-right)) + 50px); }
+  body.has-timebar :is(.hud-bl, .hud-br) { bottom: calc(190px + env(safe-area-inset-bottom)); }
+  .w-controls { right: max(10px, env(safe-area-inset-right)); bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .timebar { bottom: calc(84px + env(safe-area-inset-bottom)); width: calc(100vw - 80px); left: 10px; transform: none; }
+  /* Credits shrink to an (i) above the rail's left end, lifted over the time bar when it shows. */
+  .statusbar { left: max(10px, env(safe-area-inset-left)); right: auto; bottom: calc(76px + env(safe-area-inset-bottom)); }
+  body.has-timebar .statusbar { bottom: calc(190px + env(safe-area-inset-bottom)); }
+  #status-coords { display: none; }
+  .attr-pill { width: 32px; padding: 0; justify-content: center; max-width: none; }
+  .attr-pill .attr-text { display: none; }
+  .attr-full { left: 0; right: auto; width: calc(100vw - 20px); }
+}
+@media (max-width: 379px) {
+  .omni-ask { width: 40px; padding: 0; justify-content: center; }
+  .omni-ask .ask-label { display: none; }
+}
+
+/* ---------------------------------------------------------------- tablet portrait */
+/* Too narrow for the desktop top row: the mode bar drops to a second row, and with the
+   dock open the card becomes a sheet beside it. */
+@media (min-width: 721px) and (max-width: 920px) and (min-height: 521px) {
+  .modebar { top: 70px; right: max(14px, env(safe-area-inset-right)); }
+  .hud-tr { top: 120px; }
+  body:has(#dock:not([hidden])) .hud-tl { top: 128px; } /* beside the dock it would sit under the mode bar */
+  .card-float { top: 124px; max-height: calc(100vh - 196px); }
+  .dock { top: 128px; } /* below the mode bar's row */
+  body:has(#dock:not([hidden])) .card-float {
+    top: auto; left: 470px; right: calc(max(14px, env(safe-area-inset-right)) + 54px); bottom: 58px; width: auto; max-width: none; max-height: 45vh;
+  }
+}
+@media (min-width: 721px) and (max-width: 837px) and (min-height: 521px) {
+  /* Under 300px beside the dock (and clear of the controls): the card spans the width
+     below a shortened dock instead. */
+  body:has(#dock:not([hidden])) .card-float { left: 76px; }
+  body:has(#card:not([hidden])) .dock { bottom: calc(45vh + 70px); }
+}
+
+/* ---------------------------------------------------------------- phone landscape / short windows */
+@media (max-height: 520px) and (min-width: 721px) {
+  .w-top { top: 10px; }
+  .omni { width: min(440px, calc(100vw - 96px - 340px)); }
+  .modebar { top: 10px; }
+  .modebar button { padding: 7px 9px; font-size: 0.7rem; }
+  .rail { top: 62px; gap: 2px; }
+  .rail-btn { height: 40px; }
+  .dock { top: 62px; bottom: calc(10px + env(safe-area-inset-bottom)); width: 340px; max-height: none; }
+  .card-float { top: 62px; bottom: calc(62px + env(safe-area-inset-bottom)); right: max(14px, env(safe-area-inset-right)); max-height: none; }
+  /* Beside an open dock no map would be left: the card takes the dock's place until it is
+     closed (and ends above the time bar, as the dock does; catalog.js sets --tb-clear). */
+  body:has(#dock:not([hidden])) .card-float {
+    left: calc(max(14px, env(safe-area-inset-left)) + 62px); right: auto; bottom: calc(10px + env(safe-area-inset-bottom)); width: 340px; max-width: none;
+  }
+  body.tb-over.has-timebar:has(#dock:not([hidden])) .card-float { bottom: var(--tb-clear, 58px); }
+  body:has(#dock:not([hidden])) .hud-tr { right: calc(max(14px, env(safe-area-inset-right)) + 4px); }
+  body:has(#dock:not([hidden])) .hud-br { right: calc(max(14px, env(safe-area-inset-right)) + 60px); bottom: 110px; } /* above the controls' two rows */
+  /* beside an open dock the controls wrap to two rows */
+  body:has(#dock:not([hidden])) .w-controls { max-width: calc(100vw - max(14px, env(safe-area-inset-left)) - max(14px, env(safe-area-inset-right)) - 416px); }
+  /* One row of control groups along the bottom edge (tools.js adds its group here too). */
+  .w-controls {
+    flex-direction: row; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: flex-end; max-width: calc(100vw - 140px);
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    pointer-events: none; /* the empty end of a wrapped row leaves the credits (i) beside it tappable */
+  }
+  .w-controls > * { pointer-events: auto; }
+  .ctl-group { flex-direction: row; }
+  .ctl-group button + button { border-top: 0; border-left: 1px solid var(--hair); }
+  .timebar { bottom: 62px; }
+  .hud-tr { top: 62px; }
+  .hud-bl, .hud-br { bottom: 62px; }
+  .hud-bl { left: calc(max(14px, env(safe-area-inset-left)) + 70px); } /* clear of the rail, like .hud-tl */
+  body:has(#dock:not([hidden])) :is(.hud-tl, .hud-bl) { left: calc(max(14px, env(safe-area-inset-left)) + 416px); }
+  .statusbar { left: calc(max(14px, env(safe-area-inset-left)) + 62px); right: auto; bottom: calc(10px + env(safe-area-inset-bottom)); }
+  /* The open dock reaches the foot of the screen: the credits (i) moves beside it. (With the
+     time bar showing, catalog.js ends the dock above the bar and the (i) stays put.) */
+  body:has(#dock:not([hidden])):not(.has-timebar) .statusbar { left: calc(max(14px, env(safe-area-inset-left)) + 412px); }
+  body:has(#dock:not([hidden])):not(.has-timebar) .attr-full { width: min(420px, calc(100vw - max(14px, env(safe-area-inset-left)) - 426px)); }
+  #status-coords { display: none; }
+  .attr-pill { width: 32px; padding: 0; justify-content: center; max-width: none; }
+  .attr-pill .attr-text { display: none; }
+  .attr-full { left: 0; right: auto; }
+}
+
+@media (max-width: 720px) and (max-height: 520px) {
+  .w-controls { flex-direction: row; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: flex-end; max-width: 60vw; }
+  .ctl-group { flex-direction: row; }
+  .ctl-group button + button { border-top: 0; border-left: 1px solid var(--hair); }
+}
+
+/* ---------------------------------------------------------------- touch */
+@media (pointer: coarse) {
+  .icon-btn { width: 40px; height: 40px; }
+  .modebar button { min-height: 40px; }
+  .omni-lucky { width: 40px; height: 40px; }
+  .omni-ask { height: 40px; }
+  .omni-clear { width: 40px; height: 40px; }
+  /* Small pill buttons in cards and panels (Fly in 3D, exports, Set up Claude). */
+  .btn-sm { min-height: 40px; }
+  .seg button { min-height: 40px; }
+  .attr-pill { min-height: 40px; }
+}
+/* The compact credits (i) is a 40px circle on touch screens. */
+@media (pointer: coarse) and (max-width: 720px) { .attr-pill { width: 40px; } }
+@media (pointer: coarse) and (max-height: 520px) and (min-width: 721px) { .attr-pill { width: 40px; } }

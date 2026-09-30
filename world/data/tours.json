@@ -1,0 +1,1434 @@
+{
+ "about": "Baryon World Model stories. Each stop's Wikipedia title and fallback coordinates were checked against the Wikipedia REST summary on 2026-09-28; at runtime the centre comes from the live summary.",
+ "checked": "2026-09-28",
+ "stories": [
+  {
+   "id": "wonders",
+   "title": "Wonders of the physical Earth",
+   "teaser": "Canyons, waterfalls, reefs and the roof of the world.",
+   "keywords": [
+    "wonders",
+    "nature",
+    "natural",
+    "landscapes",
+    "physical",
+    "scenery"
+   ],
+   "cover": {
+    "lat": 36.1,
+    "lng": -112.3,
+    "z": 9
+   },
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Grand Canyon",
+     "lat": 36.3,
+     "lng": -112.75,
+     "camera": {
+      "zoom": 10.2,
+      "pitch": 55,
+      "bearing": 30
+     },
+     "caption": "The Colorado River carved this chasm through layer upon layer of ancient rock."
+    },
+    {
+     "wiki": "Iguazu Falls",
+     "lat": -25.6867,
+     "lng": -54.4447,
+     "camera": {
+      "zoom": 13,
+      "pitch": 50,
+      "bearing": 0
+     },
+     "caption": "A sweeping arc of waterfalls on the border between Argentina and Brazil."
+    },
+    {
+     "wiki": "Victoria Falls",
+     "lat": -17.9244,
+     "lng": 25.8567,
+     "camera": {
+      "zoom": 13.2,
+      "pitch": 58,
+      "bearing": -25
+     },
+     "caption": "The Zambezi plunges into a narrow gorge on the border of Zambia and Zimbabwe."
+    },
+    {
+     "wiki": "Kilimanjaro National Park",
+     "lat": -3.0667,
+     "lng": 37.3667,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 0
+     },
+     "caption": "The park protects Kilimanjaro, Africa's highest mountain, a lone volcano above the plains of Tanzania."
+    },
+    {
+     "wiki": "Mount Everest",
+     "lat": 27.9883,
+     "lng": 86.9253,
+     "camera": {
+      "zoom": 12.4,
+      "pitch": 70,
+      "bearing": -35
+     },
+     "caption": "The highest mountain on Earth, on the border of Nepal and China."
+    },
+    {
+     "wiki": "Great Barrier Reef",
+     "lat": -16.4,
+     "lng": 145.8,
+     "camera": {
+      "zoom": 8.2,
+      "pitch": 40,
+      "bearing": 0
+     },
+     "caption": "The largest coral reef system on Earth, off the coast of Queensland."
+    },
+    {
+     "wiki": "Uluru",
+     "lat": -25.345,
+     "lng": 131.0361,
+     "camera": {
+      "zoom": 13,
+      "pitch": 62,
+      "bearing": 30
+     },
+     "caption": "A great sandstone monolith in the red centre of Australia, sacred to the Anangu people."
+    }
+   ]
+  },
+  {
+   "id": "ring-of-fire",
+   "title": "The Ring of Fire",
+   "teaser": "Volcanoes along the restless rim of the Pacific.",
+   "keywords": [
+    "ring of fire",
+    "volcano",
+    "volcanoes",
+    "eruptions",
+    "earthquakes",
+    "pacific",
+    "tectonic",
+    "plates"
+   ],
+   "cover": {
+    "lat": 46.1912,
+    "lng": -122.1944,
+    "z": 11
+   },
+   "layers": [
+    "earthquakes",
+    "ed-plates"
+   ],
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Villarrica (volcano)",
+     "lat": -39.4208,
+     "lng": -71.9392,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 20
+     },
+     "caption": "A snow-capped volcano rising over the lake district of southern Chile."
+    },
+    {
+     "wiki": "Cotopaxi",
+     "lat": -0.6806,
+     "lng": -78.4378,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 0
+     },
+     "caption": "A near-symmetrical snow-capped cone in the Ecuadorian Andes."
+    },
+    {
+     "wiki": "Popocatépetl",
+     "lat": 19.0222,
+     "lng": -98.6278,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 290
+     },
+     "caption": "An active volcano looming over the highlands between Mexico City and Puebla."
+    },
+    {
+     "wiki": "Mount St. Helens",
+     "lat": 46.1912,
+     "lng": -122.1944,
+     "camera": {
+      "zoom": 12.4,
+      "pitch": 60,
+      "bearing": 180
+     },
+     "caption": "Its famous eruption blew away the north face of the mountain, leaving an open crater."
+    },
+    {
+     "wiki": "Klyuchevskaya Sopka",
+     "lat": 56.056,
+     "lng": 160.6441,
+     "camera": {
+      "zoom": 9.8,
+      "pitch": 55,
+      "bearing": 30
+     },
+     "caption": "A towering volcano among the many that crowd Russia's Kamchatka Peninsula."
+    },
+    {
+     "wiki": "Mount Fuji",
+     "lat": 35.3608,
+     "lng": 138.7275,
+     "camera": {
+      "zoom": 11,
+      "pitch": 55,
+      "bearing": 330
+     },
+     "caption": "Japan's highest mountain, a classic cone-shaped volcano."
+    },
+    {
+     "wiki": "Krakatoa",
+     "lat": -6.102,
+     "lng": 105.423,
+     "camera": {
+      "zoom": 11,
+      "pitch": 50,
+      "bearing": 0
+     },
+     "caption": "The island volcano in the Sunda Strait remembered for a catastrophic eruption."
+    },
+    {
+     "wiki": "Mount Ruapehu",
+     "lat": -39.28,
+     "lng": 175.57,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 200
+     },
+     "caption": "An active volcano at the heart of New Zealand's North Island."
+    }
+   ]
+  },
+  {
+   "id": "mines",
+   "title": "The world's great mines",
+   "teaser": "Giant pits and deep mines dug for copper, iron, gold and diamonds.",
+   "keywords": [
+    "mines",
+    "mining",
+    "mine",
+    "copper",
+    "iron",
+    "gold",
+    "diamonds",
+    "resources",
+    "pits"
+   ],
+   "cover": {
+    "lat": -6.0586,
+    "lng": -50.1769,
+    "z": 11
+   },
+   "layers": [
+    "key-assets",
+    "resource-sites"
+   ],
+   "stops": [
+    {
+     "wiki": "Bingham Canyon Mine",
+     "lat": 40.523,
+     "lng": -112.151,
+     "camera": {
+      "zoom": 13.4,
+      "pitch": 55,
+      "bearing": 20
+     },
+     "caption": "A vast terraced copper pit in the Oquirrh Mountains near Salt Lake City."
+    },
+    {
+     "wiki": "Chuquicamata",
+     "lat": -22.3055,
+     "lng": -68.9022,
+     "camera": {
+      "zoom": 13,
+      "pitch": 55,
+      "bearing": 30
+     },
+     "caption": "A colossal copper pit in the Atacama Desert of northern Chile."
+    },
+    {
+     "wiki": "Escondida",
+     "lat": -24.27,
+     "lng": -69.07,
+     "camera": {
+      "zoom": 12.6,
+      "pitch": 55,
+      "bearing": 0
+     },
+     "caption": "A giant copper mine high in the Atacama Desert."
+    },
+    {
+     "wiki": "Carajás mine",
+     "lat": -6.0586,
+     "lng": -50.1769,
+     "camera": {
+      "zoom": 12.6,
+      "pitch": 55,
+      "bearing": 0
+     },
+     "caption": "An iron-ore mine carved into the hills of the Brazilian Amazon."
+    },
+    {
+     "wiki": "Kiruna mine",
+     "lat": 67.8503,
+     "lng": 20.1928,
+     "camera": {
+      "zoom": 12.3,
+      "pitch": 55,
+      "bearing": 300
+     },
+     "caption": "A vast underground iron-ore mine in Swedish Lapland, right beside the town of Kiruna."
+    },
+    {
+     "wiki": "Mir mine",
+     "lat": 62.5258,
+     "lng": 113.9842,
+     "camera": {
+      "zoom": 13.2,
+      "pitch": 50,
+      "bearing": 0
+     },
+     "caption": "A giant open-pit diamond mine in Siberia, beside the town of Mirny."
+    },
+    {
+     "wiki": "Grasberg mine",
+     "lat": -4.0528,
+     "lng": 137.1158,
+     "camera": {
+      "zoom": 12.8,
+      "pitch": 60,
+      "bearing": 0
+     },
+     "caption": "A copper and gold mine high in the mountains of Papua, Indonesia."
+    },
+    {
+     "wiki": "Super Pit gold mine",
+     "lat": -30.7747,
+     "lng": 121.5094,
+     "camera": {
+      "zoom": 13.3,
+      "pitch": 55,
+      "bearing": 330
+     },
+     "caption": "A huge gold pit on the edge of Kalgoorlie in Western Australia."
+    }
+   ]
+  },
+  {
+   "id": "chokepoints",
+   "title": "Chokepoints of world trade",
+   "teaser": "The narrow straits and canals that ships cannot avoid.",
+   "keywords": [
+    "chokepoints",
+    "straits",
+    "canals",
+    "trade",
+    "shipping",
+    "ships",
+    "maritime",
+    "logistics",
+    "sea lanes"
+   ],
+   "cover": {
+    "lat": 35.95,
+    "lng": -5.5,
+    "z": 8
+   },
+   "layers": [
+    "key-assets",
+    "trade-routes"
+   ],
+   "hide": [
+    "resource-sites"
+   ],
+   "stops": [
+    {
+     "wiki": "Panama Canal",
+     "lat": 9.12,
+     "lng": -79.75,
+     "camera": {
+      "zoom": 10,
+      "pitch": 50,
+      "bearing": 320
+     },
+     "caption": "Locks lift ships across the isthmus between the Atlantic and the Pacific."
+    },
+    {
+     "wiki": "Strait of Gibraltar",
+     "lat": 35.95,
+     "lng": -5.5,
+     "camera": {
+      "zoom": 9,
+      "pitch": 45,
+      "bearing": 0
+     },
+     "caption": "The narrow gateway between the Atlantic and the Mediterranean."
+    },
+    {
+     "wiki": "Strait of Dover",
+     "lat": 51,
+     "lng": 1.5,
+     "camera": {
+      "zoom": 9,
+      "pitch": 45,
+      "bearing": 20
+     },
+     "caption": "The narrowest crossing of the English Channel, between England and France."
+    },
+    {
+     "wiki": "Bosporus",
+     "lat": 41.1194,
+     "lng": 29.0753,
+     "camera": {
+      "zoom": 11,
+      "pitch": 55,
+      "bearing": 20
+     },
+     "caption": "The strait that divides Istanbul and links the Black Sea with the Sea of Marmara."
+    },
+    {
+     "wiki": "Suez Canal",
+     "lat": 30.705,
+     "lng": 32.3442,
+     "camera": {
+      "zoom": 9.4,
+      "pitch": 50,
+      "bearing": 0
+     },
+     "caption": "A sea-level canal that shortens the voyage between Europe and Asia."
+    },
+    {
+     "wiki": "Bab al-Mandab Strait",
+     "lat": 12.5833,
+     "lng": 43.3333,
+     "camera": {
+      "zoom": 9,
+      "pitch": 45,
+      "bearing": 330
+     },
+     "caption": "The southern gate of the Red Sea, between Arabia and the Horn of Africa."
+    },
+    {
+     "wiki": "Strait of Hormuz",
+     "lat": 26.6,
+     "lng": 56.5,
+     "camera": {
+      "zoom": 8.2,
+      "pitch": 45,
+      "bearing": 20
+     },
+     "caption": "The only sea passage out of the Persian Gulf."
+    },
+    {
+     "wiki": "Singapore Strait",
+     "lat": 1.22,
+     "lng": 103.92,
+     "camera": {
+      "zoom": 10,
+      "pitch": 45,
+      "bearing": 0
+     },
+     "caption": "Where the route from the Strait of Malacca squeezes past Singapore into the South China Sea."
+    }
+   ]
+  },
+  {
+   "id": "night",
+   "title": "Earth at night",
+   "teaser": "City lights trace rivers, coasts and borders.",
+   "keywords": [
+    "night",
+    "lights",
+    "city lights",
+    "black marble",
+    "dark",
+    "cities",
+    "viirs"
+   ],
+   "cover": {
+    "lat": 29.5,
+    "lng": 31.2,
+    "z": 5,
+    "night": true
+   },
+   "imagery": "night",
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Northeast megalopolis",
+     "lat": 41,
+     "lng": -74,
+     "camera": {
+      "zoom": 6,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "From Boston to Washington, cities merge into one continuous glow."
+    },
+    {
+     "wiki": "Bakken formation",
+     "lat": 48.3929,
+     "lng": -102.9399,
+     "camera": {
+      "zoom": 6.6,
+      "pitch": 20,
+      "bearing": 0
+     },
+     "caption": "Oil-field flares scatter light across the dark plains of North Dakota."
+    },
+    {
+     "wiki": "Moscow",
+     "lat": 55.7558,
+     "lng": 37.6178,
+     "camera": {
+      "zoom": 6.8,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "Highways radiate from Moscow like the spokes of a wheel."
+    },
+    {
+     "wiki": "Nile Delta",
+     "lat": 30.9,
+     "lng": 31.1167,
+     "camera": {
+      "zoom": 6,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "The Nile valley and delta shine through the darkness of the desert."
+    },
+    {
+     "wiki": "Indo-Gangetic Plain",
+     "lat": 27,
+     "lng": 80,
+     "camera": {
+      "zoom": 5.3,
+      "pitch": 20,
+      "bearing": 0
+     },
+     "caption": "Countless towns and villages speckle one of the most densely populated plains on Earth."
+    },
+    {
+     "wiki": "Korea",
+     "lat": 38.3167,
+     "lng": 127.2333,
+     "camera": {
+      "zoom": 6,
+      "pitch": 20,
+      "bearing": 0
+     },
+     "caption": "A brightly lit south and a dark north divide the peninsula.",
+     "name": "The Korean Peninsula"
+    },
+    {
+     "wiki": "Greater Tokyo Area",
+     "lat": 35.6897,
+     "lng": 139.6917,
+     "camera": {
+      "zoom": 6.8,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "The lights of Japan's capital region spread around Tokyo Bay."
+    }
+   ]
+  },
+  {
+   "id": "rivers",
+   "title": "Rivers that shaped civilisations",
+   "teaser": "The river valleys where farming, cities and empires began.",
+   "keywords": [
+    "rivers",
+    "river",
+    "civilisations",
+    "civilizations",
+    "history",
+    "deltas",
+    "valleys",
+    "nile",
+    "mesopotamia"
+   ],
+   "cover": {
+    "lat": 30.9,
+    "lng": 31.1,
+    "z": 7
+   },
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Danube",
+     "lat": 45.2175,
+     "lng": 29.7614,
+     "camera": {
+      "zoom": 8.6,
+      "pitch": 40,
+      "bearing": 0
+     },
+     "caption": "One of Europe's great rivers ends in a maze of wetlands on the Black Sea."
+    },
+    {
+     "wiki": "Nile",
+     "lat": 30.1725,
+     "lng": 31.14,
+     "camera": {
+      "zoom": 7.4,
+      "pitch": 35,
+      "bearing": 0
+     },
+     "caption": "Egypt's lifeline fans out into its delta just north of Cairo."
+    },
+    {
+     "wiki": "Euphrates",
+     "lat": 31.005,
+     "lng": 47.4419,
+     "camera": {
+      "zoom": 8,
+      "pitch": 35,
+      "bearing": 330
+     },
+     "caption": "Here the Euphrates meets the Tigris; the land between them was Mesopotamia."
+    },
+    {
+     "wiki": "Indus River",
+     "lat": 23.995,
+     "lng": 67.435,
+     "camera": {
+      "zoom": 8,
+      "pitch": 35,
+      "bearing": 0
+     },
+     "caption": "The river of the Indus Valley Civilisation reaches the Arabian Sea."
+    },
+    {
+     "wiki": "Ganges",
+     "lat": 22,
+     "lng": 90.9,
+     "camera": {
+      "zoom": 7.3,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "India's sacred river joins the Brahmaputra in a vast delta."
+    },
+    {
+     "wiki": "Yangtze",
+     "lat": 31.3936,
+     "lng": 121.9831,
+     "camera": {
+      "zoom": 8,
+      "pitch": 35,
+      "bearing": 300
+     },
+     "caption": "Asia's longest river meets the sea beside Shanghai."
+    },
+    {
+     "wiki": "Yellow River",
+     "lat": 37.763,
+     "lng": 119.162,
+     "camera": {
+      "zoom": 8,
+      "pitch": 35,
+      "bearing": 0
+     },
+     "caption": "The cradle of early Chinese civilisation, named for the colour of the silt it carries."
+    }
+   ]
+  },
+  {
+   "id": "ice",
+   "title": "Ice: glaciers and ice sheets",
+   "teaser": "Rivers of ice from the Karakoram to Antarctica.",
+   "keywords": [
+    "ice",
+    "glaciers",
+    "glacier",
+    "polar",
+    "ice sheet",
+    "antarctica",
+    "greenland",
+    "climate",
+    "cryosphere"
+   ],
+   "cover": {
+    "lat": 46.47,
+    "lng": 8.05,
+    "z": 11
+   },
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Baltoro Glacier",
+     "lat": 35.7364,
+     "lng": 76.3808,
+     "camera": {
+      "zoom": 11,
+      "pitch": 65,
+      "bearing": 90
+     },
+     "caption": "A long river of ice among the giant peaks of the Karakoram."
+    },
+    {
+     "wiki": "Aletsch Glacier",
+     "lat": 46.4422,
+     "lng": 8.0772,
+     "camera": {
+      "zoom": 12.4,
+      "pitch": 65,
+      "bearing": 20
+     },
+     "caption": "The largest glacier in the Alps, curving between Swiss peaks."
+    },
+    {
+     "wiki": "Vatnajökull",
+     "lat": 64.4,
+     "lng": -16.8,
+     "camera": {
+      "zoom": 8.5,
+      "pitch": 45,
+      "bearing": 0
+     },
+     "caption": "Iceland's great ice cap, resting on active volcanoes."
+    },
+    {
+     "wiki": "Jakobshavn Glacier",
+     "lat": 69.1667,
+     "lng": -49.8333,
+     "camera": {
+      "zoom": 9.5,
+      "pitch": 50,
+      "bearing": 90
+     },
+     "caption": "A fast-flowing glacier that drains the Greenland ice sheet into the sea."
+    },
+    {
+     "wiki": "Greenland ice sheet",
+     "lat": 76.7,
+     "lng": -41.2,
+     "camera": {
+      "zoom": 3.6,
+      "pitch": 20,
+      "bearing": 0
+     },
+     "caption": "A dome of ice that covers most of Greenland."
+    },
+    {
+     "wiki": "Hubbard Glacier",
+     "lat": 60.3139,
+     "lng": -139.3708,
+     "camera": {
+      "zoom": 9.6,
+      "pitch": 55,
+      "bearing": 200
+     },
+     "caption": "A tidewater glacier that meets the sea on the coast of Alaska."
+    },
+    {
+     "wiki": "Perito Moreno Glacier",
+     "lat": -50.5,
+     "lng": -73.1333,
+     "camera": {
+      "zoom": 11,
+      "pitch": 60,
+      "bearing": 270
+     },
+     "caption": "A wall of ice in Patagonia that advances into a mountain lake."
+    },
+    {
+     "wiki": "Ross Ice Shelf",
+     "lat": -81.5,
+     "lng": -175,
+     "camera": {
+      "zoom": 4,
+      "pitch": 30,
+      "bearing": 0
+     },
+     "caption": "The largest ice shelf in Antarctica, a floating plain of ice."
+    }
+   ]
+  },
+  {
+   "id": "deserts",
+   "title": "Deserts",
+   "teaser": "Dunes, salt flats and bare rock on the driest ground on Earth.",
+   "keywords": [
+    "deserts",
+    "desert",
+    "dunes",
+    "sand",
+    "sahara",
+    "dry",
+    "arid",
+    "salt"
+   ],
+   "cover": {
+    "lat": 21.1147,
+    "lng": -11.3943,
+    "z": 9
+   },
+   "hide": [
+    "resource-sites",
+    "key-assets",
+    "trade-routes"
+   ],
+   "stops": [
+    {
+     "wiki": "Death Valley",
+     "lat": 36.2469,
+     "lng": -116.8169,
+     "camera": {
+      "zoom": 10,
+      "pitch": 60,
+      "bearing": 0
+     },
+     "caption": "The lowest, hottest and driest corner of North America."
+    },
+    {
+     "wiki": "Atacama Desert",
+     "lat": -24.5,
+     "lng": -69.25,
+     "camera": {
+      "zoom": 8.5,
+      "pitch": 45,
+      "bearing": 90
+     },
+     "caption": "One of the driest places on Earth, between the Andes and the Pacific."
+    },
+    {
+     "wiki": "Salar de Uyuni",
+     "lat": -20.1338,
+     "lng": -67.4891,
+     "camera": {
+      "zoom": 9,
+      "pitch": 40,
+      "bearing": 0
+     },
+     "caption": "The largest salt flat on Earth, high in the Bolivian Andes."
+    },
+    {
+     "wiki": "Richat Structure",
+     "lat": 21.1147,
+     "lng": -11.3943,
+     "camera": {
+      "zoom": 10,
+      "pitch": 35,
+      "bearing": 0
+     },
+     "caption": "The Eye of the Sahara, a vast ring of eroded rock in Mauritania."
+    },
+    {
+     "wiki": "Sossusvlei",
+     "lat": -24.7398,
+     "lng": 15.2876,
+     "camera": {
+      "zoom": 12.3,
+      "pitch": 60,
+      "bearing": 90
+     },
+     "caption": "Towering red dunes around a white clay pan in the Namib."
+    },
+    {
+     "wiki": "Rub' al Khali",
+     "lat": 20,
+     "lng": 50,
+     "camera": {
+      "zoom": 6.3,
+      "pitch": 45,
+      "bearing": 0
+     },
+     "caption": "The Empty Quarter, a sea of sand across southern Arabia."
+    },
+    {
+     "wiki": "Lut Desert",
+     "lat": 30.605,
+     "lng": 59.0678,
+     "camera": {
+      "zoom": 9,
+      "pitch": 55,
+      "bearing": 0
+     },
+     "caption": "Wind-carved ridges in one of the hottest places on Earth."
+    },
+    {
+     "wiki": "Taklamakan Desert",
+     "lat": 38.9,
+     "lng": 82.2,
+     "camera": {
+      "zoom": 6.5,
+      "pitch": 40,
+      "bearing": 0
+     },
+     "caption": "A sea of shifting sand ringed by mountains in western China."
+    }
+   ]
+  }
+ ],
+ "lucky": [
+  {
+   "wiki": "Machu Picchu",
+   "lat": -13.1633,
+   "lng": -72.5456,
+   "camera": {
+    "zoom": 13,
+    "pitch": 60,
+    "bearing": 200
+   }
+  },
+  {
+   "wiki": "Matterhorn",
+   "lat": 45.9764,
+   "lng": 7.6586,
+   "camera": {
+    "zoom": 12.8,
+    "pitch": 72,
+    "bearing": 230
+   }
+  },
+  {
+   "wiki": "Table Mountain",
+   "lat": -33.9622,
+   "lng": 18.4099,
+   "camera": {
+    "zoom": 12.8,
+    "pitch": 62,
+    "bearing": 180
+   }
+  },
+  {
+   "wiki": "Niagara Falls",
+   "lat": 43.0799,
+   "lng": -79.0747,
+   "camera": {
+    "zoom": 15,
+    "pitch": 55,
+    "bearing": 200
+   }
+  },
+  {
+   "wiki": "Half Dome",
+   "lat": 37.746,
+   "lng": -119.5329,
+   "camera": {
+    "zoom": 13.6,
+    "pitch": 70,
+    "bearing": 70
+   }
+  },
+  {
+   "wiki": "Monument Valley",
+   "lat": 36.9833,
+   "lng": -110.1,
+   "camera": {
+    "zoom": 12.8,
+    "pitch": 70,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Grand Prismatic Spring",
+   "lat": 44.525,
+   "lng": -110.8381,
+   "camera": {
+    "zoom": 15.5,
+    "pitch": 45,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Crater Lake",
+   "lat": 42.95,
+   "lng": -122.1,
+   "camera": {
+    "zoom": 11,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Giant's Causeway",
+   "lat": 55.2408,
+   "lng": -6.5117,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Cliffs of Moher",
+   "lat": 52.9718,
+   "lng": -9.4263,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 65,
+    "bearing": 30
+   }
+  },
+  {
+   "wiki": "Lofoten",
+   "lat": 68.3333,
+   "lng": 14.6667,
+   "camera": {
+    "zoom": 9,
+    "pitch": 60,
+    "bearing": 45
+   }
+  },
+  {
+   "wiki": "Geirangerfjord",
+   "lat": 62.121,
+   "lng": 7.129,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 65,
+    "bearing": 60
+   }
+  },
+  {
+   "wiki": "Mount Etna",
+   "lat": 37.755,
+   "lng": 14.995,
+   "camera": {
+    "zoom": 11,
+    "pitch": 60,
+    "bearing": 300
+   }
+  },
+  {
+   "wiki": "Mount Vesuvius",
+   "lat": 40.8214,
+   "lng": 14.4261,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 60,
+    "bearing": 300
+   }
+  },
+  {
+   "wiki": "Pamukkale",
+   "lat": 37.9239,
+   "lng": 29.1233,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Wadi Rum",
+   "lat": 29.5931,
+   "lng": 35.42,
+   "camera": {
+    "zoom": 12.2,
+    "pitch": 65,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Socotra",
+   "lat": 12.51,
+   "lng": 53.92,
+   "camera": {
+    "zoom": 9,
+    "pitch": 40,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Okavango Delta",
+   "lat": -19.4,
+   "lng": 22.9,
+   "camera": {
+    "zoom": 8.3,
+    "pitch": 35,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Mount Roraima",
+   "lat": 5.1433,
+   "lng": -60.7625,
+   "camera": {
+    "zoom": 12.6,
+    "pitch": 70,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Angel Falls",
+   "lat": 5.9675,
+   "lng": -62.5356,
+   "camera": {
+    "zoom": 13.4,
+    "pitch": 72,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Galápagos Islands",
+   "lat": -0.5,
+   "lng": -90.5,
+   "camera": {
+    "zoom": 7.8,
+    "pitch": 35,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Easter Island",
+   "lat": -27.12,
+   "lng": -109.35,
+   "camera": {
+    "zoom": 11,
+    "pitch": 45,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Milford Sound",
+   "lat": -44.6481,
+   "lng": 167.9056,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 65,
+    "bearing": 300
+   }
+  },
+  {
+   "wiki": "Aoraki / Mount Cook",
+   "lat": -43.595,
+   "lng": 170.1419,
+   "camera": {
+    "zoom": 11,
+    "pitch": 65,
+    "bearing": 20
+   }
+  },
+  {
+   "wiki": "Mount Kailash",
+   "lat": 31.0667,
+   "lng": 81.3125,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 68,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "K2",
+   "lat": 35.8825,
+   "lng": 76.5133,
+   "camera": {
+    "zoom": 12.4,
+    "pitch": 70,
+    "bearing": 180
+   }
+  },
+  {
+   "wiki": "Lake Baikal",
+   "lat": 53.5,
+   "lng": 108,
+   "camera": {
+    "zoom": 6.6,
+    "pitch": 30,
+    "bearing": 30
+   }
+  },
+  {
+   "wiki": "Lake Natron",
+   "lat": -2.4167,
+   "lng": 36,
+   "camera": {
+    "zoom": 10,
+    "pitch": 40,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Great Blue Hole",
+   "lat": 17.3153,
+   "lng": -87.5344,
+   "camera": {
+    "zoom": 14,
+    "pitch": 40,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Jökulsárlón",
+   "lat": 64.0703,
+   "lng": -16.2117,
+   "camera": {
+    "zoom": 11,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Fitz Roy",
+   "lat": -49.2713,
+   "lng": -73.0432,
+   "camera": {
+    "zoom": 11,
+    "pitch": 65,
+    "bearing": 270
+   }
+  },
+  {
+   "wiki": "Lake Titicaca",
+   "lat": -15.825,
+   "lng": -69.325,
+   "camera": {
+    "zoom": 8.6,
+    "pitch": 35,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Christ the Redeemer (statue)",
+   "lat": -22.9519,
+   "lng": -43.2106,
+   "camera": {
+    "zoom": 14.6,
+    "pitch": 65,
+    "bearing": 60
+   }
+  },
+  {
+   "wiki": "Mount Nyiragongo",
+   "lat": -1.5219,
+   "lng": 29.2494,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 60,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Meteora",
+   "lat": 39.7142,
+   "lng": 21.6311,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 65,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Plitvice Lakes National Park",
+   "lat": 44.8806,
+   "lng": 15.6161,
+   "camera": {
+    "zoom": 13.3,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Hallstatt",
+   "lat": 47.562,
+   "lng": 13.649,
+   "camera": {
+    "zoom": 14.3,
+    "pitch": 65,
+    "bearing": 200
+   }
+  },
+  {
+   "wiki": "Teide",
+   "lat": 28.2731,
+   "lng": -16.6394,
+   "camera": {
+    "zoom": 11,
+    "pitch": 60,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Denali",
+   "lat": 63.0692,
+   "lng": -151.0064,
+   "camera": {
+    "zoom": 11,
+    "pitch": 65,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Horseshoe Bend (Arizona)",
+   "lat": 36.8794,
+   "lng": -111.5139,
+   "camera": {
+    "zoom": 14,
+    "pitch": 50,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Mount Ararat",
+   "lat": 39.7019,
+   "lng": 44.2983,
+   "camera": {
+    "zoom": 11,
+    "pitch": 60,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Moraine Lake",
+   "lat": 51.3225,
+   "lng": -116.1856,
+   "camera": {
+    "zoom": 13.6,
+    "pitch": 65,
+    "bearing": 200
+   }
+  },
+  {
+   "wiki": "Mont-Saint-Michel",
+   "lat": 48.636,
+   "lng": -1.511,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 50,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Santorini",
+   "lat": 36.415,
+   "lng": 25.4325,
+   "camera": {
+    "zoom": 11,
+    "pitch": 50,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Venice",
+   "lat": 45.4375,
+   "lng": 12.3358,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 45,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Dubrovnik",
+   "lat": 42.6403,
+   "lng": 18.1083,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Neuschwanstein Castle",
+   "lat": 47.5575,
+   "lng": 10.7494,
+   "camera": {
+    "zoom": 15.6,
+    "pitch": 65,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Eiffel Tower",
+   "lat": 48.8582,
+   "lng": 2.2945,
+   "camera": {
+    "zoom": 16,
+    "pitch": 65,
+    "bearing": 300
+   }
+  },
+  {
+   "wiki": "Golden Gate Bridge",
+   "lat": 37.8197,
+   "lng": -122.4786,
+   "camera": {
+    "zoom": 14.6,
+    "pitch": 65,
+    "bearing": 300
+   }
+  },
+  {
+   "wiki": "Angkor Wat",
+   "lat": 13.4125,
+   "lng": 103.8667,
+   "camera": {
+    "zoom": 14,
+    "pitch": 45,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Sydney Opera House",
+   "lat": -33.8568,
+   "lng": 151.2151,
+   "camera": {
+    "zoom": 13,
+    "pitch": 55,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Kata Tjuta",
+   "lat": -25.3,
+   "lng": 130.7333,
+   "camera": {
+    "zoom": 12.6,
+    "pitch": 60,
+    "bearing": 0
+   }
+  },
+  {
+   "wiki": "Mount Bromo",
+   "lat": -7.9417,
+   "lng": 112.95,
+   "camera": {
+    "zoom": 12.3,
+    "pitch": 60,
+    "bearing": 0
+   }
+  }
+ ]
+}

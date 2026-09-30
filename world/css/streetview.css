@@ -1,0 +1,230 @@
+/* World Model — street level (Panoramax): Street view control, pick hint, map popups,
+   and the full-bleed viewer. Tokens from /assets/baryon.css. */
+
+/* ---------------------------------------------------------------- control + pick mode */
+.sv-ctl button svg { display: block; }
+body.sv-picking #map .maplibregl-canvas { cursor: crosshair; }
+
+.sv-hint {
+  position: fixed; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 23;
+  display: flex; align-items: center; gap: 10px; width: max-content; max-width: min(680px, calc(100vw - 160px));
+  padding: 6px 6px 6px 14px; border-radius: 999px; font-size: 0.84rem; font-weight: 500; color: var(--ink);
+  animation: sv-rise 200ms var(--ease-out-soft);
+}
+body:has(#timebar:not([hidden])) .sv-hint { bottom: 122px; }
+.sv-hint-ic { position: relative; flex: none; display: grid; place-items: center; width: 20px; height: 20px; color: var(--ink); }
+.sv-hint-t { flex: 1; min-width: 0; line-height: 1.35; }
+.sv-hint .btn { flex: none; }
+.sv-hint .btn + .btn { margin-left: -4px; }
+@media (pointer: coarse) { .sv-hint-here { display: none; } }
+.sv-hint.is-busy .sv-hint-ic svg { visibility: hidden; }
+.sv-hint.is-busy .sv-hint-ic::after {
+  content: ""; position: absolute; inset: 2px; border-radius: 999px;
+  border: 2px solid rgba(20, 20, 20, 0.16); border-top-color: var(--ink); animation: sv-spin 0.8s linear infinite;
+}
+@keyframes sv-rise { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes sv-rise-m { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------- map popups + legend */
+.sv-pop .maplibregl-popup-content { padding: 6px 6px 8px !important; }
+.sv-pop-img {
+  width: 208px; aspect-ratio: 16 / 9; margin-bottom: 7px; border-radius: 10px;
+  background: var(--surface) center / cover no-repeat;
+}
+.sv-pop-t { padding: 2px 6px 0; font-size: 0.78rem; font-weight: 600; line-height: 1.35; }
+.sv-pop-s { padding: 0 6px; font-size: 0.75rem; font-weight: 400; line-height: 1.4; color: var(--ink-soft); }
+
+.sv-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.75rem; color: var(--graphite); }
+.sv-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sv-sw { display: inline-block; width: 18px; height: 4px; border-radius: 999px; }
+.sv-sw-dot { width: 10px; height: 10px; margin: 0 4px; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--hair); }
+
+/* ---------------------------------------------------------------- viewer shell */
+.sv {
+  position: fixed; inset: 0; z-index: 50; overflow: hidden; outline: none;
+  background: #0b0b0d; color: var(--ink); opacity: 0; transition: opacity 200ms var(--ease-out-soft);
+  overscroll-behavior: contain;
+}
+.sv.is-open { opacity: 1; }
+.sv-stage { position: absolute; inset: 0; overflow: hidden; }
+.sv-psv, .sv-flat { position: absolute; inset: 0; }
+.sv-psv { cursor: grab; }
+.sv-psv:active { cursor: grabbing; }
+
+/* Photo Sphere Viewer 5 core rules the viewer relies on (MIT, © Damien Sorel, adapted);
+   its own chrome is replaced by ours, so the loader, overlay and navbar stay hidden. */
+.sv .psv-container {
+  --psv-core-loaded: true;
+  position: relative; width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #0b0b0d;
+}
+.sv .psv-canvas-container { position: absolute; top: 0; left: 0; z-index: 0; }
+.sv .psv-canvas { display: block; }
+/* PSV measures its loader at start-up, so it keeps a size and is hidden, not removed. */
+.sv .psv-loader-container { position: absolute; inset: 0; visibility: hidden !important; pointer-events: none; }
+.sv .psv-loader { --psv-loader-border: 3px; --psv-loader-tickness: 6px; width: 60px; height: 60px; }
+.sv .psv-overlay, .sv .psv-notification, .sv .psv-navbar, .sv .psv-panel, .sv .psv-tooltip { display: none !important; }
+
+.sv-flat { overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none; -webkit-user-select: none; }
+.sv-flat.is-zoomed { cursor: grab; }
+.sv-flat.is-grabbing { cursor: grabbing; }
+.sv-flat-img {
+  position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform;
+  -webkit-user-drag: none; user-select: none; pointer-events: none;
+}
+
+/* loading + error veil */
+.sv-veil {
+  position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; overflow: hidden;
+  background: #0b0b0d; transition: opacity 280ms var(--ease-out-soft), visibility 0s linear 0s;
+}
+.sv-veil.is-off { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 280ms var(--ease-out-soft), visibility 0s linear 280ms; }
+.sv-veil-img {
+  position: absolute; inset: -48px; background: center / cover no-repeat;
+  filter: blur(30px) saturate(115%); opacity: 0.5; transform: scale(1.06);
+}
+.sv-veil-box {
+  position: relative; display: grid; justify-items: center; gap: 14px; max-width: min(440px, calc(100vw - 48px));
+  padding: 22px 26px; text-align: center; color: #fff;
+}
+.sv-veil-box p { margin: 0; font-size: 0.92rem; font-weight: 500; line-height: 1.5; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55); }
+.sv-veil-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.sv-veil-actions:empty { display: none; }
+.sv-btn-light { background: #fff; color: var(--ink); border-color: #fff; }
+.sv-btn-light:hover { background: color-mix(in srgb, var(--ink) 6%, var(--surface)); border-color: transparent; }
+.sv-btn-dim { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
+.sv-btn-dim:hover { background: rgba(255, 255, 255, 0.2); }
+.sv-veil :focus-visible { outline-color: #fff; }
+.sv-veil.is-error .sv-spin { display: none; }
+.sv-spin {
+  width: 26px; height: 26px; border-radius: 999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.22); border-top-color: #fff; animation: sv-spin 0.8s linear infinite;
+}
+@keyframes sv-spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------------- info card */
+.sv-info {
+  position: absolute; z-index: 3; top: 16px; left: 16px; width: 340px; max-width: calc(100vw - 104px);
+  max-height: calc(100% - 244px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 14px 14px 14px 18px; border-radius: 20px;
+}
+.sv-info-head { display: flex; align-items: flex-start; gap: 10px; }
+.sv-info-title { flex: 1; min-width: 0; }
+.sv-info h2 {
+  margin: 4px 0 2px; font-size: 1.12rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.sv-info .sub { font-size: 0.78rem; line-height: 1.45; color: var(--ink-soft); }
+.sv-nw { white-space: nowrap; }
+.sv-more { flex: none; margin-top: 2px; }
+.sv-more svg { transition: transform 200ms var(--ease-out-soft); }
+.sv.details-open .sv-more svg { transform: rotate(180deg); }
+.sv-details { display: none; margin-top: 14px; padding: 14px 4px 0 0; border-top: 1px solid var(--hair); }
+.sv.details-open .sv-details { display: block; }
+.sv-details .kv { font-size: 0.8rem; gap: 7px 14px; line-height: 1.45; }
+.sv-details .kv dd { overflow-wrap: anywhere; }
+.sv-dates { margin-top: 12px; padding-right: 4px; }
+.sv-dates .eyebrow { display: block; margin-bottom: 7px; }
+.sv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sv-dates.is-stale .sv-chips { opacity: 0.45; transition: opacity 160ms; }
+.sv-info .card-actions { margin: 16px 0 0; }
+.sv-info .card-actions .btn svg { margin-left: 1px; }
+.sv-info .note { margin: 12px 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- close, nav, mini-map, credit */
+.sv-close {
+  position: absolute; z-index: 3; top: 16px; right: 16px; width: 46px; height: 46px; padding: 0;
+  display: grid; place-items: center; border-radius: 999px; color: var(--ink); cursor: pointer;
+  transition: transform 120ms var(--ease-out-soft), background-color 140ms;
+}
+.sv-close:hover { background: #fff; }
+.sv-close:active { transform: scale(0.95); }
+
+.sv-nav {
+  position: absolute; z-index: 3; left: 50%; bottom: 22px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 999px; overflow: hidden;
+}
+.sv-nav button {
+  display: inline-grid; place-items: center; height: 42px; min-width: 42px; padding: 0 9px; border: 0; border-radius: 999px;
+  background: transparent; color: var(--ink); cursor: pointer; font: 500 0.8rem var(--font-sans);
+  transition: background-color 140ms, color 140ms;
+}
+.sv-nav button:hover:not(:disabled) { background: rgba(20, 20, 20, 0.06); }
+.sv-nav button:disabled { color: rgba(20, 20, 20, 0.26); cursor: default; }
+.sv-nav .sv-heading { display: inline-flex; align-items: center; gap: 8px; min-width: 112px; padding: 0 14px 0 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sv-nav .sv-heading:disabled { color: var(--ink); }
+.sv-heading svg { flex: none; }
+.sv-nav .sv-heading.is-unknown { color: var(--ink-soft); }
+.sv-heading.is-unknown .sv-needle { opacity: 0.3; }
+.sv-sep { flex: none; width: 1px; height: 22px; margin: 0 3px; background: var(--hair); }
+.sv-nav.is-busy::after {
+  content: ""; position: absolute; left: 22px; right: 22px; bottom: 3px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(20, 20, 20, 0.55), transparent) no-repeat;
+  background-size: 40% 100%; animation: sv-busy 1s linear infinite;
+}
+@keyframes sv-busy { from { background-position: -60% 0; } to { background-position: 160% 0; } }
+
+.sv-mini {
+  position: absolute; z-index: 3; left: 16px; bottom: 16px; width: 252px; height: 176px; overflow: hidden;
+  border-radius: 20px; background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: var(--shadow-float);
+  transition: width 240ms var(--ease-out-soft), height 240ms var(--ease-out-soft);
+}
+.sv.mini-big .sv-mini { width: min(480px, calc(100vw - 32px)); height: min(360px, calc(100% - 250px)); }
+.sv.mini-big .sv-info { max-height: calc(100% - min(360px, 100% - 250px) - 48px); }
+.sv-mini-map { position: absolute; inset: 0; }
+.sv-mini-map .maplibregl-canvas { outline: none; }
+.sv-mini-cone { pointer-events: none; }
+.sv-mini-cone path { fill: rgba(20, 20, 20, 0.18); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.sv-mini-cone circle { fill: var(--ink); stroke: #fff; stroke-width: 2.5; }
+.sv-mini-size {
+  position: absolute; top: 8px; right: 8px; z-index: 2; width: 30px; height: 30px; padding: 0; border: 0;
+  display: grid; place-items: center; border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: var(--ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); cursor: pointer;
+}
+.sv-mini-size:hover { background: #fff; }
+.sv-mini-attr {
+  position: absolute; right: 6px; bottom: 5px; z-index: 2; padding: 1px 6px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82); color: var(--graphite); font: 500 0.68rem/1.5 var(--font-sans); text-decoration: none; white-space: nowrap;
+}
+.sv-mini-attr:hover { color: var(--ink); }
+
+.sv-credit {
+  position: absolute; z-index: 3; right: 18px; bottom: 18px; margin: 0; max-width: min(34vw, 420px);
+  font: 500 0.68rem/1.45 var(--font-sans); color: rgba(255, 255, 255, 0.92); text-align: right;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75); pointer-events: none;
+}
+.sv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  /* Left of the control column, above the bottom rail (and above the time bar when it shows). */
+  .sv-hint {
+    left: 10px; right: 64px; bottom: 84px; width: auto; max-width: none; transform: none;
+    padding: 6px 6px 6px 12px; font-size: 0.8rem; animation-name: sv-rise-m;
+  }
+  body:has(#timebar:not([hidden])) .sv-hint { bottom: 176px; } /* the phone time bar wraps to 84px */
+  .sv-info {
+    top: max(10px, env(safe-area-inset-top)); left: 10px; right: 64px; width: auto; max-width: none;
+    max-height: calc(100% - 214px); padding: 12px 12px 12px 14px;
+  }
+  .sv-info h2 { font-size: 1rem; }
+  .sv-close { top: max(10px, env(safe-area-inset-top)); right: 10px; width: 44px; height: 44px; }
+  .sv-nav { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); transform: none; justify-content: space-between; }
+  .sv-nav .sv-heading { min-width: 0; padding: 0 10px 0 6px; }
+  .sv-mini { left: 10px; bottom: calc(74px + env(safe-area-inset-bottom)); width: 116px; height: 116px; }
+  .sv-mini-attr { right: 4px; bottom: 4px; padding: 1px 5px; }
+  .sv.mini-big .sv-mini { width: calc(100vw - 20px); height: 44vh; }
+  .sv-credit { right: 10px; bottom: calc(78px + env(safe-area-inset-bottom)); max-width: calc(100vw - 150px); font-size: 0.68rem; }
+  .sv.mini-big .sv-credit { bottom: calc(82px + 44vh + env(safe-area-inset-bottom)); max-width: calc(100vw - 20px); }
+  .sv.mini-big .sv-info { max-height: calc(100% - 44vh - 140px); }
+}
+
+/* Touch: 40px targets for the date chips and the mini-map's enlarge button. */
+@media (pointer: coarse) {
+  .sv-chips .chip { min-height: 40px; }
+  .sv-mini-size { top: 6px; right: 6px; width: 40px; height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv, .sv-veil, .sv-mini { transition: none; }
+  .sv-hint { animation: none; }
+}

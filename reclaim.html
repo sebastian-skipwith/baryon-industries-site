@@ -8,228 +8,304 @@
 <meta property="og:title" content="Baryon Reclaim">
 <meta property="og:description" content="Is that pile of scrap worth hauling? Run the numbers.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="canonical" href="https://baryon.industries/reclaim">
+<meta property="og:url" content="https://baryon.industries/reclaim">
+<meta property="og:site_name" content="Baryon">
+<meta property="og:image" content="https://baryon.industries/assets/og-reclaim.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Baryon Reclaim: is that pile worth hauling?">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="/assets/baryon.css?v=20260929">
 <style>
-  :root{
-    --black:#0a0a0a;
-    --gray:#55555c;
-    --line:#e6e6e2;
-    --max:1080px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    background:#ffffff;color:var(--black);
-    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;line-height:1.6;
-  }
-  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
-  header{padding:28px 0;border-bottom:1px solid var(--line)}
-  .nav{display:flex;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--black)}
-  .brand span{font-weight:800;letter-spacing:.35em;font-size:15px}
-  .nav .tabs{display:flex;align-items:center;gap:28px}
-  .nav .tabs a{
-    color:var(--gray);text-decoration:none;font-size:12px;letter-spacing:.18em;
-    text-transform:uppercase;padding-bottom:3px;border-bottom:2px solid transparent;
-    transition:color .15s,border-color .15s;
-  }
-  .nav .tabs a:hover{color:var(--black)}
-  .nav .tabs a.active{color:var(--black);border-bottom-color:var(--black)}
-  .nav a.contact{
-    color:var(--black);text-decoration:none;font-size:13px;letter-spacing:.12em;
-    text-transform:uppercase;border:1px solid var(--black);padding:9px 18px;
-    transition:background .15s,color .15s;
-  }
-  .nav a.contact:hover{background:var(--black);color:#fff}
-  @media(max-width:640px){.nav .tabs{gap:12px}.nav .tabs a{font-size:10px;letter-spacing:.06em}.nav a.contact{display:none}}
+  /* Reclaim: page layout only. Tokens, type, buttons, inputs and cards come from baryon.css. */
 
-  .hero{padding:80px 0 50px}
-  .eyebrow{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gray)}
-  h1{margin-top:14px;font-size:clamp(34px,5.4vw,64px);line-height:1.05;font-weight:800;letter-spacing:-.02em;max-width:900px}
-  .hero p.lede{margin-top:20px;font-size:clamp(16px,2vw,19px);color:var(--gray);max-width:660px}
+  /* Hero */
+  .hero { padding: clamp(56px, 9vw, 112px) 0 clamp(44px, 6vw, 76px); }
+  .hero h1 { margin: 18px 0 0; font-size: clamp(2.6rem, 6.4vw, 4.6rem); line-height: 1; letter-spacing: -0.03em; }
+  .hero h1 .then { display: block; color: var(--ink-soft); }
+  .hero .lede { margin: 26px 0 0; max-width: 640px; }
 
-  .chain{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0;overflow-x:auto}
-  .chain .wrap{display:flex;gap:14px;align-items:center;white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:12px;letter-spacing:.18em}
-  .chain em{font-style:normal;color:#b9b9b4}
+  /* The loop band */
+  .loop { border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); padding: 18px 0; }
+  .loop .wrap { display: flex; align-items: center; gap: 16px 32px; flex-wrap: wrap; }
+  .loop .eyebrow { flex: none; }
+  .loop .steps { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 6px; }
+  .loop .step {
+    display: inline-flex; align-items: center; padding: 0.42rem 0.8rem; border-radius: 999px;
+    background: var(--surface); color: var(--ink);
+    font: 500 0.72rem/1 var(--font-sans); letter-spacing: 0.12em; white-space: nowrap;
+  }
+  .loop em { font-style: normal; color: var(--ink-soft); font-size: 0.85rem; padding: 0 2px; }
 
-  section{padding:70px 0;border-bottom:1px solid var(--line)}
-  .label{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gray);margin-bottom:18px}
-  h2{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.15;max-width:820px}
-  section p.body{margin-top:18px;font-size:16px;color:var(--gray);max-width:660px}
-  section p.body b{color:var(--black);font-weight:600}
+  /* Section heads */
+  .head .eyebrow { margin-bottom: 14px; }
+  .head h2 { max-width: 22ch; }
 
   /* Calculator */
-  .calc{display:grid;grid-template-columns:1.4fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);margin-top:40px}
-  @media(max-width:860px){.calc{grid-template-columns:1fr}}
-  .pane{background:#fff;padding:26px}
-  .pane h3{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gray);margin-bottom:16px}
-  table.mats{width:100%;border-collapse:collapse;font-size:13.5px}
-  table.mats td{padding:7px 6px;border-bottom:1px solid #f0f0ec;vertical-align:middle}
-  table.mats tr:last-child td{border-bottom:none}
-  table.mats .price{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--gray);white-space:nowrap}
-  table.mats input{
-    width:86px;padding:6px 8px;border:1px solid #d8d8d2;border-radius:4px;font-size:13px;text-align:right;
-  }
-  table.mats input:focus{outline:none;border-color:var(--black)}
-  table.mats .rowval{font-family:ui-monospace,Consolas,monospace;font-size:12px;text-align:right;white-space:nowrap;min-width:70px}
-  .costrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #f0f0ec;font-size:13.5px}
-  .costrow:last-of-type{border-bottom:none}
-  .costrow input{width:96px;padding:6px 8px;border:1px solid #d8d8d2;border-radius:4px;font-size:13px;text-align:right}
-  .costrow input:focus{outline:none;border-color:var(--black)}
-  .result{margin-top:18px;border-top:2px solid var(--black);padding-top:14px}
-  .result .line{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
-  .result .line span:last-child{font-family:ui-monospace,Consolas,monospace}
-  .result .net{font-size:20px;font-weight:800;padding-top:8px}
-  .verdict{
-    display:inline-block;margin-top:12px;padding:6px 16px;font-weight:800;font-size:14px;letter-spacing:.08em;border:2px solid;
-  }
-  .verdict.buy{color:#1e8e5a;border-color:#1e8e5a}
-  .verdict.maybe{color:#b07800;border-color:#b07800}
-  .verdict.pass{color:#c0392b;border-color:#c0392b}
-  .asof{font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#9a9a94;margin-top:14px;line-height:1.5}
+  .calc { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px; margin-top: clamp(32px, 4vw, 48px); align-items: start; }
+  .pane { padding: 28px; }
+  .pane h3 { margin: 0 0 14px; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+  .bench-asof { margin: -8px 0 14px; font-size: 0.8rem; color: var(--ink-soft); }
+  .bench-asof:empty { display: none; }
 
-  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:56px}
-  .col h3{font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding-top:18px;border-top:2px solid var(--black)}
-  .col p{margin-top:12px;font-size:15px;color:var(--gray)}
-  @media(max-width:760px){.cols{grid-template-columns:1fr;gap:32px}}
+  .calc input[type="number"] { -moz-appearance: textfield; appearance: textfield; text-align: right; font-variant-numeric: tabular-nums; }
+  .calc input[type="number"]::-webkit-inner-spin-button,
+  .calc input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-  footer{padding:36px 0 48px;border-top:1px solid var(--line)}
-  footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;color:var(--gray);letter-spacing:.06em}
+  table.mats { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  table.mats th {
+    padding: 0 0 10px; border-bottom: 1px solid var(--hair); text-align: right;
+    font-weight: 500; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  table.mats th:first-child { text-align: left; }
+  table.mats td { padding: 10px 0; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+  table.mats tbody tr:last-child td { border-bottom: 0; padding-bottom: 0; }
+  table.mats td:first-child { padding-right: 16px; line-height: 1.35; }
+  /* per-material detail line under the label (--ink-soft, 12px: 5.2:1 on paper) */
+  #mats .det { margin-top: 3px; font-size: 0.75rem; color: var(--ink-soft); line-height: 1.4; }
+  table.mats .price { padding-right: 16px; text-align: right; white-space: nowrap; color: var(--graphite); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  table.mats td:nth-child(3) { text-align: right; width: 1%; }
+  table.mats .rowval { padding-left: 16px; min-width: 88px; text-align: right; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+  #mats input.lb {
+    width: 118px; min-height: 2.5rem; padding: 0.45rem 1rem;
+    border: 1px solid var(--hair-2); border-radius: 999px; background: var(--paper);
+    font: 400 1rem var(--font-sans); color: var(--ink); transition: border-color 140ms;
+  }
+  #mats input.lb:hover { border-color: color-mix(in srgb, var(--ink) 34%, transparent); }
+  #mats input.lb::placeholder { color: var(--ink-soft); }
+  #mats input.lb:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .costrow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 7px 0; font-size: 0.93rem; color: var(--graphite); cursor: text; }
+  .costrow span { line-height: 1.35; }
+  .costrow .input { width: 132px; flex: none; min-height: 2.5rem; padding: 0.45rem 1rem; }
+
+  .result { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--hair); }
+  .result .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .result .k { display: block; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+  .result .v { display: block; margin-top: 4px; font-size: 1.55rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; transition: color 180ms; }
+  /* Empty state: until any pound field has a value (or before the price table loads),
+     the figures are placeholders — dim them so a default "−$200" never reads as the headline. */
+  .calc:not(:has(input.lb:not(:placeholder-shown))) .result .v { color: var(--ink-soft); }
+  .result .net { margin-top: 20px; padding: 20px 0 0; border-top: 1px solid var(--hair); }
+  .result .net .v { margin-top: 6px; font-size: clamp(2.6rem, 4.4vw, 3.4rem); letter-spacing: -0.035em; line-height: 1; }
+  .result .roi { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 16px; font-size: 0.9rem; color: var(--graphite); }
+  .result .roi span:last-child { color: var(--ink); font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+  .result .roi small { display: block; font-size: 0.75rem; color: var(--ink-soft); }
+  .verdict {
+    display: inline-flex; align-items: center; margin-top: 16px; padding: 0.55rem 1rem;
+    border: 1px solid var(--hair-2); border-radius: 999px; background: transparent; color: var(--ink);
+    font: 600 0.75rem/1 var(--font-sans); letter-spacing: 0.08em; white-space: nowrap;
+    transition: background-color 180ms, color 180ms, border-color 180ms;
+  }
+  .verdict.buy { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .verdict.maybe { background: var(--surface); color: var(--ink); border-color: transparent; }
+  .verdict.pass { background: transparent; color: var(--ink); border-color: var(--hair-2); }
+  .asof { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--hair); font-size: 0.75rem; line-height: 1.5; color: var(--ink-soft); }
+  .asof:empty { display: none; }
+
+  .fineprint { margin: 20px 0 0; max-width: 760px; font-size: 0.82rem; font-weight: 400; line-height: 1.6; color: var(--ink-soft); }
+
+  /* Where this goes */
+  .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: clamp(32px, 4vw, 48px); }
+  .feature { padding: 28px; }
+  .feature h3 { margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; }
+  .feature p { margin: 10px 0 0; font-size: 0.95rem; font-weight: 300; line-height: 1.65; color: var(--graphite); }
+
+  .closing { display: flex; align-items: center; justify-content: space-between; gap: 20px 32px; flex-wrap: wrap; margin-top: 20px; padding: 28px 32px; }
+  .closing p { margin: 0; font-size: clamp(1.1rem, 1.8vw, 1.35rem); line-height: 1.25; }
+
+  @media (min-width: 861px) and (min-height: 860px) {
+    .calc-side { position: sticky; top: 84px; }
+  }
+  @media (max-width: 860px) {
+    .calc { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; gap: 14px; }
+  }
+  @media (max-width: 560px) {
+    .pane { padding: 22px 20px; }
+    .loop .wrap { gap: 12px; }
+    table.mats, table.mats tbody { display: block; }
+    table.mats thead { display: none; }
+    #mats tr {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name lb" "price lb" "val val";
+      column-gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--hair);
+    }
+    #mats tr:first-child { padding-top: 2px; }
+    #mats tr:last-child { border-bottom: 0; padding-bottom: 0; }
+    #mats td { display: block; padding: 0; border: 0; }
+    #mats td:nth-child(1) { grid-area: name; align-self: end; padding: 0; }
+    #mats td.price { grid-area: price; align-self: start; margin-top: 3px; padding: 0; text-align: left; font-size: 0.8rem; }
+    #mats td:nth-child(3) { grid-area: lb; width: auto; }
+    #mats td.rowval { grid-area: val; min-width: 0; margin-top: 4px; padding: 0; font-size: 0.85rem; }
+    #mats td.rowval:empty { display: none; }
+    #mats input.lb { width: 104px; }
+    .costrow .input { width: 110px; }
+    .closing { padding: 24px 22px; }
+    .closing .btn { width: 100%; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap nav">
-    <a class="brand" href="/">
-      <svg width="30" height="28" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="Baryon home"><svg width="26" height="24" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
         <path d="M9 8 L91 8 L54 82 Q50 89 46 82 Z" stroke="#0a0a0a" stroke-width="8" stroke-linejoin="round" fill="none"/>
         <text x="50" y="47" text-anchor="middle" dominant-baseline="middle" fill="#0a0a0a" font-family="Arial, sans-serif" font-weight="800" font-size="42">B</text>
-      </svg>
-      <span>BARYON</span>
-    </a>
-    <nav class="tabs">
-      <a href="/">Home</a>
-      <a href="/lost-cabin">Lost Cabin</a>
-      <a href="/resource-intelligence">Resource Intelligence</a>
-      <a class="active" href="/reclaim">Reclaim</a>
-      <a class="contact" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+      </svg><span class="word">BARYON</span></a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <a class="nl" href="/resource-intelligence">Resource Intelligence</a>
+      <a class="nl" href="/lost-cabin">Lost Cabin</a>
+      <a class="nl" href="/reclaim" aria-current="page">Reclaim</a>
+      <a class="nl" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+      <a class="btn btn-primary btn-sm" href="/world">World Model <span class="arrow">→</span></a>
     </nav>
   </div>
 </header>
 
+<main>
+
 <div class="hero">
   <div class="wrap">
     <div class="eyebrow">Live tool</div>
-    <h1>Is that pile worth hauling? Run the numbers.</h1>
-    <p class="lede">Reclaim is Baryon's material arbitrage engine. Enter what's in a load — copper, motors, aluminum, steel — plus what it costs to acquire and move, and get the number that matters: <b style="color:#0a0a0a">expected net</b>, priced against sourced scrap benchmarks.</p>
+    <h1 class="display">Is that pile worth hauling? <span class="then">Run the numbers.</span></h1>
+    <p class="lede">Reclaim is Baryon's material arbitrage engine. Enter what's in a load — copper, motors, aluminum, steel — plus what it costs to acquire and move, and get the number that matters: <b>expected net</b>, priced against sourced scrap benchmarks.</p>
   </div>
 </div>
 
-<div class="chain" aria-label="The Reclaim loop">
+<div class="loop" aria-label="The Reclaim loop">
   <div class="wrap">
-    DISCOVER <em>→</em> IDENTIFY <em>→</em> VALUE <em>→</em> OPTIMIZE <em>→</em> ACQUIRE <em>→</em> ROUTE <em>→</em> VERIFY <em>→</em> LEARN
+    <span class="eyebrow" aria-hidden="true">The Reclaim loop</span>
+    <div class="steps">
+      <span class="step">DISCOVER</span> <em>→</em> <span class="step">IDENTIFY</span> <em>→</em> <span class="step">VALUE</span> <em>→</em> <span class="step">OPTIMIZE</span> <em>→</em> <span class="step">ACQUIRE</span> <em>→</em> <span class="step">ROUTE</span> <em>→</em> <span class="step">VERIFY</span> <em>→</em> <span class="step">LEARN</span>
+    </div>
   </div>
 </div>
 
-<section>
+<section class="section" id="calculator">
   <div class="wrap">
-    <div class="label">The calculator</div>
-    <h2>Materials in, verdict out.</h2>
+    <div class="head">
+      <div class="eyebrow">The calculator</div>
+      <h2 class="display">Materials in, verdict out.</h2>
+    </div>
     <div class="calc">
-      <div class="pane">
+      <div class="card pane">
         <h3>What's in the load (lb)</h3>
-        <table class="mats"><tbody id="mats"></tbody></table>
+        <p class="bench-asof" id="bench-asof"></p>
+        <table class="mats">
+          <thead><tr><th scope="col">Material</th><th scope="col">Benchmark</th><th scope="col">Pounds</th><th scope="col">Value</th></tr></thead>
+          <tbody id="mats"></tbody>
+        </table>
       </div>
-      <div class="pane">
-        <h3>Cost stack</h3>
-        <div class="costrow"><span>Purchase price ($)</span><input type="number" id="c-buy" value="0" min="0" step="any"></div>
-        <div class="costrow"><span>Loading / labor ($)</span><input type="number" id="c-labor" value="100" min="0" step="any"></div>
-        <div class="costrow"><span>Round-trip miles</span><input type="number" id="c-miles" value="40" min="0" step="any"></div>
-        <div class="costrow"><span>Cost per mile ($)</span><input type="number" id="c-permile" value="2.50" min="0" step="any"></div>
-        <div class="costrow"><span>Disposal / dump fees ($)</span><input type="number" id="c-disposal" value="0" min="0" step="any"></div>
-        <div class="costrow"><span>Risk reserve (% of gross)</span><input type="number" id="c-risk" value="15" min="0" max="100" step="any"></div>
-        <div class="result">
-          <div class="line"><span>Gross recovery</span><span id="r-gross">$0</span></div>
-          <div class="line"><span>Total costs</span><span id="r-costs">$0</span></div>
-          <div class="line net"><span>Expected net</span><span id="r-net">$0</span></div>
-          <div class="line"><span>ROI on cash</span><span id="r-roi">—</span></div>
-          <span class="verdict pass" id="r-verdict">ENTER A LOAD</span>
+      <div class="calc-side">
+        <div class="card pane">
+          <h3>Cost stack</h3>
+          <label class="costrow"><span>Purchase price ($)</span><input class="input" type="number" id="c-buy" value="0" min="0" step="any"></label>
+          <label class="costrow"><span>Loading / labor ($)</span><input class="input" type="number" id="c-labor" value="100" min="0" step="any"></label>
+          <label class="costrow"><span>Round-trip miles</span><input class="input" type="number" id="c-miles" value="40" min="0" step="any"></label>
+          <label class="costrow"><span>Cost per mile ($)</span><input class="input" type="number" id="c-permile" value="2.50" min="0" step="any"></label>
+          <label class="costrow"><span>Disposal / dump fees ($)</span><input class="input" type="number" id="c-disposal" value="0" min="0" step="any"></label>
+          <label class="costrow"><span>Risk reserve (% of gross)</span><input class="input" type="number" id="c-risk" value="15" min="0" max="100" step="any"></label>
+          <div class="result" aria-live="polite">
+            <div class="pair">
+              <div><span class="k">Gross recovery</span><span class="v" id="r-gross">$0</span></div>
+              <div><span class="k">Total costs</span><span class="v" id="r-costs">$0</span></div>
+            </div>
+            <div class="net">
+              <span class="k">Expected net</span>
+              <span class="v" id="r-net">$0</span>
+              <span class="verdict pass" id="r-verdict">ENTER A LOAD</span>
+            </div>
+            <div class="roi"><span>Return on cash spent <small>Expected net ÷ purchase, labor, mileage and fees</small></span><span id="r-roi">—</span></div>
+          </div>
+          <div class="asof" id="asof"></div>
         </div>
-        <div class="asof" id="asof"></div>
       </div>
     </div>
-    <p class="body" style="font-size:13px;margin-top:18px">Benchmarks are national baselines — your local yard will differ; call before you haul. Only handle material with clear ownership: copper, catalytic converters, and utility equipment carry theft-law requirements in most states.</p>
+    <p class="fineprint">Benchmarks are national baselines — your local yard will differ; call before you haul. Only handle material with clear ownership: copper, catalytic converters, and utility equipment carry theft-law requirements in most states.</p>
   </div>
 </section>
 
-<section>
+<section class="section">
   <div class="wrap">
-    <div class="label">Where this goes</div>
-    <h2>The calculator is step one. The engine is the point.</h2>
-    <div class="cols">
-      <div class="col">
+    <div class="head">
+      <div class="eyebrow">Where this goes</div>
+      <h2 class="display">The calculator is step one. The engine is the point.</h2>
+    </div>
+    <div class="features">
+      <div class="card card-surface feature reveal">
         <h3>AI appraisal</h3>
         <p>The full engine reads a raw listing — "old electrical stuff, must haul away" — and produces the material breakdown, weight ranges, value waterfall (resell → parts → scrap), and verdict automatically.</p>
       </div>
-      <div class="col">
+      <div class="card card-surface feature reveal" style="--reveal-delay:80ms">
         <h3>Sourced pricing</h3>
-        <p>Every benchmark carries a source and an as-of date, refreshed by the same autonomous research agent that maintains Baryon's world model.</p>
+        <p>Every benchmark carries a source and an as-of date, so you can see how current a price is before you haul.</p>
       </div>
-      <div class="col">
+      <div class="card card-surface feature reveal" style="--reveal-delay:160ms">
         <h3>Provenance first</h3>
         <p>Theft-prone material is flagged automatically. Clean ownership is a requirement of the system, not an afterthought.</p>
       </div>
     </div>
-    <p class="body" style="margin-top:40px">Want the full engine, or want to route real loads? <a href="mailto:sebastianskipwith@gmail.com?subject=Reclaim" style="color:#0a0a0a;font-weight:600">Get in touch →</a></p>
+    <div class="card closing reveal">
+      <p class="display-wide">Want the full engine, or want to route real loads?</p>
+      <a class="btn btn-primary" href="mailto:sebastianskipwith@gmail.com?subject=Reclaim">Get in touch <span class="arrow">→</span></a>
+    </div>
   </div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <span>© 2026 Baryon</span>
-    <span>Building the Autonomous Physical Economy</span>
-  </div>
-</footer>
+</main>
+
+<footer class="site-footer"><div class="wrap row"><span>© 2026 Baryon</span><span>Building the Autonomous Physical Economy</span><span><a href="/world">World Model</a> · <a href="/resource-intelligence">Resource Intelligence</a> · <a href="/lost-cabin">Lost Cabin</a> · <a href="/reclaim">Reclaim</a></span></div></footer>
 
 <script>
 let PRICES = [];
 const $ = (id) => document.getElementById(id);
-const money = (n) => `${n < 0 ? "−" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+const money = (n) => `${Math.round(n) < 0 ? "−" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+const attr = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const asOf = (ym) => { const [y, m] = String(ym).split("-").map(Number); return m ? new Date(Date.UTC(y, m - 1, 1)).toLocaleString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) : ym; };
 
 fetch("/data/scrap.json").then(r => r.json()).then(rows => {
   PRICES = rows.filter(r => r.perLb > 0);
   $("mats").innerHTML = PRICES.map((p, i) => `
     <tr>
-      <td>${p.label}${p.detail ? `<div style="font-size:10.5px;color:#9a9a94">${p.detail}</div>` : ""}</td>
+      <td>${p.label}${p.detail ? `<div class="det">${p.detail}</div>` : ""}</td>
       <td class="price">$${p.perLb.toFixed(2)}/lb</td>
-      <td><input type="number" min="0" step="any" placeholder="0" data-i="${i}" class="lb"></td>
+      <td><input type="number" min="0" step="any" placeholder="0" data-i="${i}" class="lb" aria-label="Pounds of ${attr(p.label)}"></td>
       <td class="rowval" id="rv-${i}"></td>
     </tr>`).join("");
-  $("asof").textContent = `${rows[0].source} · as of ${rows[0].asOf}`;
+  $("asof").textContent = `${rows[0].source} · Prices as of ${asOf(rows[0].asOf)}`;
+  $("bench-asof").textContent = `National benchmark prices as of ${asOf(rows[0].asOf)}`;
   document.querySelectorAll("input").forEach(el => el.addEventListener("input", calc));
   calc();
 });
+
+// Negative or blank fields count as zero.
+const num = (v) => Math.max(0, Number(v) || 0);
 
 function calc() {
   let gross = 0;
   document.querySelectorAll("input.lb").forEach(el => {
     const i = Number(el.dataset.i);
-    const v = (Number(el.value) || 0) * PRICES[i].perLb;
+    const v = num(el.value) * PRICES[i].perLb;
     gross += v;
     $("rv-" + i).textContent = v > 0 ? money(v) : "";
   });
-  const buy = Number($("c-buy").value) || 0;
-  const costs =
-    buy + (Number($("c-labor").value) || 0) +
-    (Number($("c-miles").value) || 0) * (Number($("c-permile").value) || 0) +
-    (Number($("c-disposal").value) || 0) +
-    gross * ((Number($("c-risk").value) || 0) / 100);
+  const cashOut =
+    num($("c-buy").value) + num($("c-labor").value) +
+    num($("c-miles").value) * num($("c-permile").value) +
+    num($("c-disposal").value);
+  const costs = cashOut + gross * (Math.min(100, num($("c-risk").value)) / 100);
   const net = gross - costs;
   $("r-gross").textContent = money(gross);
-  $("r-costs").textContent = money(-costs).replace("−", "−");
+  $("r-costs").textContent = money(-costs);
   $("r-net").textContent = money(net);
-  $("r-roi").textContent = buy > 0 ? `${Math.round((net / buy) * 100)}%` : (net > 0 ? "∞ (free acquisition)" : "—");
+  $("r-roi").textContent = gross > 0 && cashOut > 0 ? `${Math.round((net / cashOut) * 100)}%` : "—";
   const v = $("r-verdict");
   if (gross === 0) { v.textContent = "ENTER A LOAD"; v.className = "verdict pass"; }
   else if (net > 150) { v.textContent = "BUY — WORTH THE TRIP"; v.className = "verdict buy"; }
@@ -237,6 +313,7 @@ function calc() {
   else { v.textContent = "PASS — YOU'D LOSE MONEY"; v.className = "verdict pass"; }
 }
 </script>
+<script src="/assets/site.js?v=20260929" defer onerror="document.documentElement.classList.remove('js')"></script>
 
 </body>
 </html>

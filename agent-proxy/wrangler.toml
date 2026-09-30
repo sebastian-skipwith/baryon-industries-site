@@ -1,0 +1,16 @@
+name = "baryon-world-agent"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Hard daily ceiling on what the hosted agent may spend, in USD.
+DAILY_BUDGET_USD = "5"
+# Requests per network per hour.
+PER_IP_PER_HOUR = "40"
+# Comma-separated list of sites allowed to call the proxy.
+ALLOWED_ORIGINS = "https://baryon.industries,http://localhost:8124"
+
+# Create with: npx wrangler kv namespace create BUDGET   (paste the id below)
+[[kv_namespaces]]
+binding = "BUDGET"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"

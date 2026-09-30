@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data sources &amp; credits | Baryon World Model</title>
+<meta name="description" content="Every dataset, map tile service and open-source library behind the Baryon World Model, with its licence and attribution.">
+<meta property="og:title" content="Data sources &amp; credits | Baryon World Model">
+<meta property="og:description" content="Every dataset, map service and open-source library behind the Baryon World Model, with its licence and attribution.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://baryon.industries/world/sources.html">
+<meta property="og:url" content="https://baryon.industries/world/sources.html">
+<meta property="og:site_name" content="Baryon">
+<meta property="og:image" content="https://baryon.industries/assets/og-sources.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Baryon World Model data sources and credits">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M9 8 L91 8 L54 82 Q50 89 46 82 Z' stroke='black' stroke-width='8' stroke-linejoin='round' fill='white'/%3E%3Ctext x='50' y='47' text-anchor='middle' dominant-baseline='middle' fill='black' font-family='Arial' font-weight='800' font-size='42'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/baryon.css?v=20260929">
+<script src="/assets/site.js?v=20260929" defer></script>
+<style>
+  h1, h2, p { margin: 0; }
+  .intro { padding: clamp(40px, 6vw, 88px) 0 clamp(24px, 4vw, 40px); }
+  .intro h1 { margin-top: 14px; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.02; letter-spacing: -0.03em; }
+  .intro .lede { margin-top: 18px; max-width: 720px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 28px; }
+  .tools .input { max-width: 360px; flex: 1 1 240px; }
+  .count { font-size: 0.82rem; color: var(--ink-soft); }
+  .group { padding: 28px 0 8px; border-top: 1px solid var(--hair); }
+  .group h2 { font-size: 1.15rem; letter-spacing: -0.01em; }
+  .group .eyebrow { margin-bottom: 6px; }
+  .rows { margin-top: 14px; display: grid; gap: 0; }
+  /* Scoped to .rows so the footer's shared .row keeps its own layout. */
+  .rows > .row {
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
+    gap: 8px 28px; padding: 16px 0; border-top: 1px solid var(--hair);
+  }
+  .rows > .row:first-child { border-top: 0; }
+  .row .n { font-weight: 600; font-size: 0.95rem; overflow-wrap: anywhere; }
+  .row .n a { color: inherit; text-decoration: none; }
+  .row .n a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .row .u, .row .a { font-size: 0.86rem; line-height: 1.55; color: var(--graphite); }
+  .row .a { margin-top: 4px; color: var(--ink-soft); font-size: 0.8rem; overflow-wrap: anywhere; }
+  /* Licence names can be long; let the chip wrap instead of widening the page. */
+  .row .l {
+    justify-self: start; align-self: start; max-width: 100%; height: auto;
+    padding-top: 0.45rem; padding-bottom: 0.45rem; border-radius: 12px;
+    white-space: normal; line-height: 1.4; text-align: left; overflow-wrap: anywhere;
+  }
+  .row .l.review { background: transparent; border: 1px dashed var(--hair-2); color: var(--graphite); }
+  .excluded { margin: 40px 0 72px; padding: clamp(22px, 3vw, 32px); }
+  .excluded ul { margin: 12px 0 0; padding-left: 18px; color: var(--graphite); font-size: 0.9rem; line-height: 1.7; }
+  @media (max-width: 760px) {
+    .rows > .row { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header class="site-header is-solid">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="Baryon home"><svg width="26" height="24" viewBox="0 0 100 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Baryon mark">
+        <path d="M9 8 L91 8 L54 82 Q50 89 46 82 Z" stroke="#0a0a0a" stroke-width="8" stroke-linejoin="round" fill="none"/>
+        <text x="50" y="47" text-anchor="middle" dominant-baseline="middle" fill="#0a0a0a" font-family="Arial, sans-serif" font-weight="800" font-size="42">B</text>
+      </svg><span class="word">BARYON</span></a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <a class="nl" href="/resource-intelligence">Resource Intelligence</a>
+      <a class="nl" href="/lost-cabin">Lost Cabin</a>
+      <a class="nl" href="/reclaim">Reclaim</a>
+      <a class="nl" href="mailto:sebastianskipwith@gmail.com">Contact</a>
+      <a class="btn btn-primary btn-sm" href="/world">World Model <span class="arrow">→</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <p class="eyebrow">World Model</p>
+    <h1>Data sources &amp; credits</h1>
+    <p class="lede">The World Model is built entirely on public data and open-source software. Each source below is used under its published licence or cited as a published figure, and the map shows the matching attribution whenever its layer is on.<span id="review-note" hidden> A source marked “Terms under review” is one whose reuse terms we are still confirming with its publisher.</span> Data stays the property of its publishers.</p>
+    <div class="tools">
+      <input class="input" id="filter" type="search" placeholder="Filter sources…" aria-label="Filter sources">
+      <span class="count" id="count"></span>
+      <a class="btn btn-ghost btn-sm" href="/world">Open the World Model <span class="arrow">→</span></a>
+    </div>
+  </section>
+  <div id="groups" aria-live="polite"><p class="count">Loading sources…</p></div>
+  <section class="card card-surface excluded" aria-labelledby="ex-title">
+    <p class="eyebrow">Deliberately left out</p>
+    <h2 id="ex-title">Sources we don't use, and why</h2>
+    <ul id="excluded"></ul>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="wrap row"><span>© 2026 Baryon</span><span>Building the Autonomous Physical Economy</span><span><a href="/world">World Model</a> · <a href="/resource-intelligence">Resource Intelligence</a> · <a href="/lost-cabin">Lost Cabin</a> · <a href="/reclaim">Reclaim</a></span></div></footer>
+
+<script type="module">
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const host = document.getElementById("groups");
+const data = await fetch("/world/data/sources.json?v=20260929c").then((r) => r.json()).catch(() => null);
+if (!data) {
+  host.innerHTML = `<p class="count">The source list could not be loaded. The full list is also in the site's THIRD_PARTY_NOTICES.md.</p>`;
+} else {
+  // Explain the "Terms under review" chip only while some source carries it.
+  document.getElementById("review-note").hidden = !data.groups.some((g) => g.items.some((s) => /^terms under review/i.test(s.license)));
+  document.getElementById("excluded").innerHTML = (data.excluded ?? []).map((x) => `<li><b>${esc(x.name)}</b> — ${esc(x.why)}</li>`).join("");
+  const render = (q) => {
+    q = q.trim().toLowerCase();
+    let n = 0;
+    host.innerHTML = data.groups.map((g) => {
+      const items = g.items.filter((s) => !q || [s.name, s.used_for, s.license, s.attribution].join(" ").toLowerCase().includes(q));
+      n += items.length;
+      if (!items.length) return "";
+      return `<section class="group"><p class="eyebrow">${esc(items.length)} source${items.length === 1 ? "" : "s"}</p><h2>${esc(g.title)}</h2><div class="rows">${items.map((s) => `
+        <div class="row">
+          <div class="n">${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>` : esc(s.name)}</div>
+          <div><div class="u">${esc(s.used_for)}</div>${s.attribution ? `<div class="a">${esc(s.attribution)}</div>` : ""}</div>
+          <span class="chip chip-soft l${/^terms under review/i.test(s.license) ? " review" : ""}">${esc(s.license)}</span>
+        </div>`).join("")}</div></section>`;
+    }).join("") || `<p class="count">No sources match “${esc(q)}”.</p>`;
+    document.getElementById("count").textContent = `${n} source${n === 1 ? "" : "s"}${data.updated ? ` · reviewed ${data.updated}` : ""}`;
+  };
+  render("");
+  document.getElementById("filter").addEventListener("input", (e) => render(e.target.value));
+}
+</script>
+</body>
+</html>

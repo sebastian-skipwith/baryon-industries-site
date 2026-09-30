@@ -1,0 +1,250 @@
+/* World Model — tours module: Explore panel, story player, welcome card.
+   Tokens from /assets/baryon.css; glass from world.css (.wglass). */
+
+/* ---------------------------------------------------------------- shared */
+.tr-mosaic { position: relative; display: block; overflow: hidden; background: #e4e2dc; }
+.tr-mosaic.is-night { background: #05070b; }
+.tr-mosaic img { position: absolute; width: 256px; height: 256px; max-width: none; user-select: none; pointer-events: none; opacity: 0; transition: opacity 320ms; }
+.tr-mosaic img.on { opacity: 1; }
+.tour-skel {
+  display: block; height: 0.62em; margin: 0.5em 0; border-radius: 999px;
+  background: linear-gradient(90deg, rgba(20, 20, 20, 0.06) 0%, rgba(20, 20, 20, 0.12) 50%, rgba(20, 20, 20, 0.06) 100%);
+  background-size: 200% 100%; animation: tour-shimmer 1.3s linear infinite;
+}
+@keyframes tour-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* ---------------------------------------------------------------- Explore panel */
+.xp-lucky { width: 100%; gap: 10px; margin-top: 4px; }
+.xp-lucky svg { flex: none; }
+.panel .xp-sub { margin: 8px 0 0; text-align: center; font-size: 0.75rem; color: var(--ink-soft); }
+.xp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.xp-card {
+  position: relative; display: flex; flex-direction: column; min-width: 0; padding: 0; overflow: hidden;
+  border: 1px solid var(--hair); border-radius: 16px; background: var(--paper); color: var(--ink);
+  font: inherit; text-align: left; cursor: pointer;
+  transition: transform 200ms var(--ease-out-soft), box-shadow 200ms var(--ease-out-soft), border-color 200ms;
+}
+.xp-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); border-color: color-mix(in srgb, var(--ink) 22%, transparent); }
+.xp-card:active { transform: scale(0.985); }
+.xp-hero { grid-column: 1 / -1; }
+.xp-cover { height: 104px; }
+.xp-hero .xp-cover { height: 168px; }
+.xp-wide { grid-column: 1 / -1; flex-direction: row; }
+.xp-wide .xp-cover { flex: none; width: 46%; height: auto; min-height: 132px; }
+.xp-wide .xp-cover::after { box-shadow: inset -1px 0 0 var(--hair); }
+.xp-wide .xp-body { justify-content: center; padding: 12px 14px; }
+.xp-wide .xp-play { margin-top: 0; }
+.xp-cover::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 -1px 0 var(--hair); pointer-events: none; }
+.xp-count {
+  position: absolute; left: 8px; top: 8px; z-index: 1; padding: 3px 9px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font: 500 0.68rem/1.5 var(--font-sans); letter-spacing: 0.02em; color: var(--ink);
+}
+.xp-body { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
+.xp-title { font-size: 0.86rem; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
+.xp-hero .xp-title { font-size: 1.02rem; letter-spacing: -0.015em; }
+.xp-teaser {
+  margin-bottom: 10px; font-size: 0.75rem; line-height: 1.42; color: var(--ink-soft);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.xp-play {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding: 5px 11px 5px 9px;
+  border-radius: 999px; background: var(--ink); color: var(--paper); font: 500 0.72rem/1.3 var(--font-sans);
+}
+.xp-card.is-playing { border-color: var(--ink); }
+.xp-card.is-playing .xp-play { background: var(--surface); color: var(--ink); }
+.xp-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+.xp-eq i { display: block; width: 2px; height: 100%; border-radius: 2px; background: currentColor; transform-origin: bottom; animation: xp-eq 900ms ease-in-out infinite; }
+.xp-eq i:nth-child(2) { animation-delay: -300ms; }
+.xp-eq i:nth-child(3) { animation-delay: -600ms; }
+@keyframes xp-eq { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+.xp-skel { cursor: default; }
+.xp-skel:hover { transform: none; box-shadow: none; border-color: var(--hair); }
+.xp-skel .xp-cover { background: var(--surface); }
+.xp-empty { padding: 18px; border-radius: 16px; background: var(--surface); text-align: center; }
+.panel .xp-empty p { margin-bottom: 12px; }
+.xp-note a { color: var(--graphite); text-decoration: underline; text-decoration-color: var(--hair-2); text-underline-offset: 2px; }
+.xp-note a:hover { color: var(--ink); text-decoration-color: currentColor; }
+
+/* ---------------------------------------------------------------- story player */
+.tour {
+  --tour-w: min(640px, calc(100vw - 180px));
+  position: fixed; z-index: 27; left: 50%; bottom: 58px; width: var(--tour-w); transform: translateX(-50%);
+  padding: 8px 14px 14px 16px; border-radius: 20px; animation: tour-in 320ms var(--ease-out-soft);
+  transition: left 280ms var(--ease-out-soft), width 280ms var(--ease-out-soft), bottom 280ms var(--ease-out-soft);
+}
+.tour.beside-dock { left: calc(50% + 201px); --tour-w: min(640px, calc(100vw - 560px)); }
+.tour.beside-card { left: calc(50% - 177px); --tour-w: min(640px, calc(100vw - 560px)); }
+.tour.beside-dock.beside-card { left: calc(50% + 16px); --tour-w: min(600px, calc(100vw - 960px)); min-width: 360px; }
+@keyframes tour-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.tour.is-covered { display: none; }
+/* Stories can switch dated layers on, so the time bar stays usable: the sheet rides above it (bar: 52px at 58px). */
+body.has-timebar .tour { bottom: calc(58px + 52px + 12px); }
+
+.tour-segs { display: flex; gap: 4px; margin: 0 -2px 4px; }
+.tour-seg { flex: 1; min-width: 0; height: 16px; padding: 0 2px; border: 0; background: none; cursor: pointer; display: flex; align-items: center; }
+.tour-seg i { position: relative; display: block; width: 100%; height: 3px; border-radius: 999px; overflow: hidden; background: rgba(20, 20, 20, 0.13); transition: height 140ms; }
+.tour-seg i::after { content: ""; position: absolute; inset: 0; background: var(--ink); transform-origin: left center; transform: scaleX(var(--p, 0)); }
+.tour-seg:hover i { height: 5px; }
+.tour-seg:focus-visible { outline-offset: 0; border-radius: 4px; }
+
+.tour-head { display: flex; align-items: center; gap: 12px; }
+.tour-meta { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+.tour-meta .eyebrow { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--graphite); }
+.tour-count { flex: none; font: 500 0.72rem var(--font-sans); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.tour-state { flex: none; font: 500 0.7rem var(--font-sans); color: var(--ink-soft); }
+.tour-state:empty { display: none; }
+.tour-ctl { flex: none; display: flex; align-items: center; gap: 6px; }
+.tour-btn {
+  display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--hair-2); background: transparent; color: var(--ink);
+  transition: background-color 140ms, border-color 140ms, transform 120ms var(--ease-out-soft);
+}
+.tour-btn:hover:not(:disabled) { background: var(--surface); }
+.tour-btn:active:not(:disabled) { transform: scale(0.94); }
+.tour-btn:disabled { opacity: 0.32; cursor: default; }
+.tour-play { width: 42px; height: 42px; border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.tour-play:hover:not(:disabled) { background: #2c2c2c; border-color: #2c2c2c; }
+.tour-close { margin-left: 4px; }
+
+.tour-main { display: flex; gap: 14px; margin-top: 10px; }
+.tour-thumb { flex: none; position: relative; width: 108px; height: 108px; border-radius: 12px; overflow: hidden; background: var(--surface); }
+.tour-thumb .tr-mosaic { position: absolute; inset: 0; }
+.tour-thumb .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 260ms; }
+.tour-thumb .photo.on { opacity: 1; }
+.tour-thumb .photo:not([src]) { visibility: hidden; }
+.tour-thumb::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.08); pointer-events: none; }
+/* Fixed height, so the sheet never jumps between stops; tours.js fits the excerpt to the lines left. */
+.tour-text { position: relative; flex: 1; min-width: 0; height: 130px; overflow: hidden; }
+.tour-title { margin: 0; font-size: 1.14rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tour-caption { margin: 3px 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--ink); }
+.tour-extract {
+  margin: 6px 0 0; max-height: calc(1.5em * var(--lines, 3)); font-size: 0.78rem; font-weight: 300; line-height: 1.5; color: var(--graphite);
+  display: -webkit-box; -webkit-line-clamp: var(--lines, 3); -webkit-box-orient: vertical; overflow: hidden;
+}
+.tour-extract .tour-skel { margin: 0.45em 0 0.62em; }
+.tour-credit {
+  display: flex; align-items: baseline; gap: 0 3px; min-width: 0; margin: 8px 0 0;
+  font-size: 0.7rem; line-height: 1.45; color: var(--ink-soft); white-space: nowrap;
+}
+.tc-text { flex: none; }
+.tc-img { flex: 0 1 auto; min-width: 0; display: flex; }
+.tc-img:empty { display: none; }
+.tc-img::before { content: "·"; margin-right: 3px; }
+.tc-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.tc-lic { flex: none; }
+.tour-credit a { color: var(--ink); font-weight: 500; text-decoration: none; }
+.tour-credit a[rel~="license"] { color: inherit; font-weight: 400; }
+.tour-credit a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.tour-credit svg { vertical-align: -1px; }
+/* On a narrow sheet (beside both panels, phones) the photo credit takes its own line, so author and licence fit. */
+.tour { container: tour / inline-size; }
+@container tour (max-width: 600px) {
+  .tour-credit { flex-wrap: wrap; min-height: calc(1.45em * 2); }
+  .tc-img { flex-basis: 100%; }
+  .tc-img::before { content: none; }
+}
+.tour-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------------------------------------------------------------- welcome */
+.wl { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; pointer-events: none; }
+.wl-card {
+  pointer-events: auto; width: min(440px, 100%); padding: 26px 26px 22px; border-radius: 20px;
+  animation: wl-in 360ms var(--ease-out-soft);
+}
+.wl-card:focus { outline: none; }
+.wl.out .wl-card { opacity: 0; transform: translateY(8px) scale(0.985); transition: opacity 200ms, transform 200ms var(--ease-out-soft); }
+@keyframes wl-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: none; } }
+.wl-card h2 { margin: 8px 0 6px; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.12; }
+.wl-lede { margin: 0; font-size: 0.9rem; font-weight: 300; line-height: 1.55; color: var(--graphite); }
+.wl-tips { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 14px; }
+.wl-tips li { display: flex; align-items: flex-start; gap: 12px; }
+.wl-ic { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--surface); color: var(--ink); }
+.wl-tips b { display: block; font-size: 0.88rem; font-weight: 600; line-height: 1.35; }
+.wl-tips small { display: block; margin-top: 1px; font-size: 0.78rem; line-height: 1.45; color: var(--ink-soft); }
+.wl-actions { display: flex; gap: 10px; margin-top: 22px; }
+.wl-actions .btn { flex: 1; }
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 720px) {
+  /* a bottom sheet like the dock: the rail floats over its bottom edge */
+  .tour, .tour.beside-dock, .tour.beside-card {
+    z-index: 24; left: 0; right: 0; bottom: 0; width: 100%; min-width: 0; transform: none; border-radius: 22px 22px 0 0;
+    padding: 8px 16px calc(80px + env(safe-area-inset-bottom, 0px)); animation-name: tour-up;
+  }
+  @keyframes tour-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .tour-segs { margin-bottom: 6px; }
+  .tour-btn { width: 40px; height: 40px; }
+  .tour-play { width: 44px; height: 44px; }
+  .tour-close { width: 36px; height: 36px; margin-left: 2px; }
+  .tour-ctl { gap: 4px; }
+  .tour-meta { flex-wrap: wrap; row-gap: 0; column-gap: 8px; }
+  .tour-meta .eyebrow { flex-basis: 100%; }
+  .tour-state::before { content: "·"; margin-right: 8px; }
+  .tour-seg { height: 22px; }
+  .tour-main { gap: 12px; }
+  .tour-thumb { width: 76px; height: 76px; }
+  .tour-title { font-size: 1.02rem; }
+  .tour-caption { font-size: 0.82rem; }
+  .tour-extract { font-size: 0.76rem; }
+  .tour-text { height: 108px; }
+  /* The time bar (84px tall, 84px up) floats over the sheet's foot like the rail does. */
+  body.has-timebar .tour { bottom: 0; z-index: 22; padding-bottom: calc(180px + env(safe-area-inset-bottom, 0px)); }
+  .wl { place-items: end stretch; padding: 0; }
+  .wl-card { width: 100%; border-radius: 22px 22px 0 0; padding: 22px 20px calc(20px + env(safe-area-inset-bottom)); animation-name: wl-up; }
+  @keyframes wl-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  .wl-card h2 { font-size: 1.32rem; }
+  .wl-tips { margin-top: 16px; gap: 12px; }
+}
+
+/* Short screens (landscape phones): a compact story sheet (title, caption and controls; the
+   excerpt stays one tap away behind "Read on Wikipedia"), so the stop keeps the band above it. */
+@media (max-height: 520px) {
+  .tour { padding-top: 6px; }
+  .tour-segs { margin-bottom: 0; }
+  .tour-meta { flex-wrap: nowrap; }
+  .tour-meta .eyebrow { flex-basis: auto; }
+  .tour-main { align-items: center; gap: 12px; margin-top: 6px; }
+  .tour-thumb { width: 56px; height: 56px; border-radius: 10px; }
+  .tour-text { height: 58px; }
+  .tour-title { font-size: 1rem; }
+  .tour-caption { margin-top: 2px; font-size: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tour-extract { display: none; }
+  .tour-credit { margin-top: 6px; }
+}
+/* There the map controls run along the bottom edge (44px at 10px) and the time bar sits 62px up
+   (52px tall, 58px with touch targets): the sheet keeps 8px clear of either. */
+@media (max-height: 520px) and (min-width: 721px) {
+  .tour { bottom: 62px; padding-bottom: 10px; }
+  body.has-timebar .tour { bottom: calc(62px + 58px + 8px); }
+}
+
+/* Short screens (landscape phones): the heading and actions sit beside the tips, so the whole
+   card, buttons included, fits the height; it scrolls rather than clip if it still cannot. */
+@media (max-height: 520px) {
+  .wl-card {
+    width: min(680px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain;
+    padding: 20px 22px calc(18px + env(safe-area-inset-bottom));
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); grid-template-rows: auto auto auto 1fr; column-gap: 26px;
+  }
+  .wl-card > * { grid-column: 1; }
+  .wl-card h2 { margin: 6px 0; font-size: 1.3rem; }
+  .wl-lede { font-size: 0.84rem; line-height: 1.5; }
+  .wl-tips { grid-column: 2; grid-row: 1 / -1; align-self: center; margin: 0; gap: 12px; }
+  .wl-ic { width: 34px; height: 34px; border-radius: 11px; }
+  .wl-actions { flex-direction: column; align-self: end; gap: 8px; margin-top: 16px; }
+  .wl-actions .btn { flex: none; }
+}
+
+/* Touch: 40px targets; the progress segments keep their thin bar inside a taller hit area. */
+@media (pointer: coarse) {
+  .tour-btn, .tour-close { width: 40px; height: 40px; }
+  .tour-play { width: 44px; height: 44px; }
+  .tour-seg { height: 40px; margin: -9px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-card, .tour, .tour-btn, .tr-mosaic img, .tour-thumb .photo, .wl-card, .wl.out .wl-card { animation: none; transition: none; }
+  .xp-card:hover, .xp-card:active { transform: none; }
+  .tour-skel, .xp-eq i { animation: none; }
+}

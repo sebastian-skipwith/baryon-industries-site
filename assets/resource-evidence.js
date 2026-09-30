@@ -1,7 +1,7 @@
 import {renderFlows} from '/assets/copper-flows-view.mjs?v=20260917a';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
-import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260916a';
+import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260929';
 import { calculateCopperSupply, scenarioPreset, nextSupplyInvestigations, INPUTS } from '/assets/copper-balance.mjs?v=20260915d';
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 const $ = id => document.getElementById(id);
@@ -37,6 +37,8 @@ async function selectView() {
   const view=['soil','cores','models','trade','supply','structure','bedrock','flows'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
+  const viewName=document.querySelector(`.ri-nav a[href="#${view}"]`)?.textContent.trim();
+  document.title=viewName?`${viewName} | Resource Intelligence | Baryon`:'Resource Intelligence | Baryon';
   window.dispatchEvent(new CustomEvent('baryon:view',{detail:view}));
   if(view==='world'){window.dispatchEvent(new Event('resize'));return;}
   if(initialized.has(view)){if(view==='soil')soilMap?.resize();if(view==='structure')structureMap?.resize();if(view==='bedrock')activateBedrock();return;}
@@ -66,7 +68,7 @@ async function renderStructure(container) {
     <div class="ev-split"><div class="ev-card ev-card-body"><h2>What this layer adds</h2><p>Deep structural context for the Earth model. Soil samples, drill-core assays and slab geometry represent different physical quantities and depth scales; their proximity alone does not establish mineralization.</p><p>${escape(s.scope)}</p><div class="ev-links"><a href="#soil">Measured soil chemistry</a><a href="#cores">Reported drill-core intervals</a><a href="#models">Research and evaluation</a></div></div>
     <div class="ev-card ev-card-body"><h2>USGS Slab2 · March 2018 release</h2><p>Gavin Hayes / U.S. Geological Survey. ${escape(s.source.license)}. Acquired ${day(s.source.acquiredAt)} UTC; acquisition is not a model update.</p><p>${escape(s.source.updateFrequency)}. Horizontal and vertical datums are not named in the supplied grid metadata.</p><div class="ev-links"><a href="${escape(s.source.productUrl)}" target="_blank" rel="noopener">USGS product ↗</a><a href="${escape(s.source.url)}" target="_blank" rel="noopener">Data release ↗</a><a href="${escape(s.source.paperUrl)}" target="_blank" rel="noopener">Model paper ↗</a></div>${jsonDetails('Source dates, conventions, warnings and fingerprints',s.source)}</div></div>${footer()}`;
   const overview=await data(s.overview);
-  structureMap=new maplibregl.Map({container:'ev-structure-map',center:[-155,12],zoom:1.3,style:{version:8,projection:{type:'globe'},sources:{imagery:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}},layers:[{id:'background',type:'background',paint:{'background-color':'#102022'}},{id:'imagery',type:'raster',source:'imagery',paint:{'raster-opacity':.6}}]}});
+  structureMap=new maplibregl.Map({container:'ev-structure-map',center:[-155,12],zoom:1.3,style:{version:8,projection:{type:'globe'},sources:{imagery:{type:'raster',tiles:['https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}'],tileSize:512,maxzoom:12,attribution:'Imagery: Sentinel-2 Global Mosaic (CC BY 4.0) via VersaTiles'}},layers:[{id:'background',type:'background',paint:{'background-color':'#102022'}},{id:'imagery',type:'raster',source:'imagery',paint:{'raster-opacity':.6}}]}});
   structureMap.addControl(new maplibregl.NavigationControl(),'top-right');
   structureMap.on('load',()=>{
     structureMap.addSource('slabs',{type:'geojson',data:{type:'FeatureCollection',features:overview.map(([region,lon,lat,depth,index,kind])=>({type:'Feature',geometry:{type:'Point',coordinates:[wrapLongitude(lon),lat]},properties:{region,depth,index,kind}}))}});
@@ -141,7 +143,7 @@ async function renderSoil(container) {
     <div class="ev-card"><div class="ev-toolbar"><h2>Sample evidence</h2><input id="ev-soil-search" aria-label="Search soil samples" placeholder="Site ID or state code, e.g. UT"></div><div class="ev-card-body" id="ev-soil-detail">Select a sample to inspect all five elements, location and depth qualifiers.</div><div class="ev-table-wrap" id="ev-soil-table"></div><div class="ev-caption" id="ev-soil-count"></div></div>
     <div class="ev-split"><div class="ev-card ev-card-body"><h2>Coverage is point evidence</h2><p>One-degree cells are an angular index, not equal-area coverage. A sample does not establish the composition of a whole cell or a subsurface volume. ${fmt(summary.unknownDepthSamples)} records have unknown or unusable intervals; overlapping A/C horizons and conflicting depths retain warnings.</p><div class="ev-note">Measured soil chemistry does not establish ore, reserves, recoverability or deep mineralization.</div><a href="#models">View the frozen soil-model evaluation →</a></div>
     <div class="ev-card ev-card-body"><h2>USGS Data Series 801</h2><p>Published ${escape(s.source.publicationDate)} · acquired ${day(s.source.acquiredAt)} UTC.</p><p>${escape(s.source.method)}</p><p class="ev-small">${escape(s.source.useConstraints)}</p><div class="ev-links"><a href="${escape(s.source.url)}" target="_blank" rel="noopener">Source report ↗</a><a href="${escape(s.source.metadataUrl)}" target="_blank" rel="noopener">Source metadata ↗</a><a id="ev-soil-download" download>Download this horizon</a></div>${jsonDetails('Source provenance and hashes',s.source)}</div></div>${footer()}`;
-  soilMap=new maplibregl.Map({container:'ev-soil-map',center:[-98,38],zoom:3,style:{version:8,projection:{type:'globe'},sources:{imagery:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}},layers:[{id:'background',type:'background',paint:{'background-color':'#102022'}},{id:'imagery',type:'raster',source:'imagery',paint:{'raster-opacity':.65}}]}});
+  soilMap=new maplibregl.Map({container:'ev-soil-map',center:[-98,38],zoom:3,style:{version:8,projection:{type:'globe'},sources:{imagery:{type:'raster',tiles:['https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}'],tileSize:512,maxzoom:12,attribution:'Imagery: Sentinel-2 Global Mosaic (CC BY 4.0) via VersaTiles'}},layers:[{id:'background',type:'background',paint:{'background-color':'#102022'}},{id:'imagery',type:'raster',source:'imagery',paint:{'raster-opacity':.65}}]}});
   soilMap.addControl(new maplibregl.NavigationControl(),'top-right');
   soilMap.on('load',()=>{
     soilMap.addSource('soil',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -260,7 +262,7 @@ async function renderSupply(container) {
     `<div class="ev-metrics">${metric('29,291 t/year','2023 study · payable Cu average')}${metric('1.45% Cu','reported reserve-average grade')}${metric('Unverified','first delivery date')}${metric(fmt(manifest.core.summary.drillHoles),'linked USGS drill holes')}</div>
     <div class="ev-supply-grid">
       <div class="ev-card ev-card-body"><h2>Set the scenario</h2><p class="ev-small">A 365-day year. Throughput is the nominal rate before availability. All outputs below are calculations from these inputs.</p>
-      <div class="ev-preset-row"><button class="ev-button" data-supply-preset="early">2023 · first 3 years</button><button class="ev-button" data-supply-preset="later">2023 · later years</button><button class="ev-button" data-supply-preset="optimization">2026 · recovery sensitivity</button></div>
+      <div class="ev-preset-row" role="group" aria-label="Scenario presets"><button class="ev-button" data-supply-preset="early" aria-pressed="false">2023 · first 3 years</button><button class="ev-button" data-supply-preset="later" aria-pressed="true">2023 · later years</button><button class="ev-button" data-supply-preset="optimization" aria-pressed="false">2026 · recovery sensitivity</button></div>
       <p id="ev-preset-note" class="ev-small">2023 later-year design with reserve-average grade as a proxy.</p>
       <div class="ev-input-grid">${Object.entries(INPUTS).map(([key,rule]) => `<label for="ev-input-${key}">${escape(rule.label)} <span>${escape(rule.unit)}</span><input type="number" id="ev-input-${key}" data-supply-input="${key}" value="${defaults[key]}" min="${rule.exclusiveMin ? 0.01 : rule.min}" max="${rule.max}" step="any" required></label>`).join('')}</div>
       <p class="ev-small">Effective payability includes the study's concentrate loss. The grade proxy does not reproduce the annual mining schedule.</p></div>
@@ -294,11 +296,15 @@ async function renderSupply(container) {
     ].map(([label,value,unit],i) => `<div class="ev-flow-step"><span>${i+1} · ${escape(label)}</span><strong>${fmt(value,0)}</strong><small>${unit}</small></div>`).join('')}</div><p>${fmt(r.concentrateDryTonnes,0)} t/year dry concentrate at ${fmt(currentInput.concentrateGradePct)}% Cu. ${fmt(r.residualCopperTonnes,0)} t/year of feed copper remains outside the recovered concentrate.</p>`;
     $('ev-supply-investigations').innerHTML = `<ol class="ev-investigations">${nextSupplyInvestigations(r).map(item => `<li><h3>${escape(item.question)}</h3><p>${escape(item.action)}</p><p class="ev-small">${escape(item.reason)}</p></li>`).join('')}</ol>`;
   };
+  const presetButtons = [...container.querySelectorAll('[data-supply-preset]')];
+  const markPreset = active => presetButtons.forEach(b => b.setAttribute('aria-pressed',String(b === active)));
   container.querySelectorAll('[data-supply-input]').forEach(node => node.addEventListener('input',() => {
     $('ev-preset-note').textContent = 'Edited scenario. Check the source ledger to compare your assumptions with reported inputs.';
+    markPreset(null);
     recalculate();
   }));
-  container.querySelectorAll('[data-supply-preset]').forEach(node => node.addEventListener('click',() => {
+  presetButtons.forEach(node => node.addEventListener('click',() => {
+    markPreset(node);
     const preset = scenarioPreset(evidence,node.dataset.supplyPreset);
     for (const key of Object.keys(INPUTS)) if (key !== 'targetTonnes') $(`ev-input-${key}`).value = preset[key];
     $('ev-preset-note').textContent = node.dataset.supplyPreset === 'optimization' ? 'Hybrid sensitivity: proposed 2026 metallurgy with 2023 later-year throughput and reserve grade. No updated feasibility result is implied.' : `2023 ${node.dataset.supplyPreset === 'early' ? 'first-three-year' : 'later-year'} design with reserve-average grade as a proxy.`;
