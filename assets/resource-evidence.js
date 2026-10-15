@@ -1,6 +1,6 @@
 import {researchReviewPanel} from '/assets/research-review-view.mjs?v=20261015d';
 import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261015c';
-import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261015d';
+import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261015e';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
 import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260929';
@@ -51,7 +51,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({pathway:c=>renderPathway(c,{descriptor:manifest.pathway,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}}),flows:c=>renderFlows(c,{descriptor:manifest.flows,chileDescriptor:manifest.chileProduction,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
+    await ({pathway:c=>renderPathway(c,{descriptor:manifest.pathway,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}}),flows:c=>renderFlows(c,{descriptor:manifest.flows,chileDescriptor:manifest.chileProduction,salesDescriptor:manifest.chileSales,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);

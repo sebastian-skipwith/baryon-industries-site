@@ -1,4 +1,4 @@
-import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261015d';
+import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261015e';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
 async function renderUsFlows(container,{descriptor,data,helpers}) {
