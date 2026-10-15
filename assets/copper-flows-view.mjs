@@ -1,6 +1,7 @@
+import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261015d';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
-export async function renderFlows(container,{descriptor,data,helpers}) {
+async function renderUsFlows(container,{descriptor,data,helpers}) {
   if(!descriptor)throw new Error('Copper flows are not available in this snapshot.');
   const dataset=await data(descriptor),{heading,fmt,escape:e,jsonDetails,footer}=helpers;
   const $=id=>container.querySelector('#'+id), source=dataset.source;
@@ -30,4 +31,13 @@ export async function renderFlows(container,{descriptor,data,helpers}) {
     $('ev-flow-chart').querySelectorAll('button').forEach(button=>button.onclick=()=>{$('ev-flow-period').value=button.dataset.period;update();$('ev-flow-period').scrollIntoView({block:'nearest'});});
   }
   $('ev-flow-period').onchange=update;update();
+}
+
+export async function renderFlows(container,options){
+ if(!options.chileDescriptor)return renderUsFlows(container,options);
+ container.innerHTML='<div class="ev-card"><div class="ev-toolbar"><label>Evidence coverage <select id="ev-flow-country"><option value="CL">Chile · annual production through 2025</option><option value="US">United States · accounting through Sep 2025</option></select></label></div></div><div id="ev-flow-country-content"></div>';
+ const choice=container.querySelector('#ev-flow-country'),content=container.querySelector('#ev-flow-country-content');
+ let generation=0;
+ const update=async()=>{const version=++generation,staging=document.createElement('div');content.textContent='Loading production evidence…';try{await (choice.value==='CL'?renderChileProduction(staging,{...options,descriptor:options.chileDescriptor}):renderUsFlows(staging,options));if(version===generation)content.replaceChildren(staging);}catch(error){if(version===generation)content.textContent='Could not load production evidence: '+error.message;}};
+ choice.onchange=update;await update();
 }

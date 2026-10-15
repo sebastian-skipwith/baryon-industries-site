@@ -1,7 +1,7 @@
 export async function researchReviewPanel({descriptor,data,helpers:h}){
   if(!descriptor)return '';
   const r=await data(descriptor),{escape:esc,fmt,jsonDetails}=h,o=r.outcome;
-  const labels={evaluated_consumed:'Evaluated · audit consumed',historical_context_used:'Historical context used',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending',table_review_pending:'Table review pending'};
+  const labels={evaluated_consumed:'Evaluated · audit consumed',historical_context_used:'Historical context used',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending',table_review_pending:'Table review pending',reviewed_tables_imported:'Reviewed tables imported'};
   return `<section class="ev-card ev-card-body" id="ev-research-review" aria-label="Research outcomes and next investigations"><div class="ev-kicker">Research decisions · reviewed ${esc(r.reviewedAt)}</div><h2>What the research changed</h2>
     <p>The BC geological candidate did not pass its uncertainty gate. The spatial baseline remains in place. Historical operating evidence supports a cathode scenario, while current production and delivery evidence remain unresolved.</p>
     <div class="ev-note"><strong>No learned research-policy improvement is claimed.</strong> This log separates a completed scientific comparison, historical context, restricted sources and unfinished investigations. Source counts and downloads are not model gains.</div>
