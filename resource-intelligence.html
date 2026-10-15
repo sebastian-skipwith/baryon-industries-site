@@ -251,6 +251,7 @@
   <a href="#models">Model evaluation</a>
   <a href="#flows">Copper flows</a>
   <a href="#supply">Supply decisions</a>
+  <a href="#pathway">Cathode pathway</a>
   <a href="#trade">Trade evidence</a>
   <span class="ri-state eyebrow">REGIONAL EARTH MODEL · IN DEVELOPMENT</span>
 </nav>
@@ -355,6 +356,7 @@
 <section id="view-flows" data-ri-view="flows" class="evidence-view" aria-label="Copper flows" hidden></section>
 <section id="view-bedrock" data-ri-view="bedrock" class="evidence-view" aria-label="Bedrock model" hidden></section>
 <section id="view-models" data-ri-view="models" class="evidence-view" aria-label="Model evaluation" hidden></section>
+<section id="view-pathway" data-ri-view="pathway" class="evidence-view" aria-label="Cathode pathway" hidden></section>
 <section id="view-supply" data-ri-view="supply" class="evidence-view" aria-label="Supply decisions" hidden></section>
 <section id="view-trade" data-ri-view="trade" class="evidence-view" aria-label="Trade evidence" hidden></section>
 <footer class="site-footer"><div class="wrap row"><span>© 2026 Baryon</span><span>Building the Autonomous Physical Economy</span><span><a href="/world">World Model</a> · <a href="/resource-intelligence">Resource Intelligence</a> · <a href="/lost-cabin">Lost Cabin</a> · <a href="/reclaim">Reclaim</a></span></div></footer>
@@ -368,7 +370,7 @@ window.addEventListener("baryon:view", () => {
   if (active && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = Math.max(0, active.offsetLeft - bar.offsetLeft - 12);
 });
 </script>
-<script type="module" src="/assets/resource-evidence.js?v=20261015a"></script>
+<script type="module" src="/assets/resource-evidence.js?v=20261015b"></script>
 
 <script type="module">
 import * as maplibregl from "/maplibre/maplibre-gl.mjs";
@@ -384,7 +386,7 @@ const state = { commodity:"", product:"", off:new Set() };
 const $ = id => document.getElementById(id);
 
 // Load the large world inventory only when its view is opened.
-if (['#soil','#cores','#models','#trade','#supply','#structure','#bedrock','#flows'].includes(location.hash.split('?')[0])) {
+if (['#soil','#cores','#models','#trade','#supply','#structure','#bedrock','#flows','#pathway'].includes(location.hash.split('?')[0])) {
   await new Promise(resolve => {
     const listener = event => { if(event.detail === 'world') { window.removeEventListener('baryon:view', listener); resolve(); } };
     window.addEventListener('baryon:view', listener);

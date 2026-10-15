@@ -1,3 +1,4 @@
+import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261015b';
 import {renderFlows} from '/assets/copper-flows-view.mjs?v=20260917a';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
@@ -34,7 +35,7 @@ const footer = () => `<div class="ev-footer">Public evidence snapshot · ${escap
 function fail(target,error) { target.innerHTML=`<div class="ev-error" role="alert">${escape(error.message)} <button class="ev-button" onclick="location.reload()">Reload evidence</button></div>`; }
 async function selectView() {
   const requested=location.hash.slice(1).split('?')[0];
-  const view=['soil','cores','models','trade','supply','structure','bedrock','flows'].includes(requested)?requested:'world';
+  const view=['soil','cores','models','trade','supply','structure','bedrock','flows','pathway'].includes(requested)?requested:'world';
   document.querySelectorAll('[data-ri-view]').forEach(node=>{node.hidden=node.dataset.riView!==view;});
   document.querySelectorAll('.ri-nav a').forEach(node=>{if(node.hash===`#${view}`)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
   const viewName=document.querySelector(`.ri-nav a[href="#${view}"]`)?.textContent.trim();
@@ -49,7 +50,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({flows:c=>renderFlows(c,{descriptor:manifest.flows,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
+    await ({pathway:c=>renderPathway(c,{descriptor:manifest.pathway,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}}),flows:c=>renderFlows(c,{descriptor:manifest.flows,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);
@@ -279,7 +280,7 @@ async function renderSupply(container) {
   const evidence = await data(manifest.supply), f = evidence.facts;
   const sources = ids => ids.map(id => { const s = evidence.sources[id]; return `<a href="${escape(s.url)}" target="_blank" rel="noopener">${escape(s.name)} · ${escape(s.publicationDate || 'publication date unknown')} ↗</a>`; }).join(' · ');
   const defaults = scenarioPreset(evidence);
-  container.innerHTML = heading('Supply decisions / Copperwood, Michigan','From ore to usable copper','Test one potential copper source against an annual requirement. Follow the calculation from ore feed to concentrate and payable metal, then inspect what is still needed to establish delivery.','Scenario · sourced inputs') +
+  container.innerHTML = '<div class="ev-links"><a href="#pathway">Open the Gunnison historical operating pathway →</a></div>' + heading('Supply decisions / Copperwood, Michigan','From ore to usable copper','Test one potential copper source against an annual requirement. Follow the calculation from ore feed to concentrate and payable metal, then inspect what is still needed to establish delivery.','Scenario · sourced inputs') +
     `<div class="ev-metrics">${metric('29,291 t/year','2023 study · payable Cu average')}${metric('1.45% Cu','reported reserve-average grade')}${metric('Unverified','first delivery date')}${metric(fmt(manifest.core.summary.drillHoles),'linked USGS drill holes')}</div>
     <div class="ev-supply-grid">
       <div class="ev-card ev-card-body"><h2>Set the scenario</h2><p class="ev-small">A 365-day year. Throughput is the nominal rate before availability. All outputs below are calculations from these inputs.</p>
