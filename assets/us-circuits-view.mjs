@@ -1,0 +1,20 @@
+import {selectUsCircuit,validateUsCircuits} from '/assets/us-circuits.mjs?v=20261016a';
+export async function renderUsCircuits(container,{descriptor,data,helpers:h}){
+ const dataset=validateUsCircuits(await data(descriptor)),{heading,escape:e,jsonDetails,footer}=h;
+ const $=id=>container.querySelector('#'+id),s=dataset.source;
+ const link=(page,label)=>`<a href="${e(s.url)}#page=${page}" target="_blank" rel="noopener">${label} ↗</a>`;
+ container.innerHTML=heading('Physical economy / United States / reported circuits','Which mines are linked to which processors?','Inspect named ore origins and processing facilities in a USGS synthesis. These historical relationships identify where to investigate throughput, product quality and delivery evidence.','Reported for 2022 · published 2023')+`
+ <div class="ev-card"><div class="ev-toolbar"><label>Reported processing group <select id="uc-circuit">${dataset.circuits.map(c=>`<option value="${e(c.id)}">${e(c.name)}</option>`).join('')}</select></label></div></div>
+ <section id="uc-detail" aria-live="polite"></section>
+ <div class="ev-note">The report describes relationships as of 2022. Current operation, shipment volumes and available supply have not been established. No measured shipments are included.</div>
+ <div class="ev-card ev-card-body"><h2>Evidence needed for a supply decision</h2><div id="uc-needs"></div><div class="ev-links"><a href="#pathway">Open the cathode supply screen →</a><a href="#models">Review model evaluations →</a></div></div>
+ <details class="ev-card ev-card-body"><summary>Accounting limits and facility identity</summary>${dataset.limitations.map(t=>`<p>${e(t)}</p>`).join('')}</details>
+ <div class="ev-card ev-card-body"><h2>Source and coverage</h2><p>${e(s.attribution)} Historical context: 2022; publication year: 2023. Exact publication and original acquisition dates are unknown.</p><p>${e(dataset.evidenceStatus)} This release includes 3 reported processing groups, 10 named mines plus the Bingham district group, and 5 named processing facilities.</p><p>${e(s.rights)} Corporate tables, estimated mineral inventories, illustrations and the raw PDF are excluded.</p><div class="ev-links">${link(97,'Reported relationships · printed page 85')}${link(96,'Accounting caveats · printed page 84')}${link(4,'Publication and reuse notice')}<a href="${e(s.rightsUrl)}" target="_blank" rel="noopener">USGS reuse policy ↗</a><a href="/data/evidence/${e(descriptor.file)}" download>Download reported circuit evidence</a></div>${jsonDetails('Provenance and temporal scope',{source:s,temporalScope:dataset.temporalScope})}</div>${footer()}`;
+ function update(){
+  const r=selectUsCircuit(dataset,$('uc-circuit').value),c=r.circuit;
+  const list=rows=>`<ul>${rows.map(n=>`<li><strong>${e(n.name)}</strong> · ${e(n.state)}<br><span class="ev-small">${e(n.kind.replaceAll('_',' '))}</span></li>`).join('')}</ul>`;
+  $('uc-detail').innerHTML=`<div class="ev-card ev-card-body"><div class="ev-kicker">${e(c.operatorAsReported)} · source context ${r.asOfYear}</div><h2>${e(c.name)}</h2><div class="ev-split"><div><h3>Reported ore origins</h3>${list(c.origins)}</div><div><h3>Associated processing facilities</h3>${list(c.facilities)}</div></div><p><b>Relationship:</b> reported origins → processing group. Individual transport legs and quantities are unspecified.</p><p>${e(c.qualification)}</p><p>${e(c.originCoverage)}</p><p class="ev-small">${e(c.materialDescription)}</p><div class="ev-metrics"><div class="ev-metric"><strong>Unknown</strong><span>Shipment quantity and material basis</span></div><div class="ev-metric"><strong>Unknown</strong><span>Current throughput and recovery</span></div><div class="ev-metric"><strong>Unknown</strong><span>Verified deliverable supply</span></div></div>${jsonDetails('Reported group and unmeasured fields',c)}</div>`;
+  $('uc-needs').innerHTML='<ol>'+r.nextEvidence.map(n=>`<li><strong>${e(n.need)}</strong><p>${e(n.effect)}</p></li>`).join('')+'</ol>';
+ }
+ $('uc-circuit').onchange=update;update();
+}
