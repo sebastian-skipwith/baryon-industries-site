@@ -1,3 +1,4 @@
+import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261016c';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
 export async function renderPathway(container,{descriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
@@ -21,10 +22,11 @@ export async function renderPathway(container,{descriptor,data,helpers:h}) {
     <div class="ev-card ev-card-body"><h2>Keep the evidence bases separate</h2><p>471 tonnes is a full-year sales observation. It is not a production measurement, inventory balance or current supply offer. The 11,300 t/year figure is nameplate capacity whose ramp-up was delayed.</p><p>Subtracting sales from capacity would not measure spare capacity. Dividing the two would not establish plant utilization. A subsurface copper occurrence does not determine fluid flow or recoverable product.</p><div class="ev-links"><a href="#supply">Compare the Copperwood development scenario →</a><a href="#flows">Inspect dated US copper accounts →</a><a href="#models">Review model evaluations →</a></div></div></div>
     <div class="ev-card ev-card-body"><h2>Evidence and scenario record</h2><p>${esc(e.confidence)} ${esc(e.scope)}</p><p>${esc(e.redistribution)} ${source} · <a href="${esc(e.source.rightsUrl)}" target="_blank" rel="noopener">Source-use policy ↗</a></p>
     ${jsonDetails('Reported facts, persistent facility IDs and unknowns',e)}
-    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">View decision report</button></div><div id="cp-report" hidden></div></div>${footer()}`;
-  const $=id=>container.querySelector('#'+id);let input,result,url;
+    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create decision brief</button></div><div id="cp-report" hidden></div></div>${footer()}`;
+  const $=id=>container.querySelector('#'+id);let input,result,revision=0;const urls=[];
+  const releaseDownloads=()=>{for(const url of urls)URL.revokeObjectURL(url);urls.length=0;};
   function update(){
-    if(url){URL.revokeObjectURL(url);url=null;}
+    revision++;releaseDownloads();
     $('cp-report').hidden=true;$('cp-report').textContent='';
     input=Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,$('cp-'+k).value===''?null:$('cp-'+k).valueAsNumber]));
     result=screenCathodeSupply(input,e);$('cp-report-button').disabled=!result.ok;
@@ -42,11 +44,28 @@ export async function renderPathway(container,{descriptor,data,helpers:h}) {
   }
   container.querySelectorAll('input').forEach(n=>n.addEventListener('input',update));
   $('cp-clear').addEventListener('click',()=>{for(const [k,r]of Object.entries(SCREEN_INPUTS))if(!r.required)$('cp-'+k).value='';update();});
-  $('cp-report-button').addEventListener('click',()=>{
+  $('cp-report-button').addEventListener('click',async()=>{
     if(!result.ok)return;
-    const report={schemaVersion:1,generatedAt:new Date().toISOString(),evidenceId:e.id,evidenceSha256:descriptor.sha256,inputs:input,result,investigations:supplyInvestigations(result),evidence:e};
-    const raw=JSON.stringify(report,null,2);if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
-    $('cp-report').innerHTML=`<h3>Decision report</h3><a href="${esc(url)}" download="baryon-gunnison-decision.json">Save report as JSON</a><pre class="ev-json" tabindex="0">${esc(raw)}</pre>`;$('cp-report').hidden=false;
+    const requestedRevision=revision;$('cp-report-button').disabled=true;
+    try{
+      const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString());
+      const markdown=await cathodeDecisionMarkdown(report);
+      if(requestedRevision!==revision)return;
+      releaseDownloads();
+      const raw=JSON.stringify(report,null,2);
+      const jsonUrl=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+      const markdownUrl=URL.createObjectURL(new Blob([markdown],{type:'text/markdown;charset=utf-8'}));
+      urls.push(jsonUrl,markdownUrl);
+      $('cp-report').innerHTML=`<h3>Decision brief</h3><div class="ev-note"><strong>Investigate before commitment.</strong> Verified deliverable supply remains unknown, including when the entered scenario reaches the target.</div>
+        <p>Save a readable brief with the requirement, assumptions, historical facts, unresolved evidence checks and next investigations. The paired JSON retains exact values and the evidence fingerprint. Downloads stay in your browser; no scenario is sent to a server.</p>
+        <ul>${report.evidenceGates.map(g=>`<li><strong>Unverified:</strong> ${esc(g.requires)}</li>`).join('')}</ul>
+        <div class="ev-links"><a href="${esc(markdownUrl)}" download="baryon-gunnison-decision.md">Download decision brief (.md)</a><a href="${esc(jsonUrl)}" download="baryon-gunnison-decision.json">Download exact scenario (.json)</a></div>
+        ${jsonDetails('Exact scenario, evidence and reproducibility record',report)}`;
+      $('cp-report').hidden=false;
+    }catch(error){
+      if(requestedRevision!==revision)return;
+      releaseDownloads();$('cp-report').innerHTML=`<div role="alert" class="ev-error">Could not create the brief: ${esc(error.message)}</div>`;$('cp-report').hidden=false;
+    }finally{if(requestedRevision===revision)$('cp-report-button').disabled=!result.ok;}
   });
   update();
 }
