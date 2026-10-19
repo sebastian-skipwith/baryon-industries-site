@@ -1,6 +1,7 @@
 import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261016c';
+import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261019a';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
-export async function renderPathway(container,{descriptor,data,helpers:h}) {
+export async function renderPathway(container,{descriptor,reviewDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
   const source=`<a href="${esc(e.source.url)}#page=4" target="_blank" rel="noopener">USGS Copper Yearbook · page 20.2 ↗</a>`;
@@ -22,7 +23,8 @@ export async function renderPathway(container,{descriptor,data,helpers:h}) {
     <div class="ev-card ev-card-body"><h2>Keep the evidence bases separate</h2><p>471 tonnes is a full-year sales observation. It is not a production measurement, inventory balance or current supply offer. The 11,300 t/year figure is nameplate capacity whose ramp-up was delayed.</p><p>Subtracting sales from capacity would not measure spare capacity. Dividing the two would not establish plant utilization. A subsurface copper occurrence does not determine fluid flow or recoverable product.</p><div class="ev-links"><a href="#supply">Compare the Copperwood development scenario →</a><a href="#flows">Inspect dated US copper accounts →</a><a href="#models">Review model evaluations →</a></div></div></div>
     <div class="ev-card ev-card-body"><h2>Evidence and scenario record</h2><p>${esc(e.confidence)} ${esc(e.scope)}</p><p>${esc(e.redistribution)} ${source} · <a href="${esc(e.source.rightsUrl)}" target="_blank" rel="noopener">Source-use policy ↗</a></p>
     ${jsonDetails('Reported facts, persistent facility IDs and unknowns',e)}
-    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create decision brief</button></div><div id="cp-report" hidden></div></div>${footer()}`;
+    <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
+    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div>${footer()}`;
   const $=id=>container.querySelector('#'+id);let input,result,revision=0;const urls=[];
   const releaseDownloads=()=>{for(const url of urls)URL.revokeObjectURL(url);urls.length=0;};
   function update(){
@@ -50,17 +52,33 @@ export async function renderPathway(container,{descriptor,data,helpers:h}) {
     try{
       const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString());
       const markdown=await cathodeDecisionMarkdown(report);
+      if(!reviewDescriptor)throw new Error('Research review is missing from this snapshot. Reload to retry.');
+      const review=await data(reviewDescriptor);
+      const handoff=await makeCathodeResearchHandoff(report,review,reviewDescriptor);
+      const handoffMarkdown=await cathodeResearchHandoffMarkdown(handoff);
       if(requestedRevision!==revision)return;
       releaseDownloads();
       const raw=JSON.stringify(report,null,2);
       const jsonUrl=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
       const markdownUrl=URL.createObjectURL(new Blob([markdown],{type:'text/markdown;charset=utf-8'}));
-      urls.push(jsonUrl,markdownUrl);
+      const handoffUrl=URL.createObjectURL(new Blob([JSON.stringify(handoff,null,2)],{type:'application/json'}));
+      const handoffMarkdownUrl=URL.createObjectURL(new Blob([handoffMarkdown],{type:'text/markdown;charset=utf-8'}));
+      urls.push(jsonUrl,markdownUrl,handoffUrl,handoffMarkdownUrl);
+      const sourceLabels={historical_context_used:'Historical context only',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending'};
       $('cp-report').innerHTML=`<h3>Decision brief</h3><div class="ev-note"><strong>Investigate before commitment.</strong> Verified deliverable supply remains unknown, including when the entered scenario reaches the target.</div>
         <p>Save a readable brief with the requirement, assumptions, historical facts, unresolved evidence checks and next investigations. The paired JSON retains exact values and the evidence fingerprint. Downloads stay in your browser; no scenario is sent to a server.</p>
         <ul>${report.evidenceGates.map(g=>`<li><strong>Unverified:</strong> ${esc(g.requires)}</li>`).join('')}</ul>
         <div class="ev-links"><a href="${esc(markdownUrl)}" download="baryon-gunnison-decision.md">Download decision brief (.md)</a><a href="${esc(jsonUrl)}" download="baryon-gunnison-decision.json">Download exact scenario (.json)</a></div>
-        ${jsonDetails('Exact scenario, evidence and reproducibility record',report)}`;
+        ${jsonDetails('Exact scenario, evidence and reproducibility record',report)}
+        <section id="cp-handoff" aria-label="Copper evidence research handoff"><h2>From this scenario to evidence</h2>
+        <p>Four checks still need evidence. These are proposed research tasks; no source has been acquired and no check has been satisfied by creating this handoff. Source statuses below were recorded in the ${esc(review.reviewedAt)} review.</p>
+        <ol class="ev-investigations">${handoff.tasks.map(t=>`<li data-gate="${esc(t.id)}"><h3>${esc(t.title)}</h3><p><strong>Unresolved:</strong> ${esc(t.acceptanceCriteria)}</p><p>${esc(t.nextAction)}</p><p class="ev-small">${esc(t.sourceCoverage)}</p>
+          ${t.sourceIds.map(id=>{const s=handoff.sources.find(s=>s.id===id);return `<p class="ev-small"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a> · <strong>${esc(sourceLabels[s.status])}</strong> · reviewed ${esc(s.reviewedAt)}${s.policy?` · <a href="${esc(s.policy.url)}" target="_blank" rel="noopener">Recorded reuse policy ↗</a>`:''}</p>`;}).join('')}
+          <details><summary>Observation needed and possible decision effect</summary><p>${esc(t.proposedObservation)}</p><p>${esc(t.decisionEffect)}</p><p class="ev-small">Expected utility and cost: unknown. This order is a curated checklist.</p></details></li>`).join('')}</ol>
+        <div class="ev-note">${esc(handoff.completionRule)}</div>
+        <p>The soil and BC audits are consumed; the BC geological candidate did not pass its uncertainty gate. Copperwood cores remain selected known-deposit evidence. Research-policy improvement has not been demonstrated.</p>
+        <div class="ev-links"><a href="${esc(handoffMarkdownUrl)}" download="baryon-copper-research-handoff.md">Download research handoff (.md)</a><a href="${esc(handoffUrl)}" download="baryon-copper-research-handoff.json">Download reproducible handoff (.json)</a><a href="#models">Inspect research outcomes →</a></div>
+        ${jsonDetails('Research tasks, source bindings and consumed-audit safeguards',handoff)}</section>`;
       $('cp-report').hidden=false;
     }catch(error){
       if(requestedRevision!==revision)return;
