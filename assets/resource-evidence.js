@@ -1,5 +1,5 @@
-import {researchReviewPanel} from '/assets/research-review-view.mjs?v=20261015d';
-import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261019a';
+import {researchReviewPanel} from '/assets/research-review-view.mjs?v=20261019b';
+import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261019b';
 import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261016b';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';

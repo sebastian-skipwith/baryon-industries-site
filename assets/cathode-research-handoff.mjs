@@ -3,6 +3,8 @@ import {validateCathodeDecision} from './cathode-decision.mjs';
 // Versioned mapping to a reviewed public snapshot; new evidence requires a new review/binding.
 const REVIEW = Object.freeze({file:'research-review-43ad3aad1259.json',sha256:'43ad3aad1259b7cbad6f4e60899d234cddbb4b4427568e3cbfb77152b3222508',bytes:8896});
 const REVIEW_CANONICAL = '3d84ad926c04f007bde39295e0e9c2e9bddb01ec51d8023afd636b8b2f6607d4';
+const ACCESS_REVIEW = Object.freeze({file:'research-review-c00e75a48992.json',sha256:'c00e75a48992b049aadf2b818e30fe5b41ef402175f551a0c30aa48cf60388c9',bytes:9484});
+const ACCESS_CANONICAL = '1c3f20575f308a5f842e33790e4b9ad9efbeda4be4867170a757c96b9c780ef3';
 const canonical = v => v===null || typeof v!=='object' ? JSON.stringify(v) : Array.isArray(v) ? '['+v.map(canonical).join(',')+']' : '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
 const clone = v => JSON.parse(JSON.stringify(v));
 const check = (ok,message) => {if(!ok)throw new Error(message);};
@@ -33,17 +35,24 @@ const RULES = [
 export async function makeCathodeResearchHandoff(decision,review,descriptor){
   // Copy all caller-owned content before the first asynchronous digest.
   const decisionCopy=clone(decision),reviewCopy=clone(review);
-  for(const [key,value]of Object.entries(REVIEW))check(descriptor?.[key]===value,'Research review descriptor does not match the reviewed snapshot.');
+  const accessReview=descriptor?.file===ACCESS_REVIEW.file;
+  const binding=accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
+  for(const [key,value]of Object.entries(binding))check(descriptor?.[key]===value,'Research review descriptor does not match the reviewed snapshot.');
   const verified=await validateCathodeDecision(decisionCopy);
-  check(await sha(reviewCopy)===REVIEW_CANONICAL,'Research review content does not match the reviewed snapshot.');
-  const tasks=RULES.map((rule,index)=>{
+  check(await sha(reviewCopy)===canonicalHash,'Research review content does not match the reviewed snapshot.');
+  const rules=clone(RULES);
+  if(accessReview)Object.assign(rules[0],{
+    sourceCoverage:'Historical context and candidate links only. The queued EPA URL returned HTTP 404; document review is incomplete. No current output measurement is admitted.',
+    nextAction:'Resolve the exact facility and process, then find a permitted dated operating measurement. Identify an accessible official permit copy or verified replacement before reviewing authorization. A failed download does not establish permit revocation.',
+  });
+  const tasks=rules.map((rule,index)=>{
     const gate=verified.evidenceGates.find(g=>g.id===rule.id);
     check(gate?.status==='unverified','Unsupported evidence gate.');
     return {...clone(rule),order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
       acquisitionStatus:'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:'cathode-research-handoff-v1',
-    decisionReport:verified,reviewBinding:{...REVIEW,canonicalSha256:REVIEW_CANONICAL},review:reviewCopy,
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+    decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
     sources:reviewCopy.sourceDecisions.filter(s=>tasks.some(t=>t.sourceIds.includes(s.id))),
     evidenceRecordRequired:['Source URL and original artifact SHA-256','Applicable reuse permission and permitted fields','Persistent facility/product/lot identity','Observation interval and publication/retrieval dates','Quantity, units, mass basis, measurement method and uncertainty','Commitment/allocation and delivery linkage where relevant'],
