@@ -2,9 +2,12 @@ import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decis
 import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261019b';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
 import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261020a';
-export async function renderPathway(container,{descriptor,reviewDescriptor,data,helpers:h}) {
+import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261020b';
+export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
+  let flowEvidence,circuitEvidence,contextError;
+  try{if(!flowDescriptor||!circuitDescriptor)throw new Error('National account or processing-group snapshot is unavailable.');[flowEvidence,circuitEvidence]=await Promise.all([data(flowDescriptor),data(circuitDescriptor)]);}catch(error){contextError=error.message;}
   const source=`<a href="${esc(e.source.url)}#page=4" target="_blank" rel="noopener">USGS Copper Yearbook · page 20.2 ↗</a>`;
   container.innerHTML=heading('Supply decisions / Gunnison, Arizona','Can this pathway meet a copper requirement?','Follow a documented route from underground leaching to copper cathodes. Compare a delivery target with historical evidence, then test explicitly assumed operating conditions.','Historical evidence · 2022')+
     `<div class="ev-note"><strong>Evidence year: 2022. Report published: May 2026.</strong> Current operating status and available supply are unknown in this snapshot.</div>
@@ -25,6 +28,8 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,data,
     <div class="ev-card ev-card-body"><h2>Keep the evidence bases separate</h2><p>471 tonnes is a full-year sales observation. It is not a production measurement, inventory balance or current supply offer. The 11,300 t/year figure is nameplate capacity whose ramp-up was delayed.</p><p>Subtracting sales from capacity would not measure spare capacity. Dividing the two would not establish plant utilization. A subsurface copper occurrence does not determine fluid flow or recoverable product.</p><div class="ev-links"><a href="#supply">Compare the Copperwood development scenario →</a><a href="#flows">Inspect dated US copper accounts →</a><a href="#models">Review model evaluations →</a></div></div></div>
     <div class="ev-card ev-card-body"><h2>Evidence and scenario record</h2><p>${esc(e.confidence)} ${esc(e.scope)}</p><p>${esc(e.redistribution)} ${source} · <a href="${esc(e.source.rightsUrl)}" target="_blank" rel="noopener">Source-use policy ↗</a></p>
     ${jsonDetails('Reported facts, persistent facility IDs and unknowns',e)}
+    <h3>Connect the requirement to national accounts</h3><p>Select one historical US copper reporting period. The context report reconciles that national balance and explains why its period, mass basis and geographic scope cannot establish buyer-specific cathode supply.</p>
+    ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
     <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div>${footer()}`;
   const $=id=>container.querySelector('#'+id);let input,result,revision=0;const urls=[];
@@ -60,9 +65,10 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,data,
   }
   container.querySelectorAll('input').forEach(n=>n.addEventListener('input',update));
   $('cp-clear').addEventListener('click',()=>{for(const [k,r]of Object.entries(SCREEN_INPUTS))if(!r.required)$('cp-'+k).value='';update();});
+  $('cp-context-period')?.addEventListener('change',update);
   $('cp-report-button').addEventListener('click',async()=>{
     if(!result.ok)return;
-    const requestedRevision=revision;$('cp-report-button').disabled=true;
+    const requestedRevision=revision,requestedPeriod=$('cp-context-period')?.value;$('cp-report-button').disabled=true;
     try{
       const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString());
       const markdown=await cathodeDecisionMarkdown(report);
@@ -72,6 +78,9 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,data,
       const handoffMarkdown=await cathodeResearchHandoffMarkdown(handoff);
       const thresholdReport=await makeCathodeThresholdReport(handoff);
       const thresholdMarkdown=await cathodeThresholdMarkdown(thresholdReport);
+      if(contextError)throw new Error('National context unavailable: '+contextError);
+      const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod);
+      const contextMarkdown=await cathodeFlowContextMarkdown(flowContext);
       if(requestedRevision!==revision)return;
       releaseDownloads();
       const raw=JSON.stringify(report,null,2);
@@ -81,7 +90,9 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,data,
       const handoffMarkdownUrl=URL.createObjectURL(new Blob([handoffMarkdown],{type:'text/markdown;charset=utf-8'}));
       const thresholdUrl=URL.createObjectURL(new Blob([JSON.stringify(thresholdReport,null,2)],{type:'application/json'}));
       const thresholdMarkdownUrl=URL.createObjectURL(new Blob([thresholdMarkdown],{type:'text/markdown;charset=utf-8'}));
-      urls.push(jsonUrl,markdownUrl,handoffUrl,handoffMarkdownUrl,thresholdUrl,thresholdMarkdownUrl);
+      const contextUrl=URL.createObjectURL(new Blob([JSON.stringify(flowContext,null,2)],{type:'application/json'}));
+      const contextMarkdownUrl=URL.createObjectURL(new Blob([contextMarkdown],{type:'text/markdown;charset=utf-8'}));
+      urls.push(jsonUrl,markdownUrl,handoffUrl,handoffMarkdownUrl,thresholdUrl,thresholdMarkdownUrl,contextUrl,contextMarkdownUrl);
       const sourceLabels={historical_context_used:'Historical context only',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending',source_unavailable_review_incomplete:'Source unavailable · review incomplete'};
       $('cp-report').innerHTML=`<h3>Decision brief</h3><div class="ev-note"><strong>Investigate before commitment.</strong> Verified deliverable supply remains unknown, including when the entered scenario reaches the target.</div>
         <p>Save a readable brief with the requirement, assumptions, historical facts, unresolved evidence checks and next investigations. The paired JSON retains exact values and the evidence fingerprint. Downloads stay in your browser; no scenario is sent to a server.</p>
@@ -90,6 +101,17 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,data,
         ${jsonDetails('Exact scenario, evidence and reproducibility record',report)}
         <h3>One assumption at a time</h3><p>Save the required changes calculated above, with the exact assumptions, decision and research handoff. All evidence checks remain unresolved.</p>
         <div class="ev-links"><a href="${esc(thresholdMarkdownUrl)}" download="baryon-copper-thresholds.md">Download threshold comparison (.md)</a><a href="${esc(thresholdUrl)}" download="baryon-copper-thresholds.json">Download exact comparison (.json)</a></div>
+        <section id="cp-flow-context" aria-label="Requirement and national copper accounts"><h2>The requirement and the national account</h2>
+        <div class="ev-note"><strong>Context only; this requirement is not reconciled with the national account.</strong> Verified supply and the target's share of available supply remain unknown.</div>
+        <p>Requirement: ${fmt(report.requirement.targetTonnes)} t cathode product over ${fmt(report.requirement.horizonDays)} relative days. Account: United States, ${esc(flowContext.account.period.label)}, ${esc(flowContext.account.period.start)} through ${esc(flowContext.account.period.end)}; tonnes of copper.</p>
+        <h3>Reconcile this national period only</h3><ul>${flowContext.account.components.map(t=>'<li>'+esc(t.label)+': '+fmt(t.value)+' t Cu; signed contribution '+(t.signedContribution>0?'+':'')+fmt(t.signedContribution)+' t Cu · '+(t.sourceEstimated?'Estimated':t.includesEstimates?'Includes estimates':'Reported')+'</li>').join('')}</ul>
+        <p><strong>Reconstructed: ${fmt(flowContext.account.balance.reconstructed)} t Cu.</strong> Published apparent consumption: ${fmt(flowContext.account.balance.reported)} t Cu. Reconstructed minus published: ${fmt(flowContext.account.balance.roundingDifference)} t Cu. Rounded components and published totals are retained separately.</p>
+        <p>Reported refined use: ${fmt(flowContext.account.reportedRefinedUse.value)} t Cu (${flowContext.account.reportedRefinedUse.sourceEstimated?'estimated':flowContext.account.reportedRefinedUse.includesEstimates?'includes estimates':'reported'}). The national balance ${flowContext.account.balance.containsEstimates?'includes estimates':'uses reported terms'}. Its coverage differs from apparent consumption; the difference is not unmet demand. Old-scrap recovery includes forms beyond refined cathodes. ${esc(flowContext.account.periodRule)}</p>
+        <h3>What prevents a direct reconciliation?</h3><ul class="ev-investigations">${flowContext.compatibility.checks.map(v=>'<li data-context-check="'+esc(v.id)+'"><p><strong>Requirement:</strong> '+esc(v.requirement)+'</p><p><strong>Account/context:</strong> '+esc(v.context)+'</p><p><strong>Evidence needed:</strong> '+esc(v.needed)+'</p></li>').join('')}</ul>
+        <p>Plant sales, capacity and scenario output are not added to national terms. No product-purity conversion, target-share ratio, current availability or demand forecast is inferred.</p>
+        <div class="ev-links"><a href="${esc(flowEvidence.source.url)}#page=11" target="_blank" rel="noopener">USGS national balance · table 8 ↗</a><a href="${esc(circuitEvidence.source.url)}#page=97" target="_blank" rel="noopener">USGS processing groups · page 85 ↗</a><a href="#flows">Inspect all copper-flow accounts →</a></div><p class="ev-small">National account published ${esc(flowEvidence.source.publicationDate)}. Processing relationships are framed as of 2022. These source dates do not establish present conditions.</p>
+        <div class="ev-links"><a href="${esc(contextMarkdownUrl)}" download="baryon-copper-flow-context.md">Download account context (.md)</a><a href="${esc(contextUrl)}" download="baryon-copper-flow-context.json">Download exact account context (.json)</a></div>
+        ${jsonDetails('National account, incompatibilities and source bindings',flowContext)}</section>
         <section id="cp-handoff" aria-label="Copper evidence research handoff"><h2>From this scenario to evidence</h2>
         <p>Four checks still need evidence. These are proposed research tasks; no source has been acquired and no check has been satisfied by creating this handoff. Source statuses below were recorded in the ${esc(review.reviewedAt)} review.</p>
         <ol class="ev-investigations">${handoff.tasks.map(t=>`<li data-gate="${esc(t.id)}"><h3>${esc(t.title)}</h3><p><strong>Unresolved:</strong> ${esc(t.acceptanceCriteria)}</p><p>${esc(t.nextAction)}</p><p class="ev-small">${esc(t.sourceCoverage)}</p>
