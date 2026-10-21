@@ -232,3 +232,9 @@
   #ev-method-commitment-ngsa .ev-table td{border-top:0;padding:6px 0 14px}
   #ev-method-commitment-ngsa .ev-table td:first-child{border-top:1px solid var(--hair);padding:14px 0 0;font-weight:600}
 }
+
+/* Buyer intent is grouped separately from conditional operating assumptions. */
+#cp-buyer-requirement{min-width:0;border:0;border-top:1px solid var(--line);padding:20px 0 0;margin:24px 0}
+#cp-buyer-requirement legend{padding-right:10px;font-weight:600}
+#cp-horizonDays:disabled{background:var(--bg-soft,#f6f5f3);color:var(--ink-soft);opacity:1}
+#cp-report{overflow-wrap:anywhere}

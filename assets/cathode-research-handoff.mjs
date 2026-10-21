@@ -1,4 +1,5 @@
-import {validateCathodeDecision} from './cathode-decision.mjs';
+import {cathodeRequirementLines} from './cathode-requirement.mjs?v=20261021c';
+import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021c';
 
 // Versioned mapping to a reviewed public snapshot; new evidence requires a new review/binding.
 const REVIEW = Object.freeze({file:'research-review-43ad3aad1259.json',sha256:'43ad3aad1259b7cbad6f4e60899d234cddbb4b4427568e3cbfb77152b3222508',bytes:8896});
@@ -45,13 +46,15 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor){
     sourceCoverage:'Historical context and candidate links only. The queued EPA URL returned HTTP 404; document review is incomplete. No current output measurement is admitted.',
     nextAction:'Resolve the exact facility and process, then find a permitted dated operating measurement. Identify an accessible official permit copy or verified replacement before reviewing authorization. A failed download does not establish permit revocation.',
   });
+  if(verified.schemaVersion===3)rules[3].nextAction='Use the buyer requirement attached to this task; clarify any unspecified dates or destination. Identify permitted route, lead-time, transport-capacity and loss evidence for the same allocation and requested window. Buyer entries do not verify location, capability or arrival.';
   const tasks=rules.map((rule,index)=>{
     const gate=verified.evidenceGates.find(g=>g.id===rule.id);
     check(gate?.status==='unverified','Unsupported evidence gate.');
-    return {...clone(rule),order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
+    const buyerScope=verified.schemaVersion===3?{buyerScope:{targetTonnes:verified.requirement.targetTonnes,horizonDays:verified.requirement.horizonDays,...clone(verified.buyerRequest),provenance:'user_requirement',observed:false}}:{};
+    return {...clone(rule),...buyerScope,order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
       acquisitionStatus:'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
     decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
     sources:reviewCopy.sourceDecisions.filter(s=>tasks.some(t=>t.sourceIds.includes(s.id))),
@@ -90,7 +93,8 @@ export async function cathodeResearchHandoffMarkdown(handoff){
   const n=v=>v===null?'Unknown':String(v);
   return ['# Baryon copper research handoff','',
     '**Investigate before commitment. Verified deliverable supply: unknown. All four evidence gates are unresolved.**','',
-    `Requirement: ${n(d.requirement.targetTonnes)} t cathode product over ${n(d.requirement.horizonDays)} relative days. Calendar dates and product purity are unknown.`,
+    `Requirement: ${n(d.requirement.targetTonnes)} t cathode product over ${n(d.requirement.horizonDays)} ${d.requirement.windowStart?'calendar':'relative'} days. Product purity remains unverified.`,
+    ...(d.schemaVersion===3?cathodeRequirementLines(d.requirement):['Calendar dates are unknown.']),
     `Entered scenario: ${d.decision.scenarioStatus}; conditional delivery ${n(d.result.conditionalTonnes)} t; delivery minus target ${n(d.result.gapTonnes)} t.`,
     'These figures are arithmetic under user assumptions, not measured current supply or a forecast. The paired JSON includes the complete decision brief and exact assumptions.','',
     '## Evidence tasks','',...r.tasks.flatMap(t=>[

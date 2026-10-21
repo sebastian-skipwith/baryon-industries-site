@@ -1,3 +1,4 @@
+import {resolveCathodeRequirement,cathodeRequirementLines} from './cathode-requirement.mjs?v=20261021c';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from './cathode-screen.mjs';
 
 // A versioned report for one reviewed historical snapshot. New evidence needs a new binding/review.
@@ -9,21 +10,23 @@ const sha=async value=>[...new Uint8Array(await globalThis.crypto.subtle.digest(
 const check=(ok,msg)=>{if(!ok)throw new Error(msg);};
 const clone=v=>JSON.parse(JSON.stringify(v));
 
-export async function makeCathodeDecision(input,evidence,descriptor,generatedAt){
+export async function makeCathodeDecision(input,evidence,descriptor,generatedAt,buyerRequest){
   check(typeof generatedAt==='string'&&Number.isFinite(Date.parse(generatedAt))&&new Date(generatedAt).toISOString()===generatedAt,'Use an ISO UTC report timestamp.');
   for(const [key,value]of Object.entries(BINDING))check(descriptor?.[key]===value,'Decision evidence descriptor does not match the reviewed snapshot.');
   // Snapshot caller data before yielding; never serialize extra input/descriptor fields.
-  const inputs=Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,input?.[k]??null]));
+  const requested=buyerRequest===undefined?null:resolveCathodeRequirement(input,buyerRequest);
+  const inputs=requested?.inputs??Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,input?.[k]??null]));
   const source=clone(evidence);
   check(await sha(canonical(source))===EVIDENCE_HASH,'Decision evidence content does not match the reviewed snapshot.');
   const result=screenCathodeSupply(inputs,source);
   check(result.ok,result.errors?.join(' ')||'Invalid scenario.');
   const scenarioStatus=result.conditionalTonnes===null?'incomplete':result.targetMet?'reaches_target':'falls_short';
   const report={
-    schemaVersion:2,kind:'cathode_supply_decision_brief',method:{...DECISION_METHOD},
+    schemaVersion:requested?3:2,kind:'cathode_supply_decision_brief',method:requested?{...DECISION_METHOD,id:'cathode-decision-v2-buyer-requirement',requirementMethod:'cathode-requirement-v1'}:{...DECISION_METHOD},
+    ...(requested?{buyerRequest:requested.buyerRequest}:{}),
     evidenceBinding:{...BINDING,canonicalSha256:EVIDENCE_HASH},
     scope:'Historical Gunnison in-situ pathway only. Related assets, new designs and current operating capability are not established by this evidence.',
-    requirement:{product:'Copper cathode product',massBasis:'product_mass',targetTonnes:inputs.targetTonnes,horizonDays:inputs.horizonDays,windowStart:null,windowEnd:null,meaning:'Relative scenario window; no calendar delivery date is verified.'},
+    requirement:requested?.requirement??{product:'Copper cathode product',massBasis:'product_mass',targetTonnes:inputs.targetTonnes,horizonDays:inputs.horizonDays,windowStart:null,windowEnd:null,meaning:'Relative scenario window; no calendar delivery date is verified.'},
     inputs,
     assumptions:Object.entries(SCREEN_INPUTS).filter(([,r])=>!r.required).map(([key,r])=>({id:key,label:r.label,value:inputs[key],unit:r.unit,status:inputs[key]===null?'missing':'user_assumption',observed:false})),
     decision:{status:'investigate_before_commitment',verifiedDeliverableTonnes:null,verifiedTargetMet:null,scenarioStatus,
@@ -44,7 +47,7 @@ export async function makeCathodeDecision(input,evidence,descriptor,generatedAt)
 
 export async function validateCathodeDecision(report){
   check(report&&typeof report==='object','A decision report is required.');
-  const expected=await makeCathodeDecision(report.inputs,report.evidence,report.evidenceBinding,report.generatedAt);
+  const expected=await makeCathodeDecision(report.inputs,report.evidence,report.evidenceBinding,report.generatedAt,report.schemaVersion===3?report.buyerRequest:undefined);
   check(canonical(report)===canonical(expected),'Decision report changed or uses an unsupported method. Recreate it from the current scenario.');
   return expected;
 }
@@ -59,7 +62,7 @@ export async function cathodeDecisionMarkdown(report){
     r.decision.explanation,'',
     '## Requirement and conditional result','',
     `- Target: ${n(r.requirement.targetTonnes)} t of cathode product over ${n(r.requirement.horizonDays)} days.`,
-    '- Calendar delivery dates: unknown. Product purity and contained-copper mass: unknown.',
+    ...(r.schemaVersion===3?cathodeRequirementLines(r.requirement).map(line=>'- '+line):['- Calendar delivery dates: unknown. Product purity and contained-copper mass: unknown.']),
     `- Scenario: ${status}.`,
     `- Conditional delivery: ${n(r.result.conditionalTonnes)} t cathode product.`,
     `- Delivery minus target: ${n(r.result.gapTonnes)} t; a negative number is a shortfall.`,
@@ -70,7 +73,7 @@ export async function cathodeDecisionMarkdown(report){
     '## User assumptions','',
     '| Input | Value | Basis |','| --- | ---: | --- |',
     ...r.assumptions.map(a=>`| ${a.label} | ${n(a.value)} ${a.unit} | ${a.status==='missing'?'Missing':'User assumption; not observed'} |`),'',
-    'Conditional delivery = assumed plant output × relative days × assumed available share × assumed delivery retention. A known zero factor binds delivery at zero even if another factor is missing.','',
+    `Conditional delivery = assumed plant output × ${r.requirement.windowStart?'inclusive calendar days':'relative days'} × assumed available share × assumed delivery retention. A known zero factor binds delivery at zero even if another factor is missing. Actual readiness and arrival remain unverified.`,'',
     '## Historical evidence','',r.scope,'',
     `Evidence through ${r.evidence.evidenceAsOf}; report published ${r.evidence.source.publicationDate} (month precision); source acquired ${r.evidence.source.acquiredAt}.`,
     `- Reported ${f.sales.period} sales: ${n(f.sales.value)} ${f.sales.unit}. Sales are not production or available inventory.`,

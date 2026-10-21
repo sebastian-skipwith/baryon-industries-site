@@ -1,4 +1,5 @@
-import {validateCathodeDecision} from './cathode-decision.mjs';
+import {cathodeRequirementLines,requirementMarkdownText} from './cathode-requirement.mjs?v=20261021c';
+import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021c';
 import {selectFlowPeriod} from './material-flow.mjs';
 import {validateUsCircuits} from './us-circuits.mjs';
 const FLOW={file:'us-copper-flows-df49d62bed27.json',sha256:'eca489e57d281986a408e17a20898aced4d1b15da3c0d98c5284e6229f387111',bytes:43909};
@@ -30,7 +31,12 @@ export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circu
     {id:'geography-allocation',status:'unresolved',requirement:'Gunnison pathway in Arizona; buyer destination and geographic accounting boundary are unspecified.',context:'United States aggregate, with imports, exports, scrap and stocks; no buyer allocation.',needed:'Facility-to-buyer identity, location and uncommitted allocation for the chosen interval.'},
     {id:'physical-link',status:'unresolved',requirement:'A documented Gunnison-to-buyer delivery path is needed.',context:'The three reviewed processing groups describe other historical associations; no Gunnison shipment is established by this snapshot.',needed:'Dated shipments and product/lot linkage. A missing match is not proof that no physical route exists.'},
   ];
-  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:'cathode-flow-context-v1',decisionReport:verified,
+  if(verified.schemaVersion===3){
+    const r=verified.requirement;
+    checks[1].requirement=r.windowStart?`Buyer requests ${r.windowStart} through ${r.windowEnd}, both inclusive (${r.horizonDays} days). Actual delivery timing remains unverified; historical pathway evidence is from 2022.`:`${r.horizonDays} relative days; calendar dates unspecified. Historical pathway evidence is from 2022.`;
+    checks[2].requirement=r.destination?`Buyer-requested destination: ${r.destination}. Location, geographic boundary and actual route remain unverified.`:'Gunnison pathway in Arizona; buyer destination and geographic accounting boundary are unspecified.';
+  }
+  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:verified.schemaVersion===3?'cathode-flow-context-v2-buyer-requirement':'cathode-flow-context-v1',decisionReport:verified,
     flowBinding:{...FLOW,canonicalSha256:FLOW_HASH},circuitBinding:{...CIRCUITS,canonicalSha256:CIRCUITS_HASH},flowEvidence:f,circuitEvidence:c,
     account,compatibility:{status:'context_only_not_reconciled',checks,canReconcileRequirement:false,targetShareOfAccount:null,verifiedDeliverableTonnes:null,unmetDemand:null,productToCopperFactor:null,buyerGeography:null},
     pathwayLink:{pathwayId:verified.evidence.id,historicalEvidenceAsOf:verified.evidence.evidenceAsOf,reviewedCircuitYear:c.temporalScope.asOfYear,matchingReviewedGroupIds:matchingGroups,verifiedShipmentQuantity:null,closedPlantBalance:false},
@@ -49,13 +55,14 @@ export async function cathodeFlowContextMarkdown(report){
  const r=await validateCathodeFlowContext(report),a=r.account,b=a.balance,n=v=>v===null?'Unknown':String(v),status=v=>v.sourceEstimated?'Estimated':v.includesEstimates?'Includes estimates':'Reported';
  return ['# Baryon copper requirement and national accounts','',
   '**Context only. This requirement cannot be reconciled with the selected national account; verified supply remains unknown.**','',
-  `Requirement: ${r.decisionReport.requirement.targetTonnes} t cathode product over ${r.decisionReport.requirement.horizonDays} relative days.`,
+  `Requirement: ${r.decisionReport.requirement.targetTonnes} t cathode product over ${r.decisionReport.requirement.horizonDays} ${r.decisionReport.requirement.windowStart?'calendar':'relative'} days.`,
+  ...(r.decisionReport.schemaVersion===3?cathodeRequirementLines(r.decisionReport.requirement):[]),
   `Account: ${a.country}, ${a.period.label} (${a.period.start} through ${a.period.end}); ${a.unit}.`,a.periodRule,'',
   '## National accounting only','',...a.components.map(t=>`- ${t.label}: ${n(t.value)} t Cu; signed contribution ${n(t.signedContribution)} t Cu; ${status(t)}. Table ${t.table}, PDF page ${t.page}.`),
   `Reconstructed from rounded components: ${n(b.reconstructed)} t Cu.`,
   `Published apparent consumption: ${n(b.reported)} t Cu; reconstructed minus published: ${n(b.roundingDifference)} t Cu.`,
   `Reported refined use: ${n(a.reportedRefinedUse.value)} t Cu (${status(a.reportedRefinedUse)}); separate coverage, not unmet demand.`,'',
-  '## What prevents a requirement-level reconciliation','',...r.compatibility.checks.flatMap(v=>['### '+v.id,'',`Requirement: ${v.requirement}`,`Account/context: ${v.context}`,`Needed: ${v.needed}`,'']),
+  '## What prevents a requirement-level reconciliation','',...r.compatibility.checks.flatMap(v=>['### '+v.id,'',`Requirement: ${requirementMarkdownText(v.requirement)}`,`Account/context: ${v.context}`,`Needed: ${v.needed}`,'']),
   '## Limits','',...r.limitations.map(v=>'- '+v),'',
   '## Sources and reproducibility','',`[USGS national account](${r.flowEvidence.source.url}); published ${r.flowEvidence.source.publicationDate}.`,
   `[USGS processing groups](${r.circuitEvidence.source.url}); relationships framed as of ${r.circuitEvidence.temporalScope.asOfYear}.`,

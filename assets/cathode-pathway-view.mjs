@@ -1,8 +1,9 @@
-import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261016c';
-import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261019b';
+import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021c';
+import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021c';
+import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261021c';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
-import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261020a';
-import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261020b';
+import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261021c';
+import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261021c';
 export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
@@ -21,6 +22,9 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       <p>${esc(e.process)}</p><p><strong>Reported constraint:</strong> ${esc(e.constraint)}</p><p class="ev-small">The first three steps summarize the reported process; the buyer step is a requirement to investigate. There are no measured flow quantities on the connections.</p><div class="ev-links">${source}</div></div>
     <div class="ev-supply-grid"><div class="ev-card ev-card-body"><h2>Set a cathode requirement</h2><p class="ev-small">All mass inputs are tonnes of cathode product. No product purity or copper-content conversion is assumed. Optional operating inputs start blank.</p>
     <div class="ev-input-grid">${Object.entries(SCREEN_INPUTS).map(([key,r])=>`<label for="cp-${key}">${esc(r.label)} <span>${esc(r.unit)}${r.required?'':' · assumption'}</span><input id="cp-${key}" type="number" min="${r.exclusiveMin?0.001:r.min}" max="${r.max}" step="any" ${r.required?'required':''} value="${key==='targetTonnes'?1000:key==='horizonDays'?365:''}"></label>`).join('')}</div>
+    <fieldset id="cp-buyer-requirement"><legend>Buyer request · optional</legend><p class="ev-small">Enter both dates to calculate the window, counting the first and last day. Leave both blank to use relative days. These are requested conditions; supplier capability and arrival remain unverified.</p>
+    <div class="ev-input-grid"><label for="cp-windowStart">First delivery day<input id="cp-windowStart" type="date" min="1900-01-01" max="2199-12-31"></label><label for="cp-windowEnd">Last delivery day · inclusive<input id="cp-windowEnd" type="date" min="1900-01-01" max="2199-12-31"></label><label for="cp-destination">Requested destination<input id="cp-destination" type="text" maxlength="240" autocomplete="off" placeholder="City, receiving site or port"></label><label for="cp-productSpecification">Buyer product requirement<input id="cp-productSpecification" type="text" maxlength="600" autocomplete="off" placeholder="Required grade, specification or acceptance criteria"></label></div>
+    <p id="cp-window-note" class="ev-small" aria-live="polite"></p><p class="ev-small">These entries stay in this page and your downloads. They are not sent to a supplier or saved to a server.</p><button id="cp-clear-request" class="ev-button" type="button">Clear buyer request</button></fieldset>
     <p class="ev-small">The output rate is gross plant cathode production. The available share excludes other buyers’ commitments; delivery retention accounts for transport/handling. No start-up delay, starting inventory or ramp is modeled.</p><button id="cp-clear" class="ev-button">Clear operating assumptions</button></div>
     <div id="cp-answer" class="ev-card ev-card-body" aria-live="polite"></div></div>
     <section id="cp-thresholds" class="ev-card ev-card-body" aria-label="Compare single assumption thresholds" aria-live="polite"></section>
@@ -32,7 +36,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
     <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div>${footer()}`;
-  const $=id=>container.querySelector('#'+id);let input,result,revision=0;const urls=[];
+  const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0;let relativeDays='365';const urls=[];
   const releaseDownloads=()=>{for(const url of urls)URL.revokeObjectURL(url);urls.length=0;};
   const thresholdNumber=v=>v===null?'Unknown':new Intl.NumberFormat('en-US',{maximumSignificantDigits:6}).format(v);
   function renderThresholds(comparison){
@@ -49,8 +53,19 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     revision++;releaseDownloads();
     $('cp-report').hidden=true;$('cp-report').textContent='';
     input=Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,$('cp-'+k).value===''?null:$('cp-'+k).valueAsNumber]));
-    result=screenCathodeSupply(input,e);$('cp-report-button').disabled=!result.ok;
-    $('cp-thresholds').innerHTML=renderThresholds(compareCathodeThresholds(input,e));
+    buyerRequest=Object.fromEntries(['windowStart','windowEnd','destination','productSpecification'].map(k=>[k,$('cp-'+k).value]));
+    const dated=Boolean(buyerRequest.windowStart||buyerRequest.windowEnd);
+    if(!$('cp-horizonDays').disabled)relativeDays=$('cp-horizonDays').value;
+    $('cp-horizonDays').disabled=dated;
+    if(!dated){$('cp-horizonDays').value=relativeDays;input.horizonDays=relativeDays===''?null:Number(relativeDays);}
+    try{
+      const resolved=resolveCathodeRequirement(input,buyerRequest);input=resolved.inputs;buyerRequest=resolved.buyerRequest;
+      if(dated)$('cp-horizonDays').value=input.horizonDays;
+      $('cp-window-note').textContent=dated?`${input.horizonDays} calendar days, both dates inclusive. Changing the dates changes the scenario duration; lead time is not modeled.`:'Using the relative delivery window above. Calendar delivery timing is unspecified.';
+      result=screenCathodeSupply(input,e);
+    }catch(error){result={ok:false,errors:[error.message]};$('cp-window-note').textContent=error.message;}
+    $('cp-report-button').disabled=!result.ok;
+    $('cp-thresholds').innerHTML=renderThresholds(result.ok?compareCathodeThresholds(input,e):{ok:false});
     if(!result.ok){$('cp-answer').innerHTML=`<h2>Revise the requirement</h2><div role="alert" class="ev-error">${result.errors.map(esc).join('<br>')}</div>`;$('cp-investigations').textContent='Enter a valid requirement.';return;}
     const r=result;
     $('cp-answer').innerHTML=`<div class="ev-kicker">Required delivery rate</div><div class="ev-supply-total">${fmt(r.minimumCathodeRate,2)} <span>t cathodes/day</span></div><p>At least ${fmt(r.minimumAnnualEquivalent,0)} t/year on a constant 365-day basis: ${fmt(r.minimumNameplatePct,2)}% of the historical stage-one nameplate, before allocation or delivery losses.</p>
@@ -64,13 +79,14 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     $('cp-investigations').innerHTML=supplyInvestigations(r).map(v=>`<li><h3>${esc(v.question)}</h3><p>${esc(v.action)}</p></li>`).join('');
   }
   container.querySelectorAll('input').forEach(n=>n.addEventListener('input',update));
+  $('cp-clear-request').addEventListener('click',()=>{for(const key of ['windowStart','windowEnd','destination','productSpecification'])$('cp-'+key).value='';update();});
   $('cp-clear').addEventListener('click',()=>{for(const [k,r]of Object.entries(SCREEN_INPUTS))if(!r.required)$('cp-'+k).value='';update();});
   $('cp-context-period')?.addEventListener('change',update);
   $('cp-report-button').addEventListener('click',async()=>{
     if(!result.ok)return;
     const requestedRevision=revision,requestedPeriod=$('cp-context-period')?.value;$('cp-report-button').disabled=true;
     try{
-      const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString());
+      const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString(),buyerRequest);
       const markdown=await cathodeDecisionMarkdown(report);
       if(!reviewDescriptor)throw new Error('Research review is missing from this snapshot. Reload to retry.');
       const review=await data(reviewDescriptor);
@@ -96,6 +112,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       const sourceLabels={historical_context_used:'Historical context only',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending',source_unavailable_review_incomplete:'Source unavailable · review incomplete'};
       $('cp-report').innerHTML=`<h3>Decision brief</h3><div class="ev-note"><strong>Investigate before commitment.</strong> Verified deliverable supply remains unknown, including when the entered scenario reaches the target.</div>
         <p>Save a readable brief with the requirement, assumptions, historical facts, unresolved evidence checks and next investigations. The paired JSON retains exact values and the evidence fingerprint. Downloads stay in your browser; no scenario is sent to a server.</p>
+        <div id="cp-buyer-summary"><h3>Buyer request</h3><p>${report.requirement.windowStart?esc(report.requirement.windowStart)+' through '+esc(report.requirement.windowEnd)+' · both inclusive':esc(String(report.requirement.horizonDays))+' relative days · dates unspecified'}</p><p>Requested destination: ${esc(report.requirement.destination??'Unspecified')}</p><p>Buyer product requirement: ${esc(report.requirement.productSpecification??'Unspecified')}</p><p class="ev-small">Buyer intent only. Actual product quality, route and delivery timing remain unverified.</p></div>
         <ul>${report.evidenceGates.map(g=>`<li><strong>Unverified:</strong> ${esc(g.requires)}</li>`).join('')}</ul>
         <div class="ev-links"><a href="${esc(markdownUrl)}" download="baryon-gunnison-decision.md">Download decision brief (.md)</a><a href="${esc(jsonUrl)}" download="baryon-gunnison-decision.json">Download exact scenario (.json)</a></div>
         ${jsonDetails('Exact scenario, evidence and reproducibility record',report)}
@@ -103,7 +120,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
         <div class="ev-links"><a href="${esc(thresholdMarkdownUrl)}" download="baryon-copper-thresholds.md">Download threshold comparison (.md)</a><a href="${esc(thresholdUrl)}" download="baryon-copper-thresholds.json">Download exact comparison (.json)</a></div>
         <section id="cp-flow-context" aria-label="Requirement and national copper accounts"><h2>The requirement and the national account</h2>
         <div class="ev-note"><strong>Context only; this requirement is not reconciled with the national account.</strong> Verified supply and the target's share of available supply remain unknown.</div>
-        <p>Requirement: ${fmt(report.requirement.targetTonnes)} t cathode product over ${fmt(report.requirement.horizonDays)} relative days. Account: United States, ${esc(flowContext.account.period.label)}, ${esc(flowContext.account.period.start)} through ${esc(flowContext.account.period.end)}; tonnes of copper.</p>
+        <p>Requirement: ${fmt(report.requirement.targetTonnes)} t cathode product over ${fmt(report.requirement.horizonDays)} ${report.requirement.windowStart?'calendar':'relative'} days. Account: United States, ${esc(flowContext.account.period.label)}, ${esc(flowContext.account.period.start)} through ${esc(flowContext.account.period.end)}; tonnes of copper.</p>
         <h3>Reconcile this national period only</h3><ul>${flowContext.account.components.map(t=>'<li>'+esc(t.label)+': '+fmt(t.value)+' t Cu; signed contribution '+(t.signedContribution>0?'+':'')+fmt(t.signedContribution)+' t Cu · '+(t.sourceEstimated?'Estimated':t.includesEstimates?'Includes estimates':'Reported')+'</li>').join('')}</ul>
         <p><strong>Reconstructed: ${fmt(flowContext.account.balance.reconstructed)} t Cu.</strong> Published apparent consumption: ${fmt(flowContext.account.balance.reported)} t Cu. Reconstructed minus published: ${fmt(flowContext.account.balance.roundingDifference)} t Cu. Rounded components and published totals are retained separately.</p>
         <p>Reported refined use: ${fmt(flowContext.account.reportedRefinedUse.value)} t Cu (${flowContext.account.reportedRefinedUse.sourceEstimated?'estimated':flowContext.account.reportedRefinedUse.includesEstimates?'includes estimates':'reported'}). The national balance ${flowContext.account.balance.containsEstimates?'includes estimates':'uses reported terms'}. Its coverage differs from apparent consumption; the difference is not unmet demand. Old-scrap recovery includes forms beyond refined cathodes. ${esc(flowContext.account.periodRule)}</p>
