@@ -256,12 +256,13 @@ function bcEvaluationPanel(e) {
     <p class="ev-small">BC Geological Survey, GeoFile 2020-08. Contains information licensed under the <a href="${escape(r.source.licenseUrl)}" target="_blank" rel="noopener">Open Government Licence – British Columbia</a>.</p></div>`;
 }
 
-function ngsaMethodCommitmentPanel(item, download) {
+function ngsaMethodCommitmentPanel(item, download, admission) {
   const d=item.document;
   return `<section class="ev-card ev-card-body" id="ev-method-commitment-ngsa"><div class="ev-kicker">Australian catchment copper / retrospective design</div><h3>${escape(d.title)}</h3>
     <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
     <p>The released field identities are reconciled: 1,315 sites and 124 reciprocal duplicate pairs. Their 1,191 planned targets are not yet linked to verified final catchments. Reciprocal pairs do not identify an original sample.</p>
     <div class="ev-note">The copper CSV and geological feature package were not acquired at commitment. Published related BOS copper aggregates were already exposed. This is a retrospective comparison after metadata inspection; no model or audit has run.</div>
+    ${admission?`<div class="ev-note" id="ev-ngsa-admission"><strong>Current admission check: five target IDs unresolved</strong><p>${fmt(admission.counts.matchedFieldTargets)} of ${fmt(admission.counts.fieldTargets)} field targets match the catchment package exactly, covering ${fmt(admission.counts.matchedFieldSites)} of ${fmt(admission.counts.fieldSites)} field sites. Missing: ${admission.missingTargets.map(escape).join(', ')}.</p><p>No sites were discarded or reassigned. Geometry is unchecked; copper CSV and geological features remain unacquired. Source admission stays closed.</p><details><summary>Inspect source identity checks and limits</summary><p>${escape(admission.method)}</p><ul>${admission.limitations.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${escape(admission.source.attribution)}</p><p>${escape(admission.fieldSource.attribution)}</p></details><a href="/data/evidence/${escape(manifest.sourceAdmissions.find(v=>v.methodId===d.id).file)}" download>Download catchment admission review (.json)</a></div>`:''}
     <div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Design choice</th><th>Committed comparison</th></tr></thead><tbody>
       <tr><td>Target and support</td><td>Quantified total Cu in TOS outlet sediment, coarse fraction &lt;2 mm; fused-bead HF/HNO3 ICP-MS, mg/kg. Missing and censored values remain explicit. No inferred depth or ore grade.</td></tr>
       <tr><td>One representative</td><td>Combine final catchments and duplicate components; select the smallest site ID before checking copper availability. No replacement for a missing or censored target.</td></tr>
@@ -276,10 +277,10 @@ function ngsaMethodCommitmentPanel(item, download) {
     </section>`;
 }
 
-function methodCommitmentPanel(item) {
+function methodCommitmentPanel(item, admissions) {
   const d=item.document, download=manifest.methodCommitments?.find(v=>v.id===item.id);
   if(!download || download.sha256!==item.publicDocument.sha256 || download.bytes!==item.publicDocument.bytes) throw new Error('Method commitment download identity mismatch');
-  if(d.id==='ngsa-tos-coarse-cu-total-georegions-v1')return ngsaMethodCommitmentPanel(item,download);
+  if(d.id==='ngsa-tos-coarse-cu-total-georegions-v1')return ngsaMethodCommitmentPanel(item,download,admissions.get(d.id));
   return `<section class="ev-card ev-card-body" id="ev-method-commitment"><div class="ev-kicker">Next independent evaluation / design commitment</div><h3>${escape(d.title)}</h3>
     <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
     <p>Two historical Eagle Plains surveys in northern Yukon are proposed for a separate sediment-copper test. The methods are fixed; no Yukon assay workbook has been acquired and no real model or audit has run.</p>
@@ -300,6 +301,13 @@ function methodCommitmentPanel(item) {
 async function registryPanel() {
   if(!manifest.registry)return '';
   const registry=await data(manifest.registry);
+  const admissions=new Map();
+  for(const descriptor of manifest.sourceAdmissions||[]){
+    const review=await data(descriptor);
+    const method=registry.methodCommitments.find(v=>v.id===review.methodId);
+    if(review.kind!=='ngsa_catchment_admission_review'||review.methodId!==descriptor.methodId||review.status!=='not_admitted'||review.sourceAdmission!==false||review.methodSha256!==method?.originalDocument.sha256||admissions.has(review.methodId))throw new Error('Source admission review identity mismatch');
+    admissions.set(review.methodId,review);
+  }
   const labels={historical_completed:'Historical result · audit consumed',frozen:'Protocol frozen',audit_started:'Audit started · consumed',audit_failed_consumed:'Audit failed · remains consumed',audit_completed:'Completed result · audit consumed'};
   return `<div class="ev-card ev-card-body" id="ev-research-registry"><div class="ev-kicker">Research process / inspectable history</div><h2>Research registry</h2><p>Protocols record source eligibility, grouped holdouts, baseline, fixed candidates, evaluation budget and promotion rules. Audit reservations cannot be reopened by changing a plan ID or data normalization.</p>
     <div class="ev-note">${registry.events.length} recorded events · ${registry.experiments.filter(e=>e.status==='frozen').length} new frozen protocols · ${registry.proposals.length} research proposal${registry.proposals.length===1?'':'s'} · ${(registry.methodCommitments||[]).length} method commitment${(registry.methodCommitments||[]).length===1?'':'s'}. Protocol checks and audit reservations are active; the fixed BC evaluation is complete. Automatic promotion and a learned research policy remain unimplemented.</div>
@@ -310,7 +318,7 @@ async function registryPanel() {
     ${registry.experiments.map(e=>`<h3>${escape(e.title)}</h3><span class="ev-badge">${escape(labels[e.status]||e.status)}</span><p>${escape(e.scope||e.plan?.question||'')}</p><p class="ev-small">${escape(e.registrationTiming||'Protocol recorded before any audit start in this registry.')} Registry entry: ${escape(e.registeredAt)}.</p>${e.originalPlanCreatedAt?`<p class="ev-small">Original plan: ${escape(e.originalPlanCreatedAt)} · original completion: ${escape(e.originalCompletedAt)}.</p>`:''}${jsonDetails('Inspect protocol, fingerprints and status',e)}`).join('')}
     <p class="ev-small">Proposals below preserve their original scope and knowledge at registration. Later method commitments report subsequent preparation and exposure.</p>
     ${registry.proposals.map(p=>`<h3>Next proposal: ${escape(p.title)}</h3><p>${escape(p.question)}</p><p class="ev-small">Feasibility proposal; no frozen experiment, evaluation or promotion.</p><p>${escape(p.evidenceAvailable)}</p><details><summary>Required before registration</summary><ul>${p.requiredBeforeRegistration.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${p.limitations.map(escape).join(' ')}</p></details>`).join('')}
-    ${(registry.methodCommitments||[]).map(methodCommitmentPanel).join('')}
+    ${(registry.methodCommitments||[]).map(item=>methodCommitmentPanel(item,admissions)).join('')}
     <div class="ev-links"><a href="/data/evidence/${escape(manifest.registry.file)}" download>Download registry snapshot</a></div>${jsonDetails('Event history and integrity limits',{head:registry.head,events:registry.events,capabilities:registry.capabilities,artifactVerification:registry.artifactVerification,limitations:registry.limitations})}</div>`;
 }
 async function renderTrade(container) {
