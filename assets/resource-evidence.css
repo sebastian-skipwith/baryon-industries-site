@@ -221,3 +221,14 @@
 }
 @media (max-width:520px){.ev-input-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Keep the committed comparison readable without horizontal panning on phones. */
+@media (max-width:600px){
+  #ev-method-commitment-ngsa .ev-table thead{display:none}
+  #ev-method-commitment-ngsa .ev-table,
+  #ev-method-commitment-ngsa .ev-table tbody,
+  #ev-method-commitment-ngsa .ev-table tr,
+  #ev-method-commitment-ngsa .ev-table td{display:block;width:100%;box-sizing:border-box}
+  #ev-method-commitment-ngsa .ev-table td{border-top:0;padding:6px 0 14px}
+  #ev-method-commitment-ngsa .ev-table td:first-child{border-top:1px solid var(--hair);padding:14px 0 0;font-weight:600}
+}

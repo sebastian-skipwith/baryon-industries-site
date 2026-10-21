@@ -256,9 +256,30 @@ function bcEvaluationPanel(e) {
     <p class="ev-small">BC Geological Survey, GeoFile 2020-08. Contains information licensed under the <a href="${escape(r.source.licenseUrl)}" target="_blank" rel="noopener">Open Government Licence – British Columbia</a>.</p></div>`;
 }
 
+function ngsaMethodCommitmentPanel(item, download) {
+  const d=item.document;
+  return `<section class="ev-card ev-card-body" id="ev-method-commitment-ngsa"><div class="ev-kicker">Australian catchment copper / retrospective design</div><h3>${escape(d.title)}</h3>
+    <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
+    <p>The released field identities are reconciled: 1,315 sites and 124 reciprocal duplicate pairs. Their 1,191 planned targets are not yet linked to verified final catchments. Reciprocal pairs do not identify an original sample.</p>
+    <div class="ev-note">The copper CSV and geological feature package were not acquired at commitment. Published related BOS copper aggregates were already exposed. This is a retrospective comparison after metadata inspection; no model or audit has run.</div>
+    <div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Design choice</th><th>Committed comparison</th></tr></thead><tbody>
+      <tr><td>Target and support</td><td>Quantified total Cu in TOS outlet sediment, coarse fraction &lt;2 mm; fused-bead HF/HNO3 ICP-MS, mg/kg. Missing and censored values remain explicit. No inferred depth or ore grade.</td></tr>
+      <tr><td>One representative</td><td>Combine final catchments and duplicate components; select the smallest site ID before checking copper availability. No replacement for a missing or censored target.</td></tr>
+      <tr><td>Baseline → one candidate</td><td>50-neighbor spatial interpolation → dominant catchment geological-region mean with spatial residuals. Fixed shrinkage of 20; no model search.</td></tr>
+      <tr><td>Separation</td><td>${d.split.constants.gridKm} km spatial groups; ${d.split.constants.bufferKm} km polygon buffers; ${d.split.constants.priorExclusionKm} km prior-evidence exclusion. Fixed 60/20/20 allocation.</td></tr>
+      <tr><td>One audit and gate</td><td>At least ${d.split.constants.minimumSamples} representatives and ${d.split.constants.minimumGroups} groups per partition. ≥2% validation and audit error reduction, with a paired group-bootstrap lower bound above zero. Failure retains the baseline.</td></tr>
+    </tbody></table></div>
+    <p class="ev-small">Method commitment only; executable protocol not frozen, audit not reserved. Final catchment linkage, analytical qualifiers and current geological attribute lineage must pass admission. Historical map origin does not prove unchanged attributes or independent geological truth.</p>
+    <details><summary>Exposure, source attribution and scientific limits</summary><p>${escape(d.exposureAtLocalCommitment.fieldWorkbookScope)}</p><p>${escape(d.exposureAtLocalCommitment.publishedAggregateExposure)}</p><p>${escape(d.sources.identities.attribution)}</p><ol>${d.requiredBeforeFreeze.map(v=>`<li>${escape(v)}</li>`).join('')}</ol><ul>${d.limitations.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${escape(d.deviationPolicy)}</p></details>
+    <details><summary>Commitment timing and fingerprints</summary><p>Local commitment (self-reported): ${escape(d.localCommittedAt)}. Recorded in this registry: ${escape(item.recordedAt)}.</p><p>${escape(d.timing)}</p><p>${escape(d.projection)}</p>${jsonDetails('Original and public document fingerprints',{original:item.originalDocument,public:item.publicDocument})}</details>
+    <div class="ev-links"><a href="/data/evidence/${escape(download.file)}" download>Download Australian committed methods (.json)</a>${[['assay','Analytical source'],['identities','Field identities'],['catchments','Final catchments'],['geology','Geological regions']].map(([k,label])=>`<a href="${escape(d.sources[k].pid)}" target="_blank" rel="noopener">${label} ↗</a>`).join('')}</div>
+    </section>`;
+}
+
 function methodCommitmentPanel(item) {
   const d=item.document, download=manifest.methodCommitments?.find(v=>v.id===item.id);
   if(!download || download.sha256!==item.publicDocument.sha256 || download.bytes!==item.publicDocument.bytes) throw new Error('Method commitment download identity mismatch');
+  if(d.id==='ngsa-tos-coarse-cu-total-georegions-v1')return ngsaMethodCommitmentPanel(item,download);
   return `<section class="ev-card ev-card-body" id="ev-method-commitment"><div class="ev-kicker">Next independent evaluation / design commitment</div><h3>${escape(d.title)}</h3>
     <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
     <p>Two historical Eagle Plains surveys in northern Yukon are proposed for a separate sediment-copper test. The methods are fixed; no Yukon assay workbook has been acquired and no real model or audit has run.</p>
@@ -287,6 +308,7 @@ async function registryPanel() {
     <p class="ev-small" id="ev-registry-artifact-counts">${fmt(registry.artifactVerification?.boundProtocols??0)} protocols have used the new artifact binding; ${fmt(registry.artifactVerification?.predictionBundles??0)} audit prediction bundles are committed. The historical soil result remains under its original checks. The BC result below is a separate retrospective regional evaluation, with its own target and baseline.</p>
     ${registry.experiments.filter(e=>e.id==='bc-rgs2020-cu-aas-geology-v1').map(bcEvaluationPanel).join('')}
     ${registry.experiments.map(e=>`<h3>${escape(e.title)}</h3><span class="ev-badge">${escape(labels[e.status]||e.status)}</span><p>${escape(e.scope||e.plan?.question||'')}</p><p class="ev-small">${escape(e.registrationTiming||'Protocol recorded before any audit start in this registry.')} Registry entry: ${escape(e.registeredAt)}.</p>${e.originalPlanCreatedAt?`<p class="ev-small">Original plan: ${escape(e.originalPlanCreatedAt)} · original completion: ${escape(e.originalCompletedAt)}.</p>`:''}${jsonDetails('Inspect protocol, fingerprints and status',e)}`).join('')}
+    <p class="ev-small">Proposals below preserve their original scope and knowledge at registration. Later method commitments report subsequent preparation and exposure.</p>
     ${registry.proposals.map(p=>`<h3>Next proposal: ${escape(p.title)}</h3><p>${escape(p.question)}</p><p class="ev-small">Feasibility proposal; no frozen experiment, evaluation or promotion.</p><p>${escape(p.evidenceAvailable)}</p><details><summary>Required before registration</summary><ul>${p.requiredBeforeRegistration.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${p.limitations.map(escape).join(' ')}</p></details>`).join('')}
     ${(registry.methodCommitments||[]).map(methodCommitmentPanel).join('')}
     <div class="ev-links"><a href="/data/evidence/${escape(manifest.registry.file)}" download>Download registry snapshot</a></div>${jsonDetails('Event history and integrity limits',{head:registry.head,events:registry.events,capabilities:registry.capabilities,artifactVerification:registry.artifactVerification,limitations:registry.limitations})}</div>`;
