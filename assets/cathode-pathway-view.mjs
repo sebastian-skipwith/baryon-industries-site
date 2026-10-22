@@ -1,12 +1,13 @@
-import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021c';
-import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021c';
-import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261021c';
+import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
+import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021d';
+import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261021d';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
-import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261021c';
-import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261021c';
+import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261021d';
+import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261021d';
 export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
+  const identity=e.identityResolution??{statement:'This historical snapshot uses Baryon process-role keys. Physical refinery identity has not been resolved.',admissionRule:'Resolve a permitted dated physical-facility link before assigning output, inventory, product assays or shipments. Common ownership and similar names are insufficient.'};
   let flowEvidence,circuitEvidence,contextError;
   try{if(!flowDescriptor||!circuitDescriptor)throw new Error('National account or processing-group snapshot is unavailable.');[flowEvidence,circuitEvidence]=await Promise.all([data(flowDescriptor),data(circuitDescriptor)]);}catch(error){contextError=error.message;}
   const source=`<a href="${esc(e.source.url)}#page=4" target="_blank" rel="noopener">USGS Copper Yearbook · page 20.2 ↗</a>`;
@@ -17,9 +18,10 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     <div class="ev-card ev-card-body"><h2>From the deposit to a product</h2><div class="ev-flow">
       <div class="ev-flow-step"><span>1 · In situ extraction</span><strong>Wellfield</strong><small>Gunnison, Arizona</small></div>
       <div class="ev-flow-step"><span>2 · Recovery wells</span><strong>Solution</strong><small>Flow and copper concentration unknown</small></div>
-      <div class="ev-flow-step"><span>3 · Electrowinning</span><strong>Cathodes</strong><small>Production rate and purity unknown</small></div>
+      <div class="ev-flow-step"><span>3 · Electrowinning</span><strong>Cathodes</strong><small>Physical refinery identity, production rate and purity unknown</small></div>
       <div class="ev-flow-step"><span>4 · Buyer delivery</span><strong>Unverified</strong><small>Allocation and logistics unresolved</small></div></div>
       <p>${esc(e.process)}</p><p><strong>Reported constraint:</strong> ${esc(e.constraint)}</p><p class="ev-small">The first three steps summarize the reported process; the buyer step is a requirement to investigate. There are no measured flow quantities on the connections.</p><div class="ev-links">${source}</div></div>
+    <section id="cp-identity" class="ev-card ev-card-body"><h2>Physical refinery identity is unresolved</h2><p>${esc(identity.statement)}</p><p>${esc(identity.admissionRule)}</p><p class="ev-small">The links above describe historical process roles. No physical asset, location or current production is assigned to them.</p></section>
     <div class="ev-supply-grid"><div class="ev-card ev-card-body"><h2>Set a cathode requirement</h2><p class="ev-small">All mass inputs are tonnes of cathode product. No product purity or copper-content conversion is assumed. Optional operating inputs start blank.</p>
     <div class="ev-input-grid">${Object.entries(SCREEN_INPUTS).map(([key,r])=>`<label for="cp-${key}">${esc(r.label)} <span>${esc(r.unit)}${r.required?'':' · assumption'}</span><input id="cp-${key}" type="number" min="${r.exclusiveMin?0.001:r.min}" max="${r.max}" step="any" ${r.required?'required':''} value="${key==='targetTonnes'?1000:key==='horizonDays'?365:''}"></label>`).join('')}</div>
     <fieldset id="cp-buyer-requirement"><legend>Buyer request · optional</legend><p class="ev-small">Enter both dates to calculate the window, counting the first and last day. Leave both blank to use relative days. These are requested conditions; supplier capability and arrival remain unverified.</p>
@@ -31,7 +33,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     <div class="ev-split"><div class="ev-card ev-card-body"><h2>What to investigate next</h2><ol id="cp-investigations" class="ev-investigations"></ol><p class="ev-small">Fixed decision rules based on evidence gaps. This is not a learned research policy or a claim that tests have been performed.</p></div>
     <div class="ev-card ev-card-body"><h2>Keep the evidence bases separate</h2><p>471 tonnes is a full-year sales observation. It is not a production measurement, inventory balance or current supply offer. The 11,300 t/year figure is nameplate capacity whose ramp-up was delayed.</p><p>Subtracting sales from capacity would not measure spare capacity. Dividing the two would not establish plant utilization. A subsurface copper occurrence does not determine fluid flow or recoverable product.</p><div class="ev-links"><a href="#supply">Compare the Copperwood development scenario →</a><a href="#flows">Inspect dated US copper accounts →</a><a href="#models">Review model evaluations →</a></div></div></div>
     <div class="ev-card ev-card-body"><h2>Evidence and scenario record</h2><p>${esc(e.confidence)} ${esc(e.scope)}</p><p>${esc(e.redistribution)} ${source} · <a href="${esc(e.source.rightsUrl)}" target="_blank" rel="noopener">Source-use policy ↗</a></p>
-    ${jsonDetails('Reported facts, persistent facility IDs and unknowns',e)}
+    ${jsonDetails('Reported facts, historical role keys and unresolved physical identity',e)}
     <h3>Connect the requirement to national accounts</h3><p>Select one historical US copper reporting period. The context report reconciles that national balance and explains why its period, mass basis and geographic scope cannot establish buyer-specific cathode supply.</p>
     ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>

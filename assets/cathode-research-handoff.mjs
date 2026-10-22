@@ -1,5 +1,5 @@
-import {cathodeRequirementLines} from './cathode-requirement.mjs?v=20261021c';
-import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021c';
+import {cathodeRequirementLines} from './cathode-requirement.mjs';
+import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021d';
 
 // Versioned mapping to a reviewed public snapshot; new evidence requires a new review/binding.
 const REVIEW = Object.freeze({file:'research-review-43ad3aad1259.json',sha256:'43ad3aad1259b7cbad6f4e60899d234cddbb4b4427568e3cbfb77152b3222508',bytes:8896});
@@ -46,6 +46,12 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor){
     sourceCoverage:'Historical context and candidate links only. The queued EPA URL returned HTTP 404; document review is incomplete. No current output measurement is admitted.',
     nextAction:'Resolve the exact facility and process, then find a permitted dated operating measurement. Identify an accessible official permit copy or verified replacement before reviewing authorization. A failed download does not establish permit revocation.',
   });
+  const roleIdentity=verified.evidence.schemaVersion===2;
+  if(roleIdentity)Object.assign(rules[0],{
+    title:'Resolve physical identity before measuring output',
+    nextAction:verified.evidence.identityResolution.admissionRule+' Then review permitted dated operating measurements and applicable authorization. The previously failed EPA URL remains unresolved; do not retry it without a verified replacement.',
+    proposedObservation:'Explicit source-backed role-to-physical-facility link, stable facility identifier or distinguishing name/location, process, valid interval, cathode product tonnes and interruptions; separate authorization evidence.',
+  });
   if(verified.schemaVersion===3)rules[3].nextAction='Use the buyer requirement attached to this task; clarify any unspecified dates or destination. Identify permitted route, lead-time, transport-capacity and loss evidence for the same allocation and requested window. Buyer entries do not verify location, capability or arrival.';
   const tasks=rules.map((rule,index)=>{
     const gate=verified.evidenceGates.find(g=>g.id===rule.id);
@@ -54,7 +60,7 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor){
     return {...clone(rule),...buyerScope,order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
       acquisitionStatus:'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
     decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
     sources:reviewCopy.sourceDecisions.filter(s=>tasks.some(t=>t.sourceIds.includes(s.id))),

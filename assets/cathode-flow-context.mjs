@@ -1,5 +1,5 @@
-import {cathodeRequirementLines,requirementMarkdownText} from './cathode-requirement.mjs?v=20261021c';
-import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021c';
+import {cathodeRequirementLines,requirementMarkdownText} from './cathode-requirement.mjs';
+import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021d';
 import {selectFlowPeriod} from './material-flow.mjs';
 import {validateUsCircuits} from './us-circuits.mjs';
 const FLOW={file:'us-copper-flows-df49d62bed27.json',sha256:'eca489e57d281986a408e17a20898aced4d1b15da3c0d98c5284e6229f387111',bytes:43909};
@@ -23,7 +23,9 @@ export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circu
   const account={country:f.country,period:clone(period),massBasis:'copper_mass',unit:'t Cu',components,balance:clone(balance),reportedRefinedUse:clone(values.useReported),
     scope:'National reported/estimated accounting for this single period, not a closed plant balance or buyer allocation.',
     aggregatePeriod:period.kind!=='month',periodRule:'Use this period alone. Do not add quarter, year or year-to-date totals to overlapping months.'};
-  const sourceIds=verified.evidence.facilities.map(x=>x.id);
+  const roleIdentity=verified.evidence.schemaVersion===2;
+  // Process-role keys must never join to physical assets, even if their labels or keys match.
+  const sourceIds=roleIdentity?verified.evidence.processRoles.flatMap(x=>x.physicalFacilityId===null?[]:[x.physicalFacilityId]):verified.evidence.facilities.map(x=>x.id);
   const matchingGroups=c.circuits.filter(g=>[...g.origins,...g.facilities].some(x=>sourceIds.includes(x.id))).map(g=>g.id);
   const checks=[
     {id:'mass-basis',status:'unresolved',requirement:'Cathode-product mass; purity and contained-copper conversion are unknown.',context:'Copper mass across refined metal and broader old-scrap recovery forms.',needed:'A dated product assay and explicit mass-basis conversion; no 100% purity assumption.'},
@@ -36,10 +38,14 @@ export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circu
     checks[1].requirement=r.windowStart?`Buyer requests ${r.windowStart} through ${r.windowEnd}, both inclusive (${r.horizonDays} days). Actual delivery timing remains unverified; historical pathway evidence is from 2022.`:`${r.horizonDays} relative days; calendar dates unspecified. Historical pathway evidence is from 2022.`;
     checks[2].requirement=r.destination?`Buyer-requested destination: ${r.destination}. Location, geographic boundary and actual route remain unverified.`:'Gunnison pathway in Arizona; buyer destination and geographic accounting boundary are unspecified.';
   }
-  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:verified.schemaVersion===3?'cathode-flow-context-v2-buyer-requirement':'cathode-flow-context-v1',decisionReport:verified,
+  if(roleIdentity){
+    checks[3].requirement=verified.evidence.identityResolution.statement;
+    checks[3].needed=verified.evidence.identityResolution.admissionRule+' Dated shipments and product/lot linkage remain separately required.';
+  }
+  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:roleIdentity?'cathode-flow-context-v3-role-identity':verified.schemaVersion===3?'cathode-flow-context-v2-buyer-requirement':'cathode-flow-context-v1',decisionReport:verified,
     flowBinding:{...FLOW,canonicalSha256:FLOW_HASH},circuitBinding:{...CIRCUITS,canonicalSha256:CIRCUITS_HASH},flowEvidence:f,circuitEvidence:c,
     account,compatibility:{status:'context_only_not_reconciled',checks,canReconcileRequirement:false,targetShareOfAccount:null,verifiedDeliverableTonnes:null,unmetDemand:null,productToCopperFactor:null,buyerGeography:null},
-    pathwayLink:{pathwayId:verified.evidence.id,historicalEvidenceAsOf:verified.evidence.evidenceAsOf,reviewedCircuitYear:c.temporalScope.asOfYear,matchingReviewedGroupIds:matchingGroups,verifiedShipmentQuantity:null,closedPlantBalance:false},
+    pathwayLink:{...(roleIdentity?{identityStatus:verified.evidence.identityResolution.status,matchedIdentityBasis:'physical_facility_id_only'}:{}),pathwayId:verified.evidence.id,historicalEvidenceAsOf:verified.evidence.evidenceAsOf,reviewedCircuitYear:c.temporalScope.asOfYear,matchingReviewedGroupIds:matchingGroups,verifiedShipmentQuantity:null,closedPlantBalance:false},
     limitations:[f.notes.production,f.notes.scrap,f.notes.use,f.notes.stocks,f.notes.rounding,
       'Only the selected national period is reconciled. Plant cathode sales, nameplate capacity and scenario output are not added to these national terms.',
       'No target-share ratio, annualization, product-purity conversion, available supply or unmet demand is inferred from incompatible evidence.',

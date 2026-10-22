@@ -1,9 +1,11 @@
-import {resolveCathodeRequirement,cathodeRequirementLines} from './cathode-requirement.mjs?v=20261021c';
+import {resolveCathodeRequirement,cathodeRequirementLines} from './cathode-requirement.mjs';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from './cathode-screen.mjs';
 
-// A versioned report for one reviewed historical snapshot. New evidence needs a new binding/review.
+// Exact reviewed snapshots only. Legacy reports retain their original bytes and identities.
 const BINDING=Object.freeze({file:'pathway-fef98ccf0c43.json',sha256:'fef98ccf0c432fafcc0bc54528a285da537d63f6122101dbcecc1ce564b5aea5',bytes:3005});
 const EVIDENCE_HASH='099a39b48c416c928267ed1bc7190a340b684c541609dc6c5859a40f5d93d041';
+const ROLE_BINDING=Object.freeze({"file":"pathway-7d16df18d3d3.json","sha256":"7d16df18d3d373acace27410db5a1f3bb9279691a68724a81fa5c0f3e20ca2cc","bytes":3971});
+const ROLE_HASH='e0a66f20480ae62ff39782b02b92024c0230cc30cc2543030a5908da77b5fb7c';
 export const DECISION_METHOD=Object.freeze({id:'cathode-decision-v1',calculator:'cathode-screen-v1',calculatorSha256:'c6e6930691281a0501c62d6ff7ff8af7aee304a7c0f8e76496a7daf01453ea21',annualEquivalentDays:365});
 const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
 const sha=async value=>[...new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -12,19 +14,21 @@ const clone=v=>JSON.parse(JSON.stringify(v));
 
 export async function makeCathodeDecision(input,evidence,descriptor,generatedAt,buyerRequest){
   check(typeof generatedAt==='string'&&Number.isFinite(Date.parse(generatedAt))&&new Date(generatedAt).toISOString()===generatedAt,'Use an ISO UTC report timestamp.');
-  for(const [key,value]of Object.entries(BINDING))check(descriptor?.[key]===value,'Decision evidence descriptor does not match the reviewed snapshot.');
+  const roleIdentity=descriptor?.file===ROLE_BINDING.file;
+  const binding=roleIdentity?ROLE_BINDING:BINDING,evidenceHash=roleIdentity?ROLE_HASH:EVIDENCE_HASH;
+  for(const [key,value]of Object.entries(binding))check(descriptor?.[key]===value,'Decision evidence descriptor does not match the reviewed snapshot.');
   // Snapshot caller data before yielding; never serialize extra input/descriptor fields.
   const requested=buyerRequest===undefined?null:resolveCathodeRequirement(input,buyerRequest);
   const inputs=requested?.inputs??Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,input?.[k]??null]));
   const source=clone(evidence);
-  check(await sha(canonical(source))===EVIDENCE_HASH,'Decision evidence content does not match the reviewed snapshot.');
+  check(await sha(canonical(source))===evidenceHash,'Decision evidence content does not match the reviewed snapshot.');
   const result=screenCathodeSupply(inputs,source);
   check(result.ok,result.errors?.join(' ')||'Invalid scenario.');
   const scenarioStatus=result.conditionalTonnes===null?'incomplete':result.targetMet?'reaches_target':'falls_short';
   const report={
-    schemaVersion:requested?3:2,kind:'cathode_supply_decision_brief',method:requested?{...DECISION_METHOD,id:'cathode-decision-v2-buyer-requirement',requirementMethod:'cathode-requirement-v1'}:{...DECISION_METHOD},
+    schemaVersion:requested?3:2,kind:'cathode_supply_decision_brief',method:roleIdentity?{...DECISION_METHOD,id:'cathode-decision-v3-role-identity',...(requested?{requirementMethod:'cathode-requirement-v1'}:{})}:requested?{...DECISION_METHOD,id:'cathode-decision-v2-buyer-requirement',requirementMethod:'cathode-requirement-v1'}:{...DECISION_METHOD},
     ...(requested?{buyerRequest:requested.buyerRequest}:{}),
-    evidenceBinding:{...BINDING,canonicalSha256:EVIDENCE_HASH},
+    evidenceBinding:{...binding,canonicalSha256:evidenceHash},
     scope:'Historical Gunnison in-situ pathway only. Related assets, new designs and current operating capability are not established by this evidence.',
     requirement:requested?.requirement??{product:'Copper cathode product',massBasis:'product_mass',targetTonnes:inputs.targetTonnes,horizonDays:inputs.horizonDays,windowStart:null,windowEnd:null,meaning:'Relative scenario window; no calendar delivery date is verified.'},
     inputs,
@@ -33,7 +37,7 @@ export async function makeCathodeDecision(input,evidence,descriptor,generatedAt,
       explanation:'The arithmetic is conditional. No procurement commitment, current supplier offer or production forecast is supported.'},
     result,
     evidenceGates:[
-      {id:'current-operations',status:'unverified',requires:'Dated project identity, current operating authorization and sustained cathode output over a stated interval. A permit or design rate alone cannot satisfy this gate.'},
+      {id:'current-operations',status:'unverified',requires:roleIdentity?source.identityResolution.admissionRule+' Also require current operating authorization and sustained cathode output over a stated interval. A permit or design rate alone cannot satisfy this gate.':'Dated project identity, current operating authorization and sustained cathode output over a stated interval. A permit or design rate alone cannot satisfy this gate.'},
       {id:'product-quality',status:'unverified',requires:'Dated cathode assay/specification and buyer acceptance. No purity or conversion to contained copper is assumed.'},
       {id:'allocation',status:'unverified',requires:'Uncommitted inventory or output allocation after existing commitments, tied to the same facility and period.'},
       {id:'delivery',status:'unverified',requires:'Calendar delivery dates, route, transport constraints and loss basis for the proposed allocation.'},
@@ -79,6 +83,7 @@ export async function cathodeDecisionMarkdown(report){
     `- Reported ${f.sales.period} sales: ${n(f.sales.value)} ${f.sales.unit}. Sales are not production or available inventory.`,
     `- Historical stage-one nameplate: ${n(f.capacity.value)} ${f.capacity.unit}. Ramp-up was delayed; this is not actual output.`,
     `- Reported constraint: ${r.evidence.constraint}`,'',
+    ...(r.evidence.identityResolution?['## Physical facility identity','',r.evidence.identityResolution.statement,'',...r.evidence.processRoles.map(p=>`- ${p.id}: ${p.name}; physical facility ID: unknown.`),'',r.evidence.identityResolution.admissionRule,'']:[]),
     `[${r.evidence.source.name}](${r.evidence.source.url}#page=4) — ${r.evidence.source.locator}.`,
     r.evidence.confidence,'',
     '## Evidence required before commitment','',
