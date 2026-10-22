@@ -1,3 +1,4 @@
+import {makeFacilityStatusContext,facilityStatusMarkdownLines} from './cathode-facility-status.mjs?v=20261022c';
 import {cathodeRequirementLines} from './cathode-requirement.mjs';
 import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021d';
 
@@ -33,9 +34,9 @@ const RULES = [
     decisionEffect:'Could support timing and retention assumptions for a specified allocation. Country trade totals and customs destinations do not prove this facility-to-buyer route.'},
 ];
 
-export async function makeCathodeResearchHandoff(decision,review,descriptor){
+export async function makeCathodeResearchHandoff(decision,review,descriptor,statusInput){
   // Copy all caller-owned content before the first asynchronous digest.
-  const decisionCopy=clone(decision),reviewCopy=clone(review);
+  const decisionCopy=clone(decision),reviewCopy=clone(review),facilityStatus=makeFacilityStatusContext(statusInput);
   const accessReview=descriptor?.file===ACCESS_REVIEW.file;
   const binding=accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
   for(const [key,value]of Object.entries(binding))check(descriptor?.[key]===value,'Research review descriptor does not match the reviewed snapshot.');
@@ -60,7 +61,8 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor){
     return {...clone(rule),...buyerScope,order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
       acquisitionStatus:'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:facilityStatus?'cathode-research-handoff-v5-status-context':roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+    ...(facilityStatus?{facilityStatus}:{}),
     decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
     sources:reviewCopy.sourceDecisions.filter(s=>tasks.some(t=>t.sourceIds.includes(s.id))),
@@ -89,7 +91,7 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor){
 
 export async function validateCathodeResearchHandoff(handoff){
   const snapshot=clone(handoff);
-  const expected=await makeCathodeResearchHandoff(snapshot.decisionReport,snapshot.review,snapshot.reviewBinding);
+  const expected=await makeCathodeResearchHandoff(snapshot.decisionReport,snapshot.review,snapshot.reviewBinding,snapshot.facilityStatus?{evidence:snapshot.facilityStatus.evidence,binding:snapshot.facilityStatus.binding}:undefined);
   check(canonical(snapshot)===canonical(expected),'Research handoff changed or uses an unsupported method. Recreate it from the current scenario.');
   return expected;
 }
@@ -110,6 +112,7 @@ export async function cathodeResearchHandoffMarkdown(handoff){
       ...t.sourceIds.map(id=>{const s=r.sources.find(s=>s.id===id);return `- [${s.name}](${s.sourceUrl}) — ${s.status}; reviewed ${s.reviewedAt}. ${s.permittedUse}${s.policy?` [Recorded reuse policy](${s.policy.url})`:''}`;}),
       'Acquisition: not started. Gate satisfied: no. Expected utility and cost: unknown.','',
     ]),
+    ...facilityStatusMarkdownLines(r.facilityStatus),
     '## Evidence acceptance record','',...r.evidenceRecordRequired.map(x=>'- '+x),'',r.completionRule,'',
     '## Research safeguards','',r.researchConstraints.geologicalReview.reason,
     ...r.researchConstraints.geologicalReview.requires.map(x=>'- '+x),

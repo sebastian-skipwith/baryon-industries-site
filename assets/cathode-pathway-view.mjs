@@ -1,15 +1,18 @@
+import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
 import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021d';
-import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261021d';
+import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261022c';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
-import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261021d';
-import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261021d';
-export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,data,helpers:h}) {
+import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261022c';
+import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261022c';
+export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,facilityStatusDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
   const identity=e.identityResolution??{statement:'This historical snapshot uses Baryon process-role keys. Physical refinery identity has not been resolved.',admissionRule:'Resolve a permitted dated physical-facility link before assigning output, inventory, product assays or shipments. Common ownership and similar names are insufficient.'};
   let flowEvidence,circuitEvidence,contextError;
   try{if(!flowDescriptor||!circuitDescriptor)throw new Error('National account or processing-group snapshot is unavailable.');[flowEvidence,circuitEvidence]=await Promise.all([data(flowDescriptor),data(circuitDescriptor)]);}catch(error){contextError=error.message;}
+  let statusInput,statusError;
+  try{if(facilityStatusDescriptor){statusInput={evidence:await data(facilityStatusDescriptor),binding:facilityStatusDescriptor};makeFacilityStatusContext(statusInput);}}catch(error){statusError=error.message;}
   const source=`<a href="${esc(e.source.url)}#page=4" target="_blank" rel="noopener">USGS Copper Yearbook · page 20.2 ↗</a>`;
   container.innerHTML=heading('Supply decisions / Gunnison, Arizona','Can this pathway meet a copper requirement?','Follow a documented route from underground leaching to copper cathodes. Compare a delivery target with historical evidence, then test explicitly assumed operating conditions.','Historical evidence · 2022')+
     `<div class="ev-note"><strong>Evidence year: 2022. Report published: May 2026.</strong> Current operating status and available supply are unknown in this snapshot.</div>
@@ -36,6 +39,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     ${jsonDetails('Reported facts, historical role keys and unresolved physical identity',e)}
     <h3>Connect the requirement to national accounts</h3><p>Select one historical US copper reporting period. The context report reconciles that national balance and explains why its period, mass basis and geographic scope cannot establish buyer-specific cathode supply.</p>
     ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
+    <p id="cp-status-coverage">${statusError?'Operating-status qualification could not be verified: '+esc(statusError):statusInput?'The reports will include the historical ASARCO operating-status disagreement as context about other facilities. It does not resolve any Gunnison supply check.':'No operating-status qualification is included in this snapshot. Historical processing associations do not establish operation.'}</p>
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
     <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div>${footer()}`;
   const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0;let relativeDays='365';const urls=[];
@@ -92,12 +96,13 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       const markdown=await cathodeDecisionMarkdown(report);
       if(!reviewDescriptor)throw new Error('Research review is missing from this snapshot. Reload to retry.');
       const review=await data(reviewDescriptor);
-      const handoff=await makeCathodeResearchHandoff(report,review,reviewDescriptor);
+      if(statusError)throw new Error('Operating-status qualification could not be verified: '+statusError);
+      const handoff=await makeCathodeResearchHandoff(report,review,reviewDescriptor,statusInput);
       const handoffMarkdown=await cathodeResearchHandoffMarkdown(handoff);
       const thresholdReport=await makeCathodeThresholdReport(handoff);
       const thresholdMarkdown=await cathodeThresholdMarkdown(thresholdReport);
       if(contextError)throw new Error('National context unavailable: '+contextError);
-      const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod);
+      const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod,statusInput);
       const contextMarkdown=await cathodeFlowContextMarkdown(flowContext);
       if(requestedRevision!==revision)return;
       releaseDownloads();
@@ -111,6 +116,8 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       const contextUrl=URL.createObjectURL(new Blob([JSON.stringify(flowContext,null,2)],{type:'application/json'}));
       const contextMarkdownUrl=URL.createObjectURL(new Blob([contextMarkdown],{type:'text/markdown;charset=utf-8'}));
       urls.push(jsonUrl,markdownUrl,handoffUrl,handoffMarkdownUrl,thresholdUrl,thresholdMarkdownUrl,contextUrl,contextMarkdownUrl);
+      const qualification=flowContext.facilityStatus;
+      const statusHtml=qualification?`<section id="cp-status-context"><h3>ASARCO processing status: reports disagree for 2022</h3><p>${esc(qualification.decisionEffect)}</p>${qualification.evidence.claims.map(claim=>{const s=qualification.evidence.sources.find(x=>x.id===claim.sourceId);return `<p><strong>${esc(s.title)} · published ${esc(s.publicationDate)}</strong><br>${esc(claim.summary)} <a href="${esc(s.url)}#page=${s.pdfPage}" target="_blank" rel="noopener">Source · page ${s.pdfPage} ↗</a></p>`;}).join('')}<p>${esc(qualification.evidence.assessment.temporalLimit)}</p><p>${esc(qualification.evidence.assessment.quantityLimit)}</p><p><strong>Current operation and available supply: unknown.</strong> Both claims and the unresolved assessment are preserved in the account context and research handoff downloads.</p><p>Separate contextual review: ${esc(qualification.nextReview.action)}. ${esc(qualification.nextReview.acceptanceCriteria)}</p></section>`:'';
       const sourceLabels={historical_context_used:'Historical context only',links_only_reuse_restricted:'Links only · reuse restricted',document_review_pending:'Document review pending',source_unavailable_review_incomplete:'Source unavailable · review incomplete'};
       $('cp-report').innerHTML=`<h3>Decision brief</h3><div class="ev-note"><strong>Investigate before commitment.</strong> Verified deliverable supply remains unknown, including when the entered scenario reaches the target.</div>
         <p>Save a readable brief with the requirement, assumptions, historical facts, unresolved evidence checks and next investigations. The paired JSON retains exact values and the evidence fingerprint. Downloads stay in your browser; no scenario is sent to a server.</p>
@@ -129,6 +136,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
         <h3>What prevents a direct reconciliation?</h3><ul class="ev-investigations">${flowContext.compatibility.checks.map(v=>'<li data-context-check="'+esc(v.id)+'"><p><strong>Requirement:</strong> '+esc(v.requirement)+'</p><p><strong>Account/context:</strong> '+esc(v.context)+'</p><p><strong>Evidence needed:</strong> '+esc(v.needed)+'</p></li>').join('')}</ul>
         <p>Plant sales, capacity and scenario output are not added to national terms. No product-purity conversion, target-share ratio, current availability or demand forecast is inferred.</p>
         <div class="ev-links"><a href="${esc(flowEvidence.source.url)}#page=11" target="_blank" rel="noopener">USGS national balance · table 8 ↗</a><a href="${esc(circuitEvidence.source.url)}#page=97" target="_blank" rel="noopener">USGS processing groups · page 85 ↗</a><a href="#flows">Inspect all copper-flow accounts →</a></div><p class="ev-small">National account published ${esc(flowEvidence.source.publicationDate)}. Processing relationships are framed as of 2022. These source dates do not establish present conditions.</p>
+        ${statusHtml}
         <div class="ev-links"><a href="${esc(contextMarkdownUrl)}" download="baryon-copper-flow-context.md">Download account context (.md)</a><a href="${esc(contextUrl)}" download="baryon-copper-flow-context.json">Download exact account context (.json)</a></div>
         ${jsonDetails('National account, incompatibilities and source bindings',flowContext)}</section>
         <section id="cp-handoff" aria-label="Copper evidence research handoff"><h2>From this scenario to evidence</h2>
