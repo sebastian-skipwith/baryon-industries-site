@@ -1,14 +1,18 @@
+import {validateAsarcoStatus,selectCircuitStatus} from '/assets/asarco-status.mjs?v=20261022b';
 import {selectUsCircuit,validateUsCircuits} from '/assets/us-circuits.mjs?v=20261016a';
 import {validateKennecottOutput,selectCircuitOutput} from '/assets/kennecott-output.mjs?v=20261022a';
-export async function renderUsCircuits(container,{descriptor,facilityOutputDescriptor,data,helpers:h}){
+export async function renderUsCircuits(container,{descriptor,facilityOutputDescriptor,facilityStatusDescriptor,data,helpers:h}){
  const dataset=validateUsCircuits(await data(descriptor)),{heading,escape:e,jsonDetails,footer}=h;
  let output=null,outputError=null;
  try{if(facilityOutputDescriptor)output=validateKennecottOutput(await data(facilityOutputDescriptor));}catch(error){outputError=error.message;}
+ let statusData=null,statusError=null;
+ try{if(facilityStatusDescriptor)statusData=validateAsarcoStatus(await data(facilityStatusDescriptor));}catch(error){statusError=error.message;}
  const $=id=>container.querySelector('#'+id),s=dataset.source;
  const link=(page,label)=>`<a href="${e(s.url)}#page=${page}" target="_blank" rel="noopener">${label} ↗</a>`;
  container.innerHTML=heading('Physical economy / United States / reported circuits','Which mines are linked to which processors?','Inspect named ore origins and processing facilities in a USGS synthesis. These historical relationships identify where to investigate throughput, product quality and delivery evidence.','Reported for 2022 · published 2023')+`
  <div class="ev-card"><div class="ev-toolbar"><label>Reported processing group <select id="uc-circuit">${dataset.circuits.map(c=>`<option value="${e(c.id)}">${e(c.name)}</option>`).join('')}</select></label></div></div>
  <section id="uc-detail" aria-live="polite"></section>
+ <section id="uc-status" aria-live="polite"></section>
  <section id="uc-output" aria-live="polite"></section>
  <div class="ev-note">The report describes relationships as of 2022. Current operation, shipment volumes and available supply have not been established. No measured shipments are included.</div>
  <div class="ev-card ev-card-body"><h2>Evidence needed for a supply decision</h2><div id="uc-needs"></div><div class="ev-links"><a href="#pathway">Open the cathode supply screen →</a><a href="#models">Review model evaluations →</a></div></div>
@@ -18,6 +22,11 @@ export async function renderUsCircuits(container,{descriptor,facilityOutputDescr
   const r=selectUsCircuit(dataset,$('uc-circuit').value),c=r.circuit;
   const list=rows=>`<ul>${rows.map(n=>`<li><strong>${e(n.name)}</strong> · ${e(n.state)}<br><span class="ev-small">${e(n.kind.replaceAll('_',' '))}</span></li>`).join('')}</ul>`;
   $('uc-detail').innerHTML=`<div class="ev-card ev-card-body"><div class="ev-kicker">${e(c.operatorAsReported)} · source context ${r.asOfYear}</div><h2>${e(c.name)}</h2><div class="ev-split"><div><h3>Reported ore origins</h3>${list(c.origins)}</div><div><h3>Associated processing facilities</h3>${list(c.facilities)}</div></div><p><b>Relationship:</b> reported origins → processing group. Individual transport legs and quantities are unspecified.</p><p>${e(c.qualification)}</p><p>${e(c.originCoverage)}</p><p class="ev-small">${e(c.materialDescription)}</p><div class="ev-metrics"><div class="ev-metric"><strong>Unknown</strong><span>Shipment quantity and material basis</span></div><div class="ev-metric"><strong>Unknown</strong><span>Current throughput and recovery</span></div><div class="ev-metric"><strong>Unknown</strong><span>Verified deliverable supply</span></div></div>${jsonDetails('Reported group and unmeasured fields',c)}</div>`;
+  const statusMatch=statusData?selectCircuitStatus(statusData,dataset,c.id):null;
+  $('uc-status').innerHTML=statusError?`<div class="ev-error" role="alert">Historical operating-status evidence could not be verified: ${e(statusError)} No status claim is shown.</div>`:!statusMatch?.qualification?`<div class="ev-note">No reviewed operating-status qualification is included for this group. This does not establish operation.</div>`:(()=>{
+   const q=statusMatch.qualification,a=q.assessment;
+   return `<div class="ev-card ev-card-body"><div class="ev-kicker">Historical source disagreement · 2022</div><h2>Was this processing group operating?</h2><p><strong>Reports disagree for 2022.</strong> ${e(a.summary)}</p><div class="ev-split">${q.claims.map(claim=>{const s=q.sources.find(x=>x.id===claim.sourceId);return `<div><h3>${e(s.title)}</h3><p class="ev-small">Published ${e(s.publicationDate)} (${e(s.publicationDatePrecision)} precision). ${claim.period.asOfYear?'As of '+claim.period.asOfYear:e(claim.period.start)+' through '+e(claim.period.end)}.</p><p>${e(claim.summary)}</p><p class="ev-small">${e(claim.scope)}</p><a href="${e(s.url)}#page=${s.pdfPage}" target="_blank" rel="noopener">Source · PDF page ${s.pdfPage}, printed ${e(s.printedPage)} ↗</a></div>`;}).join('')}</div><p>${e(a.temporalLimit)}</p><p>${e(a.quantityLimit)}</p><div class="ev-metrics"><div class="ev-metric"><strong>Unknown</strong><span>Current operating status</span></div><div class="ev-metric"><strong>Unknown</strong><span>Verified deliverable supply</span></div></div><h3>What would resolve this?</h3><p>${e(q.nextEvidence.acceptance)}</p><details><summary>Facility match and reuse</summary><p>${e(q.identityLink.basis)}</p><p>${e(q.permission)}</p>${q.sources.map(s=>`<p class="ev-small">${e(s.attribution)} Original acquisition: ${s.acquiredAt?e(s.acquiredAt):'unknown'}.</p>`).join('')}</details><div class="ev-links"><a href="/data/evidence/${e(facilityStatusDescriptor.file)}" download>Download operating-status qualification</a></div>${jsonDetails('Source claims, assessment and unknowns',q)}</div>`;
+  })();
   const matched=output?selectCircuitOutput(output,dataset,c.id):null;
   $('uc-output').innerHTML=outputError?`<div class="ev-error" role="alert">Historical facility output could not be verified: ${e(outputError)} No output value is shown.</div>`:!matched?.observations.length?`<div class="ev-note">No reviewed facility-output observation is included for this group. Missing evidence is not zero production.</div>`:(()=>{
    const o=matched.observations[0],s=output.source;

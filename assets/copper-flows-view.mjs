@@ -1,4 +1,4 @@
-import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022a';
+import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
 import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261016b';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
