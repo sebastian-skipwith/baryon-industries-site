@@ -1,4 +1,4 @@
-import {renderCopperDemandContext} from '/assets/copper-demand-context-view.mjs?v=20261023h';
+import {renderCopperDemandContext} from '/assets/copper-demand-context-view.mjs?v=20261023i';
 import {selectIeaDemand,validateIeaDemand} from '/assets/iea-demand.mjs?v=20261023g';
 export async function renderIeaDemand(container,{descriptor,chileDescriptor,flowDescriptor,manufacturingDescriptor,data,helpers:h}){
  if(!descriptor)throw Error('Global historical demand estimates are not included in this snapshot.');

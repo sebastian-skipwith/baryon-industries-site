@@ -1,3 +1,5 @@
+import {getCopperContextSelection,clearCopperContextSelection,onCopperContextSelection} from '/assets/copper-context-selection.mjs?v=20261023i';
+import {makeCathodeDecisionPackage,cathodeDecisionPackageMarkdown} from '/assets/cathode-decision-package.mjs?v=20261023i';
 import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=20261023b';
 import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
@@ -41,6 +43,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     <h3>Connect the requirement to national accounts</h3><p>Select one historical US copper reporting period. The context report reconciles that national balance and explains why its period, mass basis and geographic scope cannot establish buyer-specific cathode supply.</p>
     ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
     <p id="cp-status-coverage">${statusError?'Operating-status qualification could not be verified: '+esc(statusError):statusInput?'The reports will include the historical ASARCO operating-status disagreement as context about other facilities. It does not resolve any Gunnison supply check.':'No operating-status qualification is included in this snapshot. Historical processing associations do not establish operation.'}</p>
+    <section id="cp-demand-attachment"><h3>Historical demand context · optional</h3><p id="cp-demand-status" aria-live="polite"></p><div class="ev-links"><a href="#flows">Prepare a global demand context in Copper flows →</a><button type="button" id="cp-demand-remove" class="ev-button" hidden>Remove historical context</button></div><p class="ev-small">The selected context stays in memory for this page. It adds an integrated package download and cannot satisfy a supply evidence check.</p></section>
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
     <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div><section id="cp-operating-preflight"></section>${footer()}`;
   const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0,preflightControl=null;let relativeDays='365';const urls=[];
@@ -88,10 +91,15 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
   container.querySelectorAll('input').forEach(n=>n.addEventListener('input',update));
   $('cp-clear-request').addEventListener('click',()=>{for(const key of ['windowStart','windowEnd','destination','productSpecification'])$('cp-'+key).value='';update();});
   $('cp-clear').addEventListener('click',()=>{for(const [k,r]of Object.entries(SCREEN_INPUTS))if(!r.required)$('cp-'+k).value='';update();});
-  $('cp-context-period')?.addEventListener('change',update);
+  $('cp-context-period')?.addEventListener('change',()=>{const c=getCopperContextSelection();if(c&&c.selection.usPeriodId!==$('cp-context-period').value){clearCopperContextSelection();$('cp-demand-status').textContent='Historical context removed because the national reporting period changed. Reattach a matching context to include it.';}else update();});
+  const refreshAttachment=()=>{const c=getCopperContextSelection();if(c&&$('cp-context-period')&&[...$('cp-context-period').options].some(o=>o.value===c.selection.usPeriodId))$('cp-context-period').value=c.selection.usPeriodId;$('cp-demand-status').textContent=c?`Attached: ${c.demand.year} global demand; Chile ${c.selection.productionYear??'missing'}; US ${c.flows.period.start} through ${c.flows.period.end}. Historical context only; buyer supply remains unverified.`:'No historical demand context attached. The existing four report pairs remain available.';$('cp-demand-remove').hidden=!c;update();};
+  $('cp-demand-remove').onclick=clearCopperContextSelection;
+  const unsubscribeAttachment=onCopperContextSelection(refreshAttachment);
+  const attachmentObserver=new MutationObserver(()=>{if(!container.isConnected){unsubscribeAttachment();attachmentObserver.disconnect();releaseDownloads();revision++;}});
+  attachmentObserver.observe(container.ownerDocument.body,{childList:true,subtree:true});
   $('cp-report-button').addEventListener('click',async()=>{
     if(!result.ok)return;
-    const requestedRevision=revision,requestedPeriod=$('cp-context-period')?.value;$('cp-report-button').disabled=true;
+    const requestedRevision=revision,requestedPeriod=$('cp-context-period')?.value,requestedDemand=getCopperContextSelection();$('cp-report-button').disabled=true;
     try{
       const report=await makeCathodeDecision(input,e,descriptor,new Date().toISOString(),buyerRequest);
       const markdown=await cathodeDecisionMarkdown(report);
@@ -105,6 +113,8 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       if(contextError)throw new Error('National context unavailable: '+contextError);
       const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod,statusInput);
       const contextMarkdown=await cathodeFlowContextMarkdown(flowContext);
+      const packageReport=requestedDemand?await makeCathodeDecisionPackage({decision:report,researchHandoff:handoff,thresholds:thresholdReport,flowContext,demandContext:requestedDemand,generatedAt:new Date().toISOString()}):null;
+      const packageMarkdown=packageReport?await cathodeDecisionPackageMarkdown(packageReport):null;
       if(requestedRevision!==revision)return;
       releaseDownloads();
       const raw=JSON.stringify(report,null,2);
@@ -149,12 +159,13 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
         <p>The soil and BC audits are consumed; the BC geological candidate did not pass its uncertainty gate. Copperwood cores remain selected known-deposit evidence. Research-policy improvement has not been demonstrated.</p>
         <div class="ev-links"><a href="${esc(handoffMarkdownUrl)}" download="baryon-copper-research-handoff.md">Download research handoff (.md)</a><a href="${esc(handoffUrl)}" download="baryon-copper-research-handoff.json">Download reproducible handoff (.json)</a><a href="#models">Inspect research outcomes →</a></div>
         ${jsonDetails('Research tasks, source bindings and consumed-audit safeguards',handoff)}</section>`;
+      if(packageReport){const section=document.createElement('section');section.id='cp-integrated-package';section.innerHTML='<h3>Integrated buyer decision package</h3><p>Includes this exact buyer decision, research handoff, threshold comparison, regional account and attached historical demand context. Verified deliverable supply remains unknown.</p><div class="ev-links"></div>';for(const [ext,text,type]of [['json',JSON.stringify(packageReport,null,2)+'\n','application/json'],['md',packageMarkdown,'text/markdown']]){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));urls.push(url);a.href=url;a.download='baryon-copper-decision-package.'+ext;a.textContent=ext==='json'?'Download exact package (JSON)':'Download complete brief (Markdown)';section.querySelector('.ev-links').append(a);}$('cp-report').prepend(section);}
       $('cp-report').hidden=false;preflightControl?.setHandoff(handoff);
     }catch(error){
       if(requestedRevision!==revision)return;
       releaseDownloads();$('cp-report').innerHTML=`<div role="alert" class="ev-error">Could not create the brief: ${esc(error.message)}</div>`;$('cp-report').hidden=false;
     }finally{if(requestedRevision===revision)$('cp-report-button').disabled=!result.ok;}
   });
-  update();
+  refreshAttachment();
   preflightControl=mountOperatingPreflight($('cp-operating-preflight'));
 }

@@ -1,6 +1,6 @@
 import {researchReviewPanel} from '/assets/research-review-view.mjs?v=20261019b';
-import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261023b';
-import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261023h';
+import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261023i';
+import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261023i';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
 import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260929';

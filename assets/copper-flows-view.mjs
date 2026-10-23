@@ -1,4 +1,4 @@
-import {renderIeaDemand} from '/assets/iea-demand-view.mjs?v=20261023h';
+import {renderIeaDemand} from '/assets/iea-demand-view.mjs?v=20261023i';
 import {renderUsEndUse} from '/assets/us-end-use-view.mjs?v=20261023f';
 import {renderUsSemifabricates} from '/assets/us-semifabricates-view.mjs?v=20261023e';
 import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
