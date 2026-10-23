@@ -1,3 +1,4 @@
+import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=20261023a';
 import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
 import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021d';
@@ -41,7 +42,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     ${contextError?'<p class="ev-error">National context unavailable: '+esc(contextError)+'</p>':'<label for="cp-context-period">National reporting period</label> <select id="cp-context-period">'+[...flowEvidence.periods].reverse().map(p=>'<option value="'+esc(p.id)+'" '+(p.id==='2025-09'?'selected':'')+'>'+esc(p.label)+' · '+esc(p.kind.replaceAll('_',' '))+'</option>').join('')+'</select>'}
     <p id="cp-status-coverage">${statusError?'Operating-status qualification could not be verified: '+esc(statusError):statusInput?'The reports will include the historical ASARCO operating-status disagreement as context about other facilities. It does not resolve any Gunnison supply check.':'No operating-status qualification is included in this snapshot. Historical processing associations do not establish operation.'}</p>
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
-    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div>${footer()}`;
+    <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div><section id="cp-operating-preflight"></section>${footer()}`;
   const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0;let relativeDays='365';const urls=[];
   const releaseDownloads=()=>{for(const url of urls)URL.revokeObjectURL(url);urls.length=0;};
   const thresholdNumber=v=>v===null?'Unknown':new Intl.NumberFormat('en-US',{maximumSignificantDigits:6}).format(v);
@@ -155,4 +156,5 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     }finally{if(requestedRevision===revision)$('cp-report-button').disabled=!result.ok;}
   });
   update();
+  mountOperatingPreflight($('cp-operating-preflight'));
 }
