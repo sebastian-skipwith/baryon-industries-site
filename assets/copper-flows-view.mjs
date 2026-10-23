@@ -1,5 +1,5 @@
 import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
-import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261023c';
+import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261023d';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
 async function renderUsFlows(container,{descriptor,data,helpers}) {
