@@ -1,3 +1,4 @@
+import {renderUsEndUse} from '/assets/us-end-use-view.mjs?v=20261023f';
 import {renderUsSemifabricates} from '/assets/us-semifabricates-view.mjs?v=20261023e';
 import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
 import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261023d';
@@ -40,9 +41,9 @@ async function renderUsFlows(container,{descriptor,manufacturingDescriptor,data,
 
 export async function renderFlows(container,options){
  if(!options.chileDescriptor)return renderUsFlows(container,options);
- container.innerHTML=`<div class="ev-card"><div class="ev-toolbar"><label>Evidence coverage <select id="ev-flow-country"><option value="CL">Chile · annual production through 2025</option><option value="US">United States · accounting through Sep 2025</option>${options.circuitsDescriptor?`<option value="circuits">United States · processing links reported for 2022</option>`:''}</select></label></div></div><div id="ev-flow-country-content"></div>`;
+ container.innerHTML=`<div class="ev-card"><div class="ev-toolbar"><label>Evidence coverage <select id="ev-flow-country"><option value="CL">Chile · annual production through 2025</option><option value="US">United States · accounting through Sep 2025</option>${options.endUseDescriptor?`<option value="end-use">United States · modeled end use 1975–2003</option>`:''}${options.circuitsDescriptor?`<option value="circuits">United States · processing links reported for 2022</option>`:''}</select></label></div></div><div id="ev-flow-country-content"></div>`;
  const choice=container.querySelector('#ev-flow-country'),content=container.querySelector('#ev-flow-country-content');
  let generation=0;
- const update=async()=>{const version=++generation,staging=document.createElement('div');content.textContent='Loading evidence…';try{await (choice.value==='circuits'?renderUsCircuits(staging,{...options,descriptor:options.circuitsDescriptor}):choice.value==='CL'?renderChileProduction(staging,{...options,descriptor:options.chileDescriptor}):renderUsFlows(staging,options));if(version===generation)content.replaceChildren(staging);}catch(error){if(version===generation)content.textContent='Could not load evidence: '+error.message;}};
+ const update=async()=>{const version=++generation,staging=document.createElement('div');content.textContent='Loading evidence…';try{await (choice.value==='end-use'?renderUsEndUse(staging,{...options,descriptor:options.endUseDescriptor}):choice.value==='circuits'?renderUsCircuits(staging,{...options,descriptor:options.circuitsDescriptor}):choice.value==='CL'?renderChileProduction(staging,{...options,descriptor:options.chileDescriptor}):renderUsFlows(staging,options));if(version===generation)content.replaceChildren(staging);}catch(error){if(version===generation)content.textContent='Could not load evidence: '+error.message;}};
  choice.onchange=update;await update();
 }
