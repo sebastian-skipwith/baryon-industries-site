@@ -1,4 +1,4 @@
-import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=20261023a';
+import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=20261023b';
 import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
 import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021d';
@@ -43,7 +43,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
     <p id="cp-status-coverage">${statusError?'Operating-status qualification could not be verified: '+esc(statusError):statusInput?'The reports will include the historical ASARCO operating-status disagreement as context about other facilities. It does not resolve any Gunnison supply check.':'No operating-status qualification is included in this snapshot. Historical processing associations do not establish operation.'}</p>
     <p>Create a decision brief and an evidence handoff: four unresolved checks, candidate source links, recorded access status and the observations needed next.</p>
     <div class="ev-links"><a href="/data/evidence/${esc(descriptor.file)}" download>Download evidence snapshot</a><button class="ev-button" id="cp-report-button">Create brief + research handoff</button></div><div id="cp-report" hidden></div></div><section id="cp-operating-preflight"></section>${footer()}`;
-  const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0;let relativeDays='365';const urls=[];
+  const $=id=>container.querySelector('#'+id);let input,result,buyerRequest,revision=0,preflightControl=null;let relativeDays='365';const urls=[];
   const releaseDownloads=()=>{for(const url of urls)URL.revokeObjectURL(url);urls.length=0;};
   const thresholdNumber=v=>v===null?'Unknown':new Intl.NumberFormat('en-US',{maximumSignificantDigits:6}).format(v);
   function renderThresholds(comparison){
@@ -57,7 +57,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       '</tbody></table></div><p class="ev-small">Values shown to six significant digits; the comparison download retains exact values. A required share above 100% cannot meet the target by changing that share alone. Calculator input ranges are not physical limits. No threshold establishes available capacity or verified supply.</p><a href="#cp-report-button">Save this comparison with the decision and research handoff ↓</a>';
   }
   function update(){
-    revision++;releaseDownloads();
+    revision++;releaseDownloads();preflightControl?.clearHandoff();
     $('cp-report').hidden=true;$('cp-report').textContent='';
     input=Object.fromEntries(Object.keys(SCREEN_INPUTS).map(k=>[k,$('cp-'+k).value===''?null:$('cp-'+k).valueAsNumber]));
     buyerRequest=Object.fromEntries(['windowStart','windowEnd','destination','productSpecification'].map(k=>[k,$('cp-'+k).value]));
@@ -149,12 +149,12 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
         <p>The soil and BC audits are consumed; the BC geological candidate did not pass its uncertainty gate. Copperwood cores remain selected known-deposit evidence. Research-policy improvement has not been demonstrated.</p>
         <div class="ev-links"><a href="${esc(handoffMarkdownUrl)}" download="baryon-copper-research-handoff.md">Download research handoff (.md)</a><a href="${esc(handoffUrl)}" download="baryon-copper-research-handoff.json">Download reproducible handoff (.json)</a><a href="#models">Inspect research outcomes →</a></div>
         ${jsonDetails('Research tasks, source bindings and consumed-audit safeguards',handoff)}</section>`;
-      $('cp-report').hidden=false;
+      $('cp-report').hidden=false;preflightControl?.setHandoff(handoff);
     }catch(error){
       if(requestedRevision!==revision)return;
       releaseDownloads();$('cp-report').innerHTML=`<div role="alert" class="ev-error">Could not create the brief: ${esc(error.message)}</div>`;$('cp-report').hidden=false;
     }finally{if(requestedRevision===revision)$('cp-report-button').disabled=!result.ok;}
   });
   update();
-  mountOperatingPreflight($('cp-operating-preflight'));
+  preflightControl=mountOperatingPreflight($('cp-operating-preflight'));
 }
