@@ -1,6 +1,6 @@
 import {researchReviewPanel} from '/assets/research-review-view.mjs?v=20261019b';
 import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=20261023b';
-import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261022b';
+import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261023c';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';
 import { renderBedrock, activateBedrock } from '/assets/bedrock-view.mjs?v=20260929';
@@ -51,7 +51,7 @@ async function selectView() {
     manifest=await data('manifest.json');
     target.innerHTML='<div class="ev-container"></div>';
     const container=target.firstElementChild;
-    await ({pathway:c=>renderPathway(c,{descriptor:manifest.pathway,reviewDescriptor:manifest.researchReview,flowDescriptor:manifest.flows,circuitDescriptor:manifest.usCircuits,facilityStatusDescriptor:manifest.facilityStatus,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}}),flows:c=>renderFlows(c,{descriptor:manifest.flows,chileDescriptor:manifest.chileProduction,salesDescriptor:manifest.chileSales,exportsDescriptor:manifest.chileExports,circuitsDescriptor:manifest.usCircuits,facilityOutputDescriptor:manifest.facilityOutput,facilityStatusDescriptor:manifest.facilityStatus,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
+    await ({pathway:c=>renderPathway(c,{descriptor:manifest.pathway,reviewDescriptor:manifest.researchReview,flowDescriptor:manifest.flows,circuitDescriptor:manifest.usCircuits,facilityStatusDescriptor:manifest.facilityStatus,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}}),flows:c=>renderFlows(c,{descriptor:manifest.flows,chileDescriptor:manifest.chileProduction,salesDescriptor:manifest.chileSales,exportsDescriptor:manifest.chileExports,energyDescriptor:manifest.chileEnergy,circuitsDescriptor:manifest.usCircuits,facilityOutputDescriptor:manifest.facilityOutput,facilityStatusDescriptor:manifest.facilityStatus,data,helpers:{heading,fmt,escape,jsonDetails,footer}}),soil:renderSoil,cores:renderCores,models:renderModels,trade:renderTrade,supply:renderSupply,structure:renderStructure,bedrock:c=>renderBedrock(c,{model:manifest.bedrock,data,helpers:{heading,metric,fmt,escape,jsonDetails,footer}})}[view])(container);
   }catch(error){initialized.delete(view);fail(target,error);}
 }
 window.addEventListener('hashchange',selectView);
