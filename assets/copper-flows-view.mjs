@@ -1,10 +1,12 @@
+import {renderUsSemifabricates} from '/assets/us-semifabricates-view.mjs?v=20261023e';
 import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
 import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261023d';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
-async function renderUsFlows(container,{descriptor,data,helpers}) {
+async function renderUsFlows(container,{descriptor,manufacturingDescriptor,data,helpers}) {
   if(!descriptor)throw new Error('Copper flows are not available in this snapshot.');
   const dataset=await data(descriptor),{heading,fmt,escape:e,jsonDetails,footer}=helpers;
+  const manufacturing=manufacturingDescriptor?await data(manufacturingDescriptor):null;
   const $=id=>container.querySelector('#'+id), source=dataset.source;
   const types={month:'month',quarter:'quarter',year:'full year',year_to_date:'year to date'};
   const status=v=>v.sourceEstimated?'Estimated':v.includesEstimates?'Includes estimates':'Reported';
@@ -16,10 +18,12 @@ async function renderUsFlows(container,{descriptor,data,helpers}) {
     <div class="ev-card ev-card-body"><h2>Reconcile apparent consumption</h2><p>Primary refined + copper recovered from old scrap + refined imports − refined exports − change in refined stocks.</p><div id="ev-flow-terms" class="ev-flow-terms"></div><div id="ev-flow-result" aria-live="polite"></div><p class="ev-small">Old-scrap recovery includes refined metal, alloys and other forms. It is broader than refinery scrap. The published balance includes estimates; rounding differences are retained.</p></div>
     <div class="ev-card ev-card-body"><h2>Monthly consumption measures</h2><p>Apparent copper consumption and reported refined use have different coverage. Their difference is not unmet demand. Click a month to inspect its figures.</p><div id="ev-flow-chart" class="ev-flow-chart"></div><p class="ev-small"><span class="ev-teal">■ Apparent consumption</span> · <span class="ev-amber">■ Reported refined use</span> · estimates included. Bar lengths use one common scale in tonnes. Monthly periods only; quarter, year and year-to-date totals are excluded.</p></div>
     <div class="ev-card"><div class="ev-card-body"><h2>Every source series for this period</h2><p>“Estimated” preserves explicit table or year annotations. “Includes estimates” identifies mixed totals and footnote-qualified series.</p></div><div class="ev-table-wrap" id="ev-flow-table"></div></div>
+    <div id="us-semifabricates"></div>
     <div class="ev-split"><div class="ev-card ev-card-body"><h2>What this adds to a supply decision</h2><p>This national snapshot shows how production, recycling, trade and inventories contributed in a reported period. It does not locate available procurement supply or establish which mine supplied a refinery.</p><div class="ev-links"><a href="#supply">Explore a copper-project supply scenario →</a><a href="#bedrock">Inspect regional geology →</a></div><p>${e(dataset.notes.freshness)}</p><p>${e(dataset.notes.trade)}</p></div>
     <div class="ev-card ev-card-body"><h2>Source and reporting lag</h2><p>${e(source.name)}. Published May 2026; acquired ${e(source.acquiredAt.slice(0,10))} UTC. Latest observation ends September 30, 2025. Acquisition does not update the observation date.</p><p>${e(source.license)}. Only reviewed statistical tables 2, 3, 4, 7 and 8 are exported.</p><div class="ev-links">${sourceLink(1,'Original survey')}<a href="${e(source.rightsUrl)}" target="_blank" rel="noopener">USGS reuse policy ↗</a><a href="/data/evidence/${e(descriptor.file)}" download>Download normalized statistics</a></div>${jsonDetails('Source qualifications and accounting scope',{notes:dataset.notes,scope:dataset.scope,source})}</div></div>${footer()}`;
   function update() {
     const {period:p,values:v,balance:b}=selectFlowPeriod(dataset,$('ev-flow-period').value);
+    renderUsSemifabricates($('us-semifabricates'),manufacturing,manufacturingDescriptor,p.id,helpers);
     $('ev-flow-period-note').textContent=`${p.label} · ${types[p.kind]} · ${p.start} through ${p.end}. ${p.kind==='month'?'One month of activity.':'Aggregate period; do not add it to its component months.'}`;
     $('ev-flow-production').innerHTML=['mineRecoverable','smelterAnodes','refineryTotal','useReported'].map(k=>`<div class="ev-metric"><strong>${fmt(v[k].value)} t</strong><span>${e(seriesLabel(k))}</span><p class="ev-small">${status(v[k])}</p></div>`).join('');
     const stock=v.balanceStockChange.value;
