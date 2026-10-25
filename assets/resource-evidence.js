@@ -296,11 +296,27 @@ function tellusMethodCommitmentPanel(item,download) {
     <div class="ev-links"><a href="/data/evidence/${escape(download.file)}" download>Download Tellus method and readiness record (.json)</a><a href="${escape(d.sourceLinks.assay)}" target="_blank" rel="noopener">GSI assay source ↗</a><a href="${escape(d.sourceLinks.geology)}" target="_blank" rel="noopener">GSI / GSNI geology source ↗</a></div></section>`;
 }
 
+function sguMethodCommitmentPanel(item,download) {
+  const d=item.document,r=d.readiness;
+  return `<section class="ev-card ev-card-body" id="ev-sgu-readiness"><div class="ev-kicker">Research registry / geographic support</div><h3>Swedish atlas copper: fixed geographic support passes</h3>
+    <span class="ev-badge">Method committed · auditor pending</span>
+    <p>The single committed geographic allocation meets the minimum of 100 sites and eight groups in each partition. Copper values remain unopened; no model has been fitted or audit started.</p>
+    <div class="ev-table-wrap"><table class="ev-table" id="ev-sgu-counts"><thead><tr><th>Partition</th><th>Retained sites</th><th>50 km groups</th></tr></thead><tbody>${[['train','Training'],['validation','Validation'],['audit','Planned audit']].map(([key,label])=>`<tr><td>${label}</td><td>${fmt(r.retainedCounts[key].samples)}</td><td>${r.retainedCounts[key].groups}</td></tr>`).join('')}</tbody></table></div>
+    <p>All ${fmt(r.sourceRows)} atlas metadata rows remain accounted for. Fixed 12.5 km separation buffers exclude ${fmt(r.bufferExcludedRows)} evaluation memberships; no assay-based exclusions or alternative splits were used.</p>
+    <div class="ev-note">Geographic support is a preparation result. Independent evaluation and source admission remain pending. The current bedrock map is not authenticated historical evidence; its independence from past geochemistry and QC-parent lineage remain unresolved.</div>
+    <details><summary>Committed target, models and evaluation</summary><p><strong>Target:</strong> ${escape(d.target.transform)} in reported ${escape(d.target.unit)}. ${escape(d.target.meaning)}</p><p>${escape(d.target.failure)}</p><p><strong>Baseline:</strong> ${escape(d.baseline.description)}</p><p><strong>Candidate:</strong> ${escape(d.candidate.description)}</p><p>${escape(d.evaluation.gate)}</p><p>${escape(d.evaluation.uncertainty)}</p><p>${escape(d.split.bufferRule)}</p></details>
+    <details><summary>Geological provenance, exposure and limits</summary><p>${escape(d.scope)}</p><ul>${d.provenance.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${escape(d.exposureAtLocalCommitment.nonTargetExposure)}</p><p>${escape(d.permissions.assay)} ${escape(d.permissions.geology)}</p></details>
+    <details><summary>Prospective support planning and commitment record</summary><p>The fixed grid contains ${r.occupiedGroupsBeforeBuffer} occupied groups. The pre-allocation calculator considered 60/20/20 allocation and eight groups per partition; actual retained counts are shown above.</p><p>${escape(d.supportPlanning.assumption)} ${escape(d.supportPlanning.limitations)}</p><p>Local method: ${escape(d.localCommittedAt)}. Metadata check: ${escape(r.at)}. Registry: ${escape(item.recordedAt)}.</p><p>${escape(d.timing)}</p><p>${escape(d.projection)}</p>${jsonDetails('Inspect committed method and metadata readiness',d)}</details>
+    <p class="ev-small">${escape(d.nextStep)} ${d.softwareVerification.syntheticTestsPassed} synthetic tests passed; no measured model gain is claimed.</p>
+    <div class="ev-links"><a href="/data/evidence/${escape(download.file)}" download>Download Swedish atlas method and readiness record (.json)</a><a href="${escape(d.sourceLinks.assayDocumentation)}" target="_blank" rel="noopener">SGU atlas methods and licence ↗</a><a href="${escape(d.sourceLinks.geologyDocumentation)}" target="_blank" rel="noopener">SGU geological map and licence ↗</a></div></section>`;
+}
+
 function methodCommitmentPanel(item, admissions) {
   const d=item.document, download=manifest.methodCommitments?.find(v=>v.id===item.id);
   if(!download || download.sha256!==item.publicDocument.sha256 || download.bytes!==item.publicDocument.bytes) throw new Error('Method commitment download identity mismatch');
   if(d.id==='ngsa-tos-coarse-cu-total-georegions-v1')return ngsaMethodCommitmentPanel(item,download,admissions.get(d.id));
   if(d.id==='tellus-g7g9-floor-cu-geology-v1')return tellusMethodCommitmentPanel(item,download);
+  if(d.id==='sgu-atlas-floor-cu-geology-v1')return sguMethodCommitmentPanel(item,download);
   return `<section class="ev-card ev-card-body" id="ev-method-commitment"><div class="ev-kicker">Next independent evaluation / design commitment</div><h3>${escape(d.title)}</h3>
     <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
     <p>Two historical Eagle Plains surveys in northern Yukon are proposed for a separate sediment-copper test. The methods are fixed; no Yukon assay workbook has been acquired and no real model or audit has run.</p>
