@@ -1,12 +1,16 @@
+import {makeStageContext} from '/assets/cathode-stage-context.mjs?v=kennecott-stages-20261025';
+import {stageContextHtml} from '/assets/kennecott-stages-view.mjs?v=kennecott-stages-20261025';
 import {validateAsarcoStatus,selectCircuitStatus} from '/assets/asarco-status.mjs?v=20261022b';
 import {selectUsCircuit,validateUsCircuits} from '/assets/us-circuits.mjs?v=20261016a';
 import {validateKennecottOutput,selectCircuitOutput} from '/assets/kennecott-output.mjs?v=20261022a';
-export async function renderUsCircuits(container,{descriptor,facilityOutputDescriptor,facilityStatusDescriptor,data,helpers:h}){
+export async function renderUsCircuits(container,{descriptor,facilityOutputDescriptor,facilityStatusDescriptor,facilityStagesDescriptor,data,helpers:h}){
  const dataset=validateUsCircuits(await data(descriptor)),{heading,escape:e,jsonDetails,footer}=h;
  let output=null,outputError=null;
  try{if(facilityOutputDescriptor)output=validateKennecottOutput(await data(facilityOutputDescriptor));}catch(error){outputError=error.message;}
  let statusData=null,statusError=null;
  try{if(facilityStatusDescriptor)statusData=validateAsarcoStatus(await data(facilityStatusDescriptor));}catch(error){statusError=error.message;}
+ let stages=null,stagesError=null;
+ try{if(facilityStagesDescriptor)stages=makeStageContext({evidence:await data(facilityStagesDescriptor),binding:facilityStagesDescriptor});}catch(error){stagesError=error.message;}
  const $=id=>container.querySelector('#'+id),s=dataset.source;
  const link=(page,label)=>`<a href="${e(s.url)}#page=${page}" target="_blank" rel="noopener">${label} ↗</a>`;
  container.innerHTML=heading('Physical economy / United States / reported circuits','Which mines are linked to which processors?','Inspect named ore origins and processing facilities in a USGS synthesis. These historical relationships identify where to investigate throughput, product quality and delivery evidence.','Reported for 2022 · published 2023')+`
@@ -14,6 +18,7 @@ export async function renderUsCircuits(container,{descriptor,facilityOutputDescr
  <section id="uc-detail" aria-live="polite"></section>
  <section id="uc-status" aria-live="polite"></section>
  <section id="uc-output" aria-live="polite"></section>
+ <section id="uc-stages" aria-live="polite"></section>
  <div class="ev-note">The report describes relationships as of 2022. Current operation, shipment volumes and available supply have not been established. No measured shipments are included.</div>
  <div class="ev-card ev-card-body"><h2>Evidence needed for a supply decision</h2><div id="uc-needs"></div><div class="ev-links"><a href="#pathway">Open the cathode supply screen →</a><a href="#models">Review model evaluations →</a></div></div>
  <details class="ev-card ev-card-body"><summary>Accounting limits and facility identity</summary>${dataset.limitations.map(t=>`<p>${e(t)}</p>`).join('')}</details>
@@ -32,6 +37,7 @@ export async function renderUsCircuits(container,{descriptor,facilityOutputDescr
    const o=matched.observations[0],s=output.source;
    return `<div class="ev-card ev-card-body"><div class="ev-kicker">Historical output estimate · ${e(o.period.start)} through ${e(o.period.end)}</div><h2>What did the named refinery produce?</h2><div class="ev-metrics"><div class="ev-metric"><strong>${o.value.toLocaleString('en-US')} ${e(o.unit)}</strong><span>${e(o.material)} · reported for 2022</span></div><div class="ev-metric"><strong>Unknown</strong><span>Current output and available supply</span></div></div><h3>${e(matched.facility.name)} · ${e(matched.facility.locality)}</h3><p>${e(o.method)}</p><p>${e(o.rounding)}</p><p><strong>Mass basis:</strong> ${e(o.basisNote)}</p><p>${e(output.constraint)}</p><details><summary>How this observation is linked to the refinery</summary><p>${e(matched.link.basis)}</p><p>The identifier is curated by Baryon; no external facility registry identifier or coordinates are supplied. This link does not independently verify production or establish shipment quantities.</p></details><p>Current production, sustained rate, purity, uncommitted inventory and delivery remain unknown. This historical value does not populate the Gunnison scenario or any buyer evidence gate.</p><div class="ev-links"><a href="${e(s.url)}#page=5" target="_blank" rel="noopener">USGS reported output · PDF page 5 ↗</a><a href="${e(s.url)}#page=4" target="_blank" rel="noopener">Facility identity · PDF page 4 ↗</a><a href="${e(s.url)}#page=3" target="_blank" rel="noopener">Estimation and rounding · PDF page 3 ↗</a><a href="/data/evidence/${e(facilityOutputDescriptor.file)}" download>Download historical output evidence</a></div><p class="ev-small">Published ${e(s.publicationDate)} (month precision); acquired ${e(s.acquiredAt)}. ${e(s.attribution)} ${e(s.permission)}</p>${jsonDetails('Historical observation, identity link and limits',output)}</div>`;
   })();
+  $('uc-stages').innerHTML=c.id!=='bingham-magna'?'':stagesError?`<div class="ev-error" role="alert">Production-stage evidence could not be verified: ${e(stagesError)}</div>`:stageContextHtml(stages,h);
   $('uc-needs').innerHTML='<ol>'+r.nextEvidence.map(n=>`<li><strong>${e(n.need)}</strong><p>${e(n.effect)}</p></li>`).join('')+'</ol>';
  }
  $('uc-circuit').onchange=update;update();

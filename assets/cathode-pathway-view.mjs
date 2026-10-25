@@ -1,6 +1,8 @@
+import {makeStageContext} from '/assets/cathode-stage-context.mjs?v=kennecott-stages-20261025';
+import {stageContextHtml} from '/assets/kennecott-stages-view.mjs?v=kennecott-stages-20261025';
 import {makeFacilityOutputContext} from '/assets/cathode-facility-output.mjs?v=facility-context-20261025';
 import {getCopperContextSelection,clearCopperContextSelection,onCopperContextSelection} from '/assets/copper-context-selection.mjs?v=20261023i';
-import {makeCathodeDecisionPackage,cathodeDecisionPackageMarkdown} from '/assets/cathode-decision-package.mjs?v=msha-identity-20261025';
+import {makeCathodeDecisionPackage,cathodeDecisionPackageMarkdown} from '/assets/cathode-decision-package.mjs?v=kennecott-stages-20261025';
 import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=msha-identity-20261025';
 import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
@@ -8,8 +10,8 @@ import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decis
 import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=msha-identity-20261025';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
 import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=msha-identity-20261025';
-import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=facility-context-20261025';
-export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,facilityStatusDescriptor,facilityOutputDescriptor,data,helpers:h}) {
+import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=kennecott-stages-20261025';
+export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,facilityStatusDescriptor,facilityOutputDescriptor,facilityStagesDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
   const e=await data(descriptor),{escape:esc,fmt,heading,metric,jsonDetails,footer}=h;
   const identity=e.identityResolution??{statement:'This historical snapshot uses Baryon process-role keys. Physical refinery identity has not been resolved.',admissionRule:'Resolve a permitted dated physical-facility link before assigning output, inventory, product assays or shipments. Common ownership and similar names are insufficient.'};
@@ -19,6 +21,8 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
   try{if(facilityStatusDescriptor){statusInput={evidence:await data(facilityStatusDescriptor),binding:facilityStatusDescriptor};makeFacilityStatusContext(statusInput);}}catch(error){statusError=error.message;}
   let outputInput,outputError;
   try{if(facilityOutputDescriptor){outputInput={evidence:await data(facilityOutputDescriptor),binding:facilityOutputDescriptor};makeFacilityOutputContext(outputInput,circuitEvidence);}}catch(error){outputError=error.message;}
+  let stagesInput,stagesError;
+  try{if(facilityStagesDescriptor){stagesInput={evidence:await data(facilityStagesDescriptor),binding:facilityStagesDescriptor};makeStageContext(stagesInput);}}catch(error){stagesError=error.message;}
   const source=`<a href="${esc(e.source.url)}#page=4" target="_blank" rel="noopener">USGS Copper Yearbook · page 20.2 ↗</a>`;
   container.innerHTML=heading('Supply decisions / Gunnison, Arizona','Can this pathway meet a copper requirement?','Follow a documented route from underground leaching to copper cathodes. Compare a delivery target with historical evidence, then test explicitly assumed operating conditions.','Historical evidence · 2022')+
     `<div class="ev-note"><strong>Evidence year: 2022. Report published: May 2026.</strong> Current operating status and available supply are unknown in this snapshot.</div>
@@ -116,7 +120,8 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
       const thresholdMarkdown=await cathodeThresholdMarkdown(thresholdReport);
       if(contextError)throw new Error('National context unavailable: '+contextError);
       if(outputError)throw new Error('Dated processor output could not be verified: '+outputError);
-      const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod,statusInput,outputInput);
+      if(stagesError)throw new Error('Production-stage evidence could not be verified: '+stagesError);
+      const flowContext=await makeCathodeFlowContext(report,flowEvidence,flowDescriptor,circuitEvidence,circuitDescriptor,requestedPeriod,statusInput,outputInput,stagesInput);
       const contextMarkdown=await cathodeFlowContextMarkdown(flowContext);
       const packageReport=requestedDemand?await makeCathodeDecisionPackage({decision:report,researchHandoff:handoff,thresholds:thresholdReport,flowContext,demandContext:requestedDemand,generatedAt:new Date().toISOString()}):null;
       const packageMarkdown=packageReport?await cathodeDecisionPackageMarkdown(packageReport):null;
@@ -160,6 +165,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
         <p>Plant sales, capacity and scenario output are not added to national terms. No product-purity conversion, target-share ratio, current availability or demand forecast is inferred.</p>
         <div class="ev-links"><a href="${esc(flowEvidence.source.url)}#page=11" target="_blank" rel="noopener">USGS national balance · table 8 ↗</a><a href="${esc(circuitEvidence.source.url)}#page=97" target="_blank" rel="noopener">USGS processing groups · page 85 ↗</a><a href="#flows">Inspect all copper-flow accounts →</a></div><p class="ev-small">National account published ${esc(flowEvidence.source.publicationDate)}. Processing relationships are framed as of 2022. These source dates do not establish present conditions.</p>
         ${outputHtml}
+        ${stageContextHtml(flowContext.facilityStages,h)}
         ${statusHtml}
         <div class="ev-links"><a href="${esc(contextMarkdownUrl)}" download="baryon-copper-flow-context.md">Download account context (.md)</a><a href="${esc(contextUrl)}" download="baryon-copper-flow-context.json">Download exact account context (.json)</a></div>
         ${jsonDetails('National account, incompatibilities and source bindings',flowContext)}</section>

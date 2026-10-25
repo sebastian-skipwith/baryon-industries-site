@@ -1,7 +1,7 @@
 import {renderIeaDemand} from '/assets/iea-demand-view.mjs?v=20261023i';
 import {renderUsEndUse} from '/assets/us-end-use-view.mjs?v=20261023f';
 import {renderUsSemifabricates} from '/assets/us-semifabricates-view.mjs?v=20261023e';
-import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=20261022b';
+import {renderUsCircuits} from '/assets/us-circuits-view.mjs?v=kennecott-stages-20261025';
 import {renderChileProduction} from '/assets/chile-production-view.mjs?v=20261023d';
 import {selectFlowPeriod,monthlyFlowRows} from '/assets/material-flow.mjs?v=20260917a';
 
