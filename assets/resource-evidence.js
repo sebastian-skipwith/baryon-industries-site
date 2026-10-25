@@ -277,10 +277,26 @@ function ngsaMethodCommitmentPanel(item, download, admission) {
     </section>`;
 }
 
+function tellusMethodCommitmentPanel(item,download) {
+  const d=item.document,r=d.readiness;
+  return `<section class="ev-card ev-card-body" id="ev-tellus-readiness"><div class="ev-kicker">Independent evaluation / readiness result</div><h3>Tellus copper: fixed design stopped</h3>
+    <span class="ev-badge">Validation groups: ${r.retainedCounts.validation.groups} / ${r.requiredMinimumGroupsEach} required</span>
+    <p>The fixed geographic allocation did not meet its validation-group minimum. Copper values remain unopened; no model was fitted and no audit was started.</p>
+    <div class="ev-note">The seed, 20 km grid, 5 km buffer and eight-group minimum were kept unchanged. This is a failed readiness check, not a measured model result.</div>
+    <div class="ev-table-wrap"><table class="ev-table" id="ev-tellus-counts"><thead><tr><th>Partition</th><th>Retained sites</th><th>Geographic groups</th></tr></thead><tbody>${[['train','Training'],['validation','Validation'],['audit','Planned audit']].map(([key,label])=>`<tr><td>${label}</td><td>${fmt(r.retainedCounts[key].samples)}</td><td>${r.retainedCounts[key].groups}</td></tr>`).join('')}</tbody></table></div>
+    <p>All ${fmt(r.sourceRows)} released metadata rows remain accounted for. The fixed separation buffers remove ${fmt(r.bufferExcludedRows)} evaluation memberships; ${r.missingGeologyRows} rows retain missing geology. No assay-based exclusions were made.</p>
+    <details><summary>Committed target, models and evaluation</summary><p>${escape(d.target)}</p><p><strong>Baseline:</strong> ${escape(d.baseline)}</p><p><strong>Candidate:</strong> ${escape(d.candidate)}</p><p>${escape(d.evaluation)}</p><p>${escape(d.split.bufferRule)}</p><p>${escape(d.deviationPolicy)}</p></details>
+    <details><summary>Geological provenance, exposure and limits</summary><p>${escape(d.provenance)}</p><p>${escape(d.cohort)}</p><p>${escape(d.exposureAtLocalCommitment)}</p><p>${escape(d.scope)}</p><ul>${d.permissions.map(v=>`<li>${escape(v)}</li>`).join('')}</ul></details>
+    <details><summary>Commitment timing and fingerprints</summary><p>Local method: ${escape(d.localCommittedAt)}. Readiness check: ${escape(r.at)}. Registry: ${escape(item.recordedAt)}.</p><p>${escape(d.timing)}</p><p>${escape(d.projection)}</p>${jsonDetails('Inspect design and readiness record',d)}</details>
+    <p class="ev-small">${escape(d.nextStep)} ${d.softwareVerification.syntheticTestsPassed} synthetic tests passed; software verification is not independent scientific evidence.</p>
+    <div class="ev-links"><a href="/data/evidence/${escape(download.file)}" download>Download Tellus method and readiness record (.json)</a><a href="${escape(d.sourceLinks.assay)}" target="_blank" rel="noopener">GSI assay source ↗</a><a href="${escape(d.sourceLinks.geology)}" target="_blank" rel="noopener">GSI / GSNI geology source ↗</a></div></section>`;
+}
+
 function methodCommitmentPanel(item, admissions) {
   const d=item.document, download=manifest.methodCommitments?.find(v=>v.id===item.id);
   if(!download || download.sha256!==item.publicDocument.sha256 || download.bytes!==item.publicDocument.bytes) throw new Error('Method commitment download identity mismatch');
   if(d.id==='ngsa-tos-coarse-cu-total-georegions-v1')return ngsaMethodCommitmentPanel(item,download,admissions.get(d.id));
+  if(d.id==='tellus-g7g9-floor-cu-geology-v1')return tellusMethodCommitmentPanel(item,download);
   return `<section class="ev-card ev-card-body" id="ev-method-commitment"><div class="ev-kicker">Next independent evaluation / design commitment</div><h3>${escape(d.title)}</h3>
     <span class="ev-badge">Design committed · admission pending</span><p>${escape(d.question)}</p>
     <p>Two historical Eagle Plains surveys in northern Yukon are proposed for a separate sediment-copper test. The methods are fixed; no Yukon assay workbook has been acquired and no real model or audit has run.</p>
@@ -317,7 +333,7 @@ async function registryPanel() {
     ${registry.experiments.filter(e=>e.id==='bc-rgs2020-cu-aas-geology-v1').map(bcEvaluationPanel).join('')}
     ${registry.experiments.map(e=>`<h3>${escape(e.title)}</h3><span class="ev-badge">${escape(labels[e.status]||e.status)}</span><p>${escape(e.scope||e.plan?.question||'')}</p><p class="ev-small">${escape(e.registrationTiming||'Protocol recorded before any audit start in this registry.')} Registry entry: ${escape(e.registeredAt)}.</p>${e.originalPlanCreatedAt?`<p class="ev-small">Original plan: ${escape(e.originalPlanCreatedAt)} · original completion: ${escape(e.originalCompletedAt)}.</p>`:''}${jsonDetails('Inspect protocol, fingerprints and status',e)}`).join('')}
     <p class="ev-small">Proposals below preserve their original scope and knowledge at registration. Later method commitments report subsequent preparation and exposure.</p>
-    ${registry.proposals.map(p=>`<h3>Next proposal: ${escape(p.title)}</h3><p>${escape(p.question)}</p><p class="ev-small">Feasibility proposal; no frozen experiment, evaluation or promotion.</p><p>${escape(p.evidenceAvailable)}</p><details><summary>Required before registration</summary><ul>${p.requiredBeforeRegistration.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${p.limitations.map(escape).join(' ')}</p></details>`).join('')}
+    ${registry.proposals.map(p=>`<h3>${p.id==='tellus-g7g9-readiness-v1'?'Stopped design':'Next proposal'}: ${escape(p.title)}</h3><p>${escape(p.question)}</p><p class="ev-small">Feasibility proposal; no frozen experiment, evaluation or promotion.</p><p>${escape(p.evidenceAvailable)}</p><details><summary>Required before registration</summary><ul>${p.requiredBeforeRegistration.map(v=>`<li>${escape(v)}</li>`).join('')}</ul><p>${p.limitations.map(escape).join(' ')}</p></details>`).join('')}
     ${(registry.methodCommitments||[]).map(item=>methodCommitmentPanel(item,admissions)).join('')}
     <div class="ev-links"><a href="/data/evidence/${escape(manifest.registry.file)}" download>Download registry snapshot</a></div>${jsonDetails('Event history and integrity limits',{head:registry.head,events:registry.events,capabilities:registry.capabilities,artifactVerification:registry.artifactVerification,limitations:registry.limitations})}</div>`;
 }
