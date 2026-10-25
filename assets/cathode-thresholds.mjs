@@ -1,5 +1,5 @@
 import {SCREEN_INPUTS,screenCathodeSupply} from './cathode-screen.mjs';
-import {validateCathodeResearchHandoff} from './cathode-research-handoff.mjs?v=source-screens-20261025';
+import {validateCathodeResearchHandoff} from './cathode-research-handoff.mjs?v=msha-identity-20261025';
 
 const FACTORS=['outputTonnesPerDay','uncommittedPct','deliveryRetentionPct','horizonDays'];
 const GATES={outputTonnesPerDay:['current-operations'],uncommittedPct:['allocation'],deliveryRetentionPct:['delivery'],horizonDays:['delivery']};

@@ -6,6 +6,8 @@ import {validateCathodeDecision} from './cathode-decision.mjs';
 const REVIEW = Object.freeze({file:'research-review-43ad3aad1259.json',sha256:'43ad3aad1259b7cbad6f4e60899d234cddbb4b4427568e3cbfb77152b3222508',bytes:8896});
 const REVIEW_CANONICAL = '3d84ad926c04f007bde39295e0e9c2e9bddb01ec51d8023afd636b8b2f6607d4';
 const ACCESS_REVIEW = Object.freeze({file:'research-review-c00e75a48992.json',sha256:'c00e75a48992b049aadf2b818e30fe5b41ef402175f551a0c30aa48cf60388c9',bytes:9484});
+const MSHA_REVIEW = Object.freeze({"file":"research-review-c84df9ac779b.json","sha256":"c84df9ac779b46add83a5245a776d65a7378ffcd000cfaede97d32ad7b0f3262","bytes":19278});
+const MSHA_CANONICAL = 'd931b24060ba5ef01618d62643554497324be286dd17212d2315186e646c5ac6';
 const SCREEN_REVIEW = Object.freeze({"file":"research-review-e9615aacdcb4.json","sha256":"e9615aacdcb454254f4208afd59dd6ad565d217a79b55ae8f4ea2087cd0d0ded","bytes":15759});
 const SCREEN_CANONICAL = '103a27367f7ff3bbd1c3c93c69c78b175a334af004482d5ab6a4bb62fa028798';
 const SGU_REVIEW = Object.freeze({"file":"research-review-4e4bf3960ac6.json","sha256":"4e4bf3960ac68f991d7fc45e738b3dac8c964e21894ebd29a7e3e9c6912baadc","bytes":12309});
@@ -41,8 +43,8 @@ const RULES = [
 export async function makeCathodeResearchHandoff(decision,review,descriptor,statusInput){
   // Copy all caller-owned content before the first asynchronous digest.
   const decisionCopy=clone(decision),reviewCopy=clone(review),facilityStatus=makeFacilityStatusContext(statusInput);
-  const screenedReview=descriptor?.file===SCREEN_REVIEW.file,sguReview=screenedReview||descriptor?.file===SGU_REVIEW.file,accessReview=sguReview||descriptor?.file===ACCESS_REVIEW.file;
-  const binding=screenedReview?SCREEN_REVIEW:sguReview?SGU_REVIEW:accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=screenedReview?SCREEN_CANONICAL:sguReview?SGU_CANONICAL:accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
+  const mshaReview=descriptor?.file===MSHA_REVIEW.file,screenedReview=mshaReview||descriptor?.file===SCREEN_REVIEW.file,sguReview=screenedReview||descriptor?.file===SGU_REVIEW.file,accessReview=sguReview||descriptor?.file===ACCESS_REVIEW.file;
+  const binding=mshaReview?MSHA_REVIEW:screenedReview?SCREEN_REVIEW:sguReview?SGU_REVIEW:accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=mshaReview?MSHA_CANONICAL:screenedReview?SCREEN_CANONICAL:sguReview?SGU_CANONICAL:accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
   for(const [key,value]of Object.entries(binding))check(descriptor?.[key]===value,'Research review descriptor does not match the reviewed snapshot.');
   const verified=await validateCathodeDecision(decisionCopy);
   check(await sha(reviewCopy)===canonicalHash,'Research review content does not match the reviewed snapshot.');
@@ -62,15 +64,20 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor,stat
     rules[0].sourceCoverage='Bounded AZDEQ, USGS and Queensland screens are complete; none supplied an eligible original for this operating task. The EPA original remains unavailable. Historical context does not establish current output or physical identity.';
     rules[0].nextAction+=' Honor each source revisit trigger: await a provenance-verified permitted original or documented availability change. Do not repeat the stopped searches. Magna and Queensland sources cannot substitute for a Gunnison processing link.';
   }
+  if(mshaReview){
+    rules[0].sourceIds.push('msha-johnson-camp-identity');
+    rules[0].sourceCoverage+=' MSHA registry context preserves separate IDs 0200411 (Abandoned) and 0202824 (Active, combined Gunnison & Johnson Camp name). Both are Surface mine records, not verified physical refinery identities or measured production.';
+    rules[0].nextAction+=' Keep the MSHA mine/property IDs distinct; the combined name and administrative Active status cannot establish the dated electrowinning connection or current cathode output.';
+  }
   if(verified.schemaVersion===3)rules[3].nextAction='Use the buyer requirement attached to this task; clarify any unspecified dates or destination. Identify permitted route, lead-time, transport-capacity and loss evidence for the same allocation and requested window. Buyer entries do not verify location, capability or arrival.';
   const tasks=rules.map((rule,index)=>{
     const gate=verified.evidenceGates.find(g=>g.id===rule.id);
     check(gate?.status==='unverified','Unsupported evidence gate.');
     const buyerScope=verified.schemaVersion===3?{buyerScope:{targetTonnes:verified.requirement.targetTonnes,horizonDays:verified.requirement.horizonDays,...clone(verified.buyerRequest),provenance:'user_requirement',observed:false}}:{};
     return {...clone(rule),...buyerScope,order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
-      acquisitionStatus:screenedReview&&rule.id==='current-operations'?'source_screened_no_eligible_original':'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
+      acquisitionStatus:mshaReview&&rule.id==='current-operations'?'administrative_context_only':screenedReview&&rule.id==='current-operations'?'source_screened_no_eligible_original':'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:screenedReview?'cathode-research-handoff-v7-source-screens':sguReview?'cathode-research-handoff-v6-sgu-outcome':facilityStatus?'cathode-research-handoff-v5-status-context':roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:mshaReview?'cathode-research-handoff-v8-msha-identity':screenedReview?'cathode-research-handoff-v7-source-screens':sguReview?'cathode-research-handoff-v6-sgu-outcome':facilityStatus?'cathode-research-handoff-v5-status-context':roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
     ...(facilityStatus?{facilityStatus}:{}),
     decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
@@ -120,8 +127,9 @@ export async function cathodeResearchHandoffMarkdown(handoff){
       `Next action: ${t.nextAction}`,`Record: ${t.proposedObservation}`,`Possible decision effect: ${t.decisionEffect}`,
       `Source coverage: ${t.sourceCoverage}`,
       ...t.sourceIds.map(id=>{const s=r.sources.find(s=>s.id===id);return `- [${s.name}](${s.sourceUrl}) — ${s.status}; reviewed ${s.reviewedAt}. ${s.permittedUse}${s.policy?` [Recorded reuse policy](${s.policy.url})`:''}`;}),
-      t.acquisitionStatus==='source_screened_no_eligible_original'?'Acquisition: source screening completed; no eligible original admitted. Gate satisfied: no. Expected utility and cost: unknown.':'Acquisition: not started. Gate satisfied: no. Expected utility and cost: unknown.','',
+      t.acquisitionStatus==='administrative_context_only'?'Acquisition: administrative registry context reviewed; physical process identity and operating measurements unresolved. Gate satisfied: no. Expected utility and cost: unknown.':t.acquisitionStatus==='source_screened_no_eligible_original'?'Acquisition: source screening completed; no eligible original admitted. Gate satisfied: no. Expected utility and cost: unknown.':'Acquisition: not started. Gate satisfied: no. Expected utility and cost: unknown.','',
     ]),
+    ...r.sources.filter(s=>s.administrativeRecords).flatMap(s=>['## Administrative mine context','',...s.administrativeRecords.map(v=>`- MSHA ${v.mineId}: ${v.name.trim()} — ${v.mineType}; ${v.administrativeStatus}; source status date ${v.statusDateRaw}; ${v.county}, ${v.state}.`),'',s.dateMeaning,s.identityRule,`Original ZIP SHA-256: ${s.original.sha256}; retrieved ${s.retrievedAt}.`,'']),
     ...facilityStatusMarkdownLines(r.facilityStatus),
     '## Evidence acceptance record','',...r.evidenceRecordRequired.map(x=>'- '+x),'',r.completionRule,'',
     '## Research safeguards','',r.researchConstraints.geologicalReview.reason,
