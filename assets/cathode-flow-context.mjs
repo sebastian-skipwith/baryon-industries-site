@@ -1,6 +1,7 @@
-import {makeFacilityStatusContext,facilityStatusMarkdownLines} from './cathode-facility-status.mjs?v=20261022c';
+import {makeFacilityStatusContext,facilityStatusMarkdownLines} from './cathode-facility-status.mjs';
+import {makeFacilityOutputContext,facilityOutputMarkdownLines} from './cathode-facility-output.mjs?v=facility-context-20261025';
 import {cathodeRequirementLines,requirementMarkdownText} from './cathode-requirement.mjs';
-import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021d';
+import {validateCathodeDecision} from './cathode-decision.mjs';
 import {selectFlowPeriod} from './material-flow.mjs';
 import {validateUsCircuits} from './us-circuits.mjs';
 const FLOW={file:'us-copper-flows-df49d62bed27.json',sha256:'eca489e57d281986a408e17a20898aced4d1b15da3c0d98c5284e6229f387111',bytes:43909};
@@ -11,9 +12,9 @@ const clone=v=>JSON.parse(JSON.stringify(v)),check=(ok,message)=>{if(!ok)throw E
 const sha=async v=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(v))))].map(x=>x.toString(16).padStart(2,'0')).join('');
 const TERMS=[['balancePrimary',1],['balanceOldScrap',1],['balanceImports',1],['balanceExports',-1],['balanceStockChange',-1]];
 
-export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circuits,circuitDescriptor,periodId,statusInput){
+export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circuits,circuitDescriptor,periodId,statusInput,outputInput){
   // Snapshot all caller-owned values before any async digest, and export only reviewed bindings.
-  const d=clone(decision),f=clone(flows),c=clone(circuits),facilityStatus=makeFacilityStatusContext(statusInput);
+  const d=clone(decision),f=clone(flows),c=clone(circuits),facilityStatus=makeFacilityStatusContext(statusInput),facilityOutput=makeFacilityOutputContext(outputInput,c);
   for(const [binding,supplied]of [[FLOW,flowDescriptor],[CIRCUITS,circuitDescriptor]])for(const [key,value]of Object.entries(binding))check(supplied?.[key]===value,'Flow context descriptor does not match the reviewed snapshot.');
   const verified=await validateCathodeDecision(d);
   check(await sha(f)===FLOW_HASH,'Flow context content does not match the reviewed national account.');
@@ -43,8 +44,9 @@ export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circu
     checks[3].requirement=verified.evidence.identityResolution.statement;
     checks[3].needed=verified.evidence.identityResolution.admissionRule+' Dated shipments and product/lot linkage remain separately required.';
   }
-  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:facilityStatus?'cathode-flow-context-v4-status-context':roleIdentity?'cathode-flow-context-v3-role-identity':verified.schemaVersion===3?'cathode-flow-context-v2-buyer-requirement':'cathode-flow-context-v1',decisionReport:verified,
+  const report={schemaVersion:1,kind:'cathode_national_flow_context',method:facilityOutput?'cathode-flow-context-v5-facility-output':facilityStatus?'cathode-flow-context-v4-status-context':roleIdentity?'cathode-flow-context-v3-role-identity':verified.schemaVersion===3?'cathode-flow-context-v2-buyer-requirement':'cathode-flow-context-v1',decisionReport:verified,
     ...(facilityStatus?{facilityStatus}:{}),
+    ...(facilityOutput?{facilityOutput}:{}),
     flowBinding:{...FLOW,canonicalSha256:FLOW_HASH},circuitBinding:{...CIRCUITS,canonicalSha256:CIRCUITS_HASH},flowEvidence:f,circuitEvidence:c,
     account,compatibility:{status:'context_only_not_reconciled',checks,canReconcileRequirement:false,targetShareOfAccount:null,verifiedDeliverableTonnes:null,unmetDemand:null,productToCopperFactor:null,buyerGeography:null},
     pathwayLink:{...(roleIdentity?{identityStatus:verified.evidence.identityResolution.status,matchedIdentityBasis:'physical_facility_id_only'}:{}),pathwayId:verified.evidence.id,historicalEvidenceAsOf:verified.evidence.evidenceAsOf,reviewedCircuitYear:c.temporalScope.asOfYear,matchingReviewedGroupIds:matchingGroups,verifiedShipmentQuantity:null,closedPlantBalance:false},
@@ -56,7 +58,7 @@ export async function makeCathodeFlowContext(decision,flows,flowDescriptor,circu
   return {...report,reportId:await sha(identity)};
 }
 export async function validateCathodeFlowContext(report){
-  const r=clone(report),expected=await makeCathodeFlowContext(r.decisionReport,r.flowEvidence,r.flowBinding,r.circuitEvidence,r.circuitBinding,r.account.period.id,r.facilityStatus?{evidence:r.facilityStatus.evidence,binding:r.facilityStatus.binding}:undefined);
+  const r=clone(report),expected=await makeCathodeFlowContext(r.decisionReport,r.flowEvidence,r.flowBinding,r.circuitEvidence,r.circuitBinding,r.account.period.id,r.facilityStatus?{evidence:r.facilityStatus.evidence,binding:r.facilityStatus.binding}:undefined,r.facilityOutput?{evidence:r.facilityOutput.evidence,binding:r.facilityOutput.binding}:undefined);
   check(canonical(r)===canonical(expected),'Flow context changed or uses an unsupported method.');return expected;
 }
 export async function cathodeFlowContextMarkdown(report){
@@ -71,6 +73,7 @@ export async function cathodeFlowContextMarkdown(report){
   `Published apparent consumption: ${n(b.reported)} t Cu; reconstructed minus published: ${n(b.roundingDifference)} t Cu.`,
   `Reported refined use: ${n(a.reportedRefinedUse.value)} t Cu (${status(a.reportedRefinedUse)}); separate coverage, not unmet demand.`,'',
   '## What prevents a requirement-level reconciliation','',...r.compatibility.checks.flatMap(v=>['### '+v.id,'',`Requirement: ${requirementMarkdownText(v.requirement)}`,`Account/context: ${v.context}`,`Needed: ${v.needed}`,'']),
+  ...facilityOutputMarkdownLines(r.facilityOutput,r.circuitEvidence),
   ...facilityStatusMarkdownLines(r.facilityStatus),
   '## Limits','',...r.limitations.map(v=>'- '+v),'',
   '## Sources and reproducibility','',`[USGS national account](${r.flowEvidence.source.url}); published ${r.flowEvidence.source.publicationDate}.`,

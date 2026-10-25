@@ -1,7 +1,7 @@
 import {validateCathodeDecision,cathodeDecisionMarkdown} from './cathode-decision.mjs';
 import {validateCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from './cathode-research-handoff.mjs?v=sgu-result-20261025';
 import {validateCathodeThresholdReport,cathodeThresholdMarkdown} from './cathode-thresholds.mjs?v=sgu-result-20261025';
-import {validateCathodeFlowContext,cathodeFlowContextMarkdown} from './cathode-flow-context.mjs';
+import {validateCathodeFlowContext,cathodeFlowContextMarkdown} from './cathode-flow-context.mjs?v=facility-context-20261025';
 import {validateCopperDemandContext,copperDemandContextMarkdown} from './copper-demand-context.mjs';
 const clone=v=>JSON.parse(JSON.stringify(v));
 const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
