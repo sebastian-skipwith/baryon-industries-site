@@ -1,4 +1,4 @@
-import {acquisitionTrialPanel} from '/assets/acquisition-trial-view.mjs?v=acquisition-trial-20261025';
+import {acquisitionTrialPanel} from '/assets/acquisition-trial-view.mjs?v=acquisition-outcome-20261025';
 import {sguEvaluationPanel} from '/assets/sgu-result-view.mjs?v=sgu-result-20261025';
 import {spatialSupportPanel,activateSpatialSupport} from '/assets/spatial-support-view.mjs?v=20261025p';
 import {researchReviewPanel} from '/assets/research-review-view.mjs?v=msha-identity-20261025';
