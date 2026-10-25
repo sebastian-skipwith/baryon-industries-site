@@ -1,12 +1,12 @@
 import {getCopperContextSelection,clearCopperContextSelection,onCopperContextSelection} from '/assets/copper-context-selection.mjs?v=20261023i';
-import {makeCathodeDecisionPackage,cathodeDecisionPackageMarkdown} from '/assets/cathode-decision-package.mjs?v=20261023i';
-import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=20261023b';
+import {makeCathodeDecisionPackage,cathodeDecisionPackageMarkdown} from '/assets/cathode-decision-package.mjs?v=sgu-result-20261025';
+import {mountOperatingPreflight} from '/assets/cathode-operating-preflight-view.mjs?v=sgu-result-20261025';
 import {makeFacilityStatusContext} from '/assets/cathode-facility-status.mjs?v=20261022c';
 import {resolveCathodeRequirement} from '/assets/cathode-requirement.mjs?v=20261021d';
 import {makeCathodeDecision,cathodeDecisionMarkdown} from '/assets/cathode-decision.mjs?v=20261021d';
-import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=20261022c';
+import {makeCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from '/assets/cathode-research-handoff.mjs?v=sgu-result-20261025';
 import {SCREEN_INPUTS,screenCathodeSupply,supplyInvestigations} from '/assets/cathode-screen.mjs?v=20261015b';
-import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=20261022c';
+import {compareCathodeThresholds,cathodeThresholdStatus,makeCathodeThresholdReport,cathodeThresholdMarkdown} from '/assets/cathode-thresholds.mjs?v=sgu-result-20261025';
 import {makeCathodeFlowContext,cathodeFlowContextMarkdown} from '/assets/cathode-flow-context.mjs?v=20261022c';
 export async function renderPathway(container,{descriptor,reviewDescriptor,flowDescriptor,circuitDescriptor,facilityStatusDescriptor,data,helpers:h}) {
   if(!descriptor)throw new Error('Operating pathway evidence is not included in this snapshot.');
@@ -156,7 +156,7 @@ export async function renderPathway(container,{descriptor,reviewDescriptor,flowD
           ${t.sourceIds.map(id=>{const s=handoff.sources.find(s=>s.id===id);return `<p class="ev-small"><a href="${esc(s.sourceUrl)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a> · <strong>${esc(sourceLabels[s.status])}</strong> · reviewed ${esc(s.reviewedAt)}${s.policy?` · <a href="${esc(s.policy.url)}" target="_blank" rel="noopener">Recorded reuse policy ↗</a>`:''}</p>`;}).join('')}
           <details><summary>Observation needed and possible decision effect</summary><p>${esc(t.proposedObservation)}</p><p>${esc(t.decisionEffect)}</p><p class="ev-small">Expected utility and cost: unknown. This order is a curated checklist.</p></details></li>`).join('')}</ol>
         <div class="ev-note">${esc(handoff.completionRule)}</div>
-        <p>The soil and BC audits are consumed; the BC geological candidate did not pass its uncertainty gate. Copperwood cores remain selected known-deposit evidence. Research-policy improvement has not been demonstrated.</p>
+        <p>${handoff.researchConstraints.sguOutcome ? 'The soil, BC and SGU audits are consumed; both geological candidates retained their spatial baselines.' : 'The soil and BC audits are consumed; the BC geological candidate did not pass its uncertainty gate.'} Copperwood cores remain selected known-deposit evidence. Research-policy improvement has not been demonstrated.</p>
         <div class="ev-links"><a href="${esc(handoffMarkdownUrl)}" download="baryon-copper-research-handoff.md">Download research handoff (.md)</a><a href="${esc(handoffUrl)}" download="baryon-copper-research-handoff.json">Download reproducible handoff (.json)</a><a href="#models">Inspect research outcomes →</a></div>
         ${jsonDetails('Research tasks, source bindings and consumed-audit safeguards',handoff)}</section>`;
       if(packageReport){const section=document.createElement('section');section.id='cp-integrated-package';section.innerHTML='<h3>Integrated buyer decision package</h3><p>Includes this exact buyer decision, research handoff, threshold comparison, regional account and attached historical demand context. Verified deliverable supply remains unknown.</p><div class="ev-links"></div>';for(const [ext,text,type]of [['json',JSON.stringify(packageReport,null,2)+'\n','application/json'],['md',packageMarkdown,'text/markdown']]){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));urls.push(url);a.href=url;a.download='baryon-copper-decision-package.'+ext;a.textContent=ext==='json'?'Download exact package (JSON)':'Download complete brief (Markdown)';section.querySelector('.ev-links').append(a);}$('cp-report').prepend(section);}

@@ -1,11 +1,13 @@
-import {makeFacilityStatusContext,facilityStatusMarkdownLines} from './cathode-facility-status.mjs?v=20261022c';
+import {makeFacilityStatusContext,facilityStatusMarkdownLines} from './cathode-facility-status.mjs';
 import {cathodeRequirementLines} from './cathode-requirement.mjs';
-import {validateCathodeDecision} from './cathode-decision.mjs?v=20261021d';
+import {validateCathodeDecision} from './cathode-decision.mjs';
 
 // Versioned mapping to a reviewed public snapshot; new evidence requires a new review/binding.
 const REVIEW = Object.freeze({file:'research-review-43ad3aad1259.json',sha256:'43ad3aad1259b7cbad6f4e60899d234cddbb4b4427568e3cbfb77152b3222508',bytes:8896});
 const REVIEW_CANONICAL = '3d84ad926c04f007bde39295e0e9c2e9bddb01ec51d8023afd636b8b2f6607d4';
 const ACCESS_REVIEW = Object.freeze({file:'research-review-c00e75a48992.json',sha256:'c00e75a48992b049aadf2b818e30fe5b41ef402175f551a0c30aa48cf60388c9',bytes:9484});
+const SGU_REVIEW = Object.freeze({"file":"research-review-4e4bf3960ac6.json","sha256":"4e4bf3960ac68f991d7fc45e738b3dac8c964e21894ebd29a7e3e9c6912baadc","bytes":12309});
+const SGU_CANONICAL = '3f813812e7cebc95e9e0354c6009de67c9e2dfd9159aac7db991e243d1c59d3a';
 const ACCESS_CANONICAL = '1c3f20575f308a5f842e33790e4b9ad9efbeda4be4867170a757c96b9c780ef3';
 const canonical = v => v===null || typeof v!=='object' ? JSON.stringify(v) : Array.isArray(v) ? '['+v.map(canonical).join(',')+']' : '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -37,8 +39,8 @@ const RULES = [
 export async function makeCathodeResearchHandoff(decision,review,descriptor,statusInput){
   // Copy all caller-owned content before the first asynchronous digest.
   const decisionCopy=clone(decision),reviewCopy=clone(review),facilityStatus=makeFacilityStatusContext(statusInput);
-  const accessReview=descriptor?.file===ACCESS_REVIEW.file;
-  const binding=accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
+  const sguReview=descriptor?.file===SGU_REVIEW.file,accessReview=sguReview||descriptor?.file===ACCESS_REVIEW.file;
+  const binding=sguReview?SGU_REVIEW:accessReview?ACCESS_REVIEW:REVIEW,canonicalHash=sguReview?SGU_CANONICAL:accessReview?ACCESS_CANONICAL:REVIEW_CANONICAL;
   for(const [key,value]of Object.entries(binding))check(descriptor?.[key]===value,'Research review descriptor does not match the reviewed snapshot.');
   const verified=await validateCathodeDecision(decisionCopy);
   check(await sha(reviewCopy)===canonicalHash,'Research review content does not match the reviewed snapshot.');
@@ -61,7 +63,7 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor,stat
     return {...clone(rule),...buyerScope,order:index+1,status:'evidence_needed',gateStatus:gate.status,acceptanceCriteria:gate.requires,
       acquisitionStatus:'not_started',gateSatisfied:false,expectedUtility:null,estimatedCost:null};
   });
-  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:facilityStatus?'cathode-research-handoff-v5-status-context':roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
+  const handoff={schemaVersion:1,kind:'cathode_research_handoff',method:sguReview?'cathode-research-handoff-v6-sgu-outcome':facilityStatus?'cathode-research-handoff-v5-status-context':roleIdentity?'cathode-research-handoff-v4-role-identity':verified.schemaVersion===3?'cathode-research-handoff-v3-buyer-requirement':accessReview?'cathode-research-handoff-v2-source-access':'cathode-research-handoff-v1',
     ...(facilityStatus?{facilityStatus}:{}),
     decisionReport:verified,reviewBinding:{...binding,canonicalSha256:canonicalHash},review:reviewCopy,
     registryHead:clone(reviewCopy.registryHead),tasks,
@@ -71,6 +73,7 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor,stat
     researchConstraints:{
       geologicalReview:clone(reviewCopy.nextInvestigations.find(i=>i.id==='independent-geological-test')),
       bcOutcome:clone(reviewCopy.outcome),
+      ...(sguReview?{sguOutcome:clone(reviewCopy.additionalOutcomes[0])}:{}),
       selectedCoreEvidence:'Copperwood assays describe selected known-deposit drill cores; they are not representative discovery evidence or independent negative examples.',
       sourceAdmission:'This workflow admits no new assays and changes no audit, protocol, partition or seed. A future geological experiment requires independently reviewed source permission and a frozen evaluation.',
     },
@@ -81,7 +84,7 @@ export async function makeCathodeResearchHandoff(decision,review,descriptor,stat
       'Source status is the recorded review status, not a live permission or operating-status check. No company numerical values are imported.',
       'Candidate links do not establish that the required evidence exists. No suitable delivery source has been identified in this queue.',
       'The gate order is a curated checklist, not a measured ranking of research value. Costs and research-policy gains remain unknown.',
-      'The soil and BC audits are permanently consumed. No tuning, new split, renamed cohort or changed seed may reuse them.',
+      sguReview?'The soil, BC and SGU audits are permanently consumed. No tuning, new split, renamed cohort or changed seed may reuse them.':'The soil and BC audits are permanently consumed. No tuning, new split, renamed cohort or changed seed may reuse them.',
       'Hashes bind these snapshots and detect changes; they do not certify source truth, observation independence or complete coverage.',
     ],
   };
@@ -121,6 +124,7 @@ export async function cathodeResearchHandoffMarkdown(handoff){
     '## Revisit triggers','',...r.sources.map(s=>`- ${s.name}: ${s.revisitWhen}`),'',r.scheduling.rule,
     'No automatic source polling, evidence acquisition, external communication or learned priority selection is performed. Research-policy gain and observed decision utility are unknown.','',
     '## Limits','',...r.limitations.map(x=>'- '+x),'',
+    ...(r.researchConstraints.sguOutcome?['## Swedish geological evaluation','',`Decision: ${r.researchConstraints.sguOutcome.decision}; audit consumed. No copper delivery gate is satisfied by this result.`,'']:[]),
     '## Reproduce this handoff','',`Decision generated: ${d.generatedAt}; source review date: ${r.review.reviewedAt}. Generation is not evidence freshness.`,
     `Decision ID: ${d.reportId}`,`Handoff ID: ${r.handoffId}`,`Method: ${r.method}`,
     `Review: ${r.reviewBinding.file}; SHA-256 ${r.reviewBinding.sha256}.`,
