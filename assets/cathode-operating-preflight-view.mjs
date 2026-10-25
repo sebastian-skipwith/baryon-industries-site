@@ -1,4 +1,4 @@
-import {makeCathodeOperatingReviewReceipt} from '/assets/cathode-review-receipt.mjs?v=sgu-result-20261025';
+import {makeCathodeOperatingReviewReceipt} from '/assets/cathode-review-receipt.mjs?v=source-screens-20261025';
 import {blankOperatingRecord,preflightOperatingRecord,sha256Bytes,PREFLIGHT_LIMITS} from '/assets/cathode-operating-preflight.mjs?v=20261023a';
 
 export function mountOperatingPreflight(host){

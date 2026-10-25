@@ -1,7 +1,7 @@
 import {sguEvaluationPanel} from '/assets/sgu-result-view.mjs?v=sgu-result-20261025';
 import {spatialSupportPanel,activateSpatialSupport} from '/assets/spatial-support-view.mjs?v=20261025p';
-import {researchReviewPanel} from '/assets/research-review-view.mjs?v=sgu-result-20261025';
-import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=facility-context-20261025';
+import {researchReviewPanel} from '/assets/research-review-view.mjs?v=source-screens-20261025';
+import {renderPathway} from '/assets/cathode-pathway-view.mjs?v=source-screens-20261025';
 import {renderFlows} from '/assets/copper-flows-view.mjs?v=20261023i';
 import * as maplibregl from '/maplibre/maplibre-gl.mjs';
 import { wrapLongitude, gridNode, latitudeRows, latitudeProfile } from '/assets/slab2-profile.mjs?v=20260915f';

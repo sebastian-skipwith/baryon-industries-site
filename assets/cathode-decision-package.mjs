@@ -1,6 +1,6 @@
 import {validateCathodeDecision,cathodeDecisionMarkdown} from './cathode-decision.mjs';
-import {validateCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from './cathode-research-handoff.mjs?v=sgu-result-20261025';
-import {validateCathodeThresholdReport,cathodeThresholdMarkdown} from './cathode-thresholds.mjs?v=sgu-result-20261025';
+import {validateCathodeResearchHandoff,cathodeResearchHandoffMarkdown} from './cathode-research-handoff.mjs?v=source-screens-20261025';
+import {validateCathodeThresholdReport,cathodeThresholdMarkdown} from './cathode-thresholds.mjs?v=source-screens-20261025';
 import {validateCathodeFlowContext,cathodeFlowContextMarkdown} from './cathode-flow-context.mjs?v=facility-context-20261025';
 import {validateCopperDemandContext,copperDemandContextMarkdown} from './copper-demand-context.mjs';
 const clone=v=>JSON.parse(JSON.stringify(v));

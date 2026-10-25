@@ -1,5 +1,5 @@
 import {preflightOperatingRecord,sha256Bytes} from '/assets/cathode-operating-preflight.mjs?v=20261023a';
-import {validateCathodeResearchHandoff} from '/assets/cathode-research-handoff.mjs?v=sgu-result-20261025';
+import {validateCathodeResearchHandoff} from '/assets/cathode-research-handoff.mjs?v=source-screens-20261025';
 
 export const CATHODE_REVIEW_RECEIPT_METHOD='cathode-review-receipt-v1';
 const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
