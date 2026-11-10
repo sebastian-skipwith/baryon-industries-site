@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "usdPerLb": 6.5807,
+  "usdPerTonne": 14508,
+  "basis": "Copper (LME), grade A cathode, settlement price — October 2026 monthly average, converted from US$/tonne",
+  "source": "World Bank Commodity Price Data (The Pink Sheet)",
+  "sourceUrl": "https://www.worldbank.org/en/research/commodity-markets",
+  "asOf": "2026-10-31",
+  "period": "2026-10",
+  "frequency": "monthly",
+  "published": "2026-11-03",
+  "nextUpdate": "2026-12-02",
+  "license": "CC BY 4.0 — The World Bank: Commodity Price Data (The Pink Sheet)",
+  "fetchedAt": "2026-11-09T23:32:43Z",
+  "note": "Static fallback the site shows until the Reclaim relay is deployed (GET /reclaim/prices refreshes it automatically). This is an exchange reference for refined copper, not a scrap-yard price: yards pay well below it, so check with your yard."
+}

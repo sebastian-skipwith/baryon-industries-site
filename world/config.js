@@ -13,4 +13,9 @@ export const config = {
   // Optional relay for feeds that do not allow browser access (live aircraft).
   // Same Cloudflare Worker as the agent proxy; see /agent-proxy/README.md.
   liveRelay: "",
+  // Base URL of the Worker that serves Reclaim's /reclaim/* routes (Marketplace scanner,
+  // photo relay, copper price). Same Cloudflare Worker again; /reclaim falls back to
+  // agentEndpoint, then liveRelay, when this is empty. With all three empty the scanner
+  // shows "not deployed yet" and the rest of Reclaim still works.
+  reclaimRelay: "",
 };

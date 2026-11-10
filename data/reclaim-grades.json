@@ -1,0 +1,103 @@
+{
+  "version": 2,
+  "updated": "2026-10-23",
+  "about": "Reclaim grade table. Copper-family grades are a band of the copper reference price (ratio low-high); other metals are fixed USD/lb bands. Every band names its source and the date it was checked. These are estimates of what US scrap yards pay; your local yard will differ.",
+  "reference": {
+    "label": "COMEX copper",
+    "unit": "USD/lb",
+    "staleAfterDays": 45,
+    "fallback": {
+      "usdPerLb": 6.47,
+      "basis": "COMEX copper, front-month benchmark",
+      "source": "MetalCharts benchmark display (COMEX)",
+      "sourceUrl": "https://metalcharts.org/scrap-copper-prices",
+      "asOf": "2026-10-23",
+      "license": "Single price fact quoted with attribution."
+    }
+  },
+  "sources": {
+    "mc-copper": {
+      "name": "MetalCharts: scrap copper prices",
+      "url": "https://metalcharts.org/scrap-copper-prices",
+      "checked": "2026-09-18",
+      "note": "Estimated yard ranges as a share of COMEX, checked against posted yard boards (Rockaway Recycling NJ, Central Metal Recycling Chicago, MetalRecap survey, ScrapMonster spreads)."
+    },
+    "mc-metals": {
+      "name": "MetalCharts: scrap metal prices",
+      "url": "https://metalcharts.org/scrap-metal-prices",
+      "checked": "2026-09-18",
+      "note": "Estimated yard ranges, checked against posted yard boards."
+    },
+    "mc-brass": {
+      "name": "MetalCharts: scrap brass prices",
+      "url": "https://metalcharts.org/scrap-brass-prices",
+      "checked": "2026-09-18",
+      "note": "Estimated yard ranges as a share of COMEX copper."
+    },
+    "mc-aluminum": {
+      "name": "MetalCharts: scrap aluminum prices",
+      "url": "https://metalcharts.org/scrap-aluminum-prices",
+      "checked": "2026-09-18",
+      "note": "Estimated yard ranges against LME aluminum."
+    },
+    "mc-motors": {
+      "name": "MetalCharts: electric motor scrap prices",
+      "url": "https://metalcharts.org/electric-motor-scrap-prices",
+      "checked": "2026-09-18",
+      "note": "Flat bands from September 2026 yard boards."
+    },
+    "sm-escrap": {
+      "name": "ScrapMonster yard price listing",
+      "url": "https://www.scrapmonster.com/",
+      "checked": "2026-08-11",
+      "note": "Single quoted prices; Reclaim shows a plus or minus 20% band around them."
+    },
+    "derived": {
+      "name": "Reclaim estimate (derived)",
+      "url": "",
+      "checked": "2026-10-23",
+      "note": "No public band found. Derived from a sourced grade as stated in the basis line. Treat as low confidence and get a yard quote."
+    }
+  },
+  "groups": [
+    { "id": "copper", "label": "Copper" },
+    { "id": "insulated", "label": "Insulated copper" },
+    { "id": "coils", "label": "Coils & radiators" },
+    { "id": "brass", "label": "Brass" },
+    { "id": "units", "label": "Motors & units" },
+    { "id": "other", "label": "Other metals" }
+  ],
+  "grades": [
+    { "id": "cu_bare_bright", "name": "Bare bright copper", "short": "Bare bright", "group": "copper", "copper": true, "kind": "ratio", "ratio": [0.78, 0.86], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts estimated yard range, as a share of COMEX", "notes": "Clean, shiny, unalloyed bare wire 16 ga or thicker. No tarnish, solder, paint or insulation." },
+    { "id": "cu_1", "name": "#1 copper (heavy, clean tubing, bus bar)", "short": "#1 copper", "group": "copper", "copper": true, "kind": "ratio", "ratio": [0.74, 0.81], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts estimated yard range, as a share of COMEX", "notes": "Clean unalloyed pipe, tubing, bus bar and clippings with no solder, fittings or paint." },
+    { "id": "cu_2", "name": "#2 copper (soldered pipe, oxidized wire)", "short": "#2 copper", "group": "copper", "copper": true, "kind": "ratio", "ratio": [0.71, 0.78], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts estimated yard range, as a share of COMEX", "notes": "Pipe with solder or fittings, painted or tarnished wire, about 96% copper." },
+    { "id": "cu_light", "name": "Light copper (#3: sheet, gutters, flashing)", "short": "Light copper", "group": "copper", "copper": true, "kind": "ratio", "ratio": [0.64, 0.75], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts estimated yard range, as a share of COMEX", "notes": "Thin sheet, roofing, gutters, downspouts. Remove nails and tar." },
+    { "id": "cu_magnet", "name": "Magnet wire (enamelled, clean)", "short": "Magnet wire", "group": "copper", "copper": true, "kind": "ratio", "ratio": [0.66, 0.76], "source": "derived", "confidence": "derived", "basis": "Derived: MetalCharts notes yards usually buy enamelled magnet wire as #2 copper; band set at or slightly under #2", "notes": "Motor and transformer windings once cut out. Spools and steel cores must be removed." },
+    { "id": "ins_1", "name": "#1 insulated (85%+ copper: heavy single conductor)", "short": "#1 insulated", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.56, 0.67], "recovery": [0.85, 0.92], "source": "derived", "confidence": "derived", "basis": "Derived: 85-92% recovery x bare-bright band x 0.85 processing factor (calibrated on MetalCharts THHN, Romex and low-grade bands)", "notes": "Thick single-conductor wire with thin insulation, 6 AWG and larger. No connectors." },
+    { "id": "ins_thhn", "name": "THHN / THWN building wire (about 78%)", "short": "THHN", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.52, 0.62], "recovery": [0.75, 0.85], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts THHN and high-grade insulated band, 52-62% of COMEX", "notes": "Single conductors with thin nylon jacket. Stripping 10 AWG and up usually pays; small gauges rarely do." },
+    { "id": "ins_romex", "name": "Romex / NM-B house wire (about 65%)", "short": "Romex", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.42, 0.5], "recovery": [0.6, 0.68], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts Romex and house wire band, 42-50% of COMEX", "notes": "Jacketed cable with a bare ground. Cut off boxes and devices." },
+    { "id": "ins_2", "name": "#2 insulated (about 48%: cords, harnesses)", "short": "#2 insulated", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.26, 0.34], "recovery": [0.4, 0.5], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts low-grade insulated band (appliance cords, car harnesses), 26-34% of COMEX", "notes": "Extension and appliance cords, mixed harnesses. Plugs cut off pays more at some yards." },
+    { "id": "ins_low", "name": "Low-grade insulated (about 25%)", "short": "Low-grade wire", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.13, 0.22], "recovery": [0.2, 0.3], "source": "derived", "confidence": "derived", "basis": "Derived: 20-30% recovery x bare-bright band x 0.85 processing factor", "notes": "Thin cords with heavy jackets, data cables with shielding, wire with steel messenger." },
+    { "id": "ins_comm", "name": "Communication wire (Cat5/6, phone)", "short": "Comm wire", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.2, 0.29], "recovery": [0.3, 0.4], "source": "derived", "confidence": "derived", "basis": "Derived: 30-40% recovery (eight 24 AWG conductors in a jacket) x bare-bright band x 0.85", "notes": "Copper-clad aluminium (CCA) network cable is NOT copper and pays far less. Coax with a steel core pays less." },
+    { "id": "xmas", "name": "Christmas lights", "short": "Xmas lights", "group": "insulated", "copper": true, "kind": "ratio", "ratio": [0.1, 0.22], "recovery": [0.15, 0.3], "source": "derived", "confidence": "derived", "basis": "Derived: 15-30% recovery x bare-bright band x 0.85; many yards cap or refuse lights", "notes": "Call first. Some yards only take them in season or by the gaylord." },
+    { "id": "acr_clean", "name": "Clean ACR / Al-Cu coil (no steel)", "short": "Clean ACR", "group": "coils", "copper": true, "refrigerant": true, "kind": "ratio", "ratio": [0.34, 0.42], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts aluminum/copper coil band, 34-42% of COMEX", "notes": "Condenser and evaporator coils with copper tube and aluminum fins, steel end plates removed. Refrigerant must be recovered first." },
+    { "id": "acr_dirty", "name": "Dirty ACR (steel ends attached)", "short": "Dirty ACR", "group": "coils", "copper": true, "refrigerant": true, "kind": "ratio", "ratio": [0.2, 0.29], "source": "derived", "confidence": "derived", "basis": "Derived: 60-70% of the clean ACR band for attached steel and brackets", "notes": "Cutting the steel ends off usually moves it up to clean ACR." },
+    { "id": "rad_cu_brass", "name": "Copper/brass radiators (auto, truck)", "short": "Cu/brass radiator", "group": "coils", "copper": true, "kind": "ratio", "ratio": [0.36, 0.47], "source": "mc-copper", "confidence": "sourced", "basis": "MetalCharts copper and brass radiator band, 36-47% of COMEX", "notes": "Drained, plastic tanks and steel brackets removed. Aluminium radiators are priced like cast/sheet aluminium." },
+    { "id": "brass_yellow", "name": "Yellow brass (fittings, valves, fixtures)", "short": "Yellow brass", "group": "brass", "copper": true, "kind": "ratio", "ratio": [0.41, 0.5], "source": "mc-brass", "confidence": "sourced", "basis": "MetalCharts yellow brass band, 41-50% of COMEX", "notes": "Plumbing fittings, valves, faucet bodies. Remove steel and plastic." },
+    { "id": "brass_red", "name": "Red brass / bronze (valves, water meters)", "short": "Red brass", "group": "brass", "copper": true, "kind": "ratio", "ratio": [0.47, 0.62], "source": "mc-brass", "confidence": "sourced", "basis": "MetalCharts red brass and bronze band, 47-62% of COMEX", "notes": "Gunmetal valves and bronze castings. Water meters can be utility property: provenance matters." },
+    { "id": "al_extrusion", "name": "Aluminum: clean extrusion (6063)", "short": "Al extrusion", "group": "other", "kind": "fixed", "usd": [0.97, 1.18], "source": "mc-aluminum", "confidence": "sourced", "basis": "MetalCharts clean 6063 extrusion band", "notes": "Window frames, rails. No glass, rubber, steel screws or paint." },
+    { "id": "al_mixed", "name": "Aluminum: sheet, cast, cans", "short": "Al mixed", "group": "other", "kind": "fixed", "usd": [0.48, 0.66], "source": "mc-aluminum", "confidence": "sourced", "basis": "MetalCharts sheet ($0.55-0.66), cast ($0.48-0.59) and UBC ($0.50-0.61) bands combined", "notes": "Separate grades pay more than mixed." },
+    { "id": "steel_hms", "name": "Steel: heavy melt / prepared", "short": "Steel HMS", "group": "other", "kind": "fixed", "usd": [0.07, 0.13], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts prepared steel / HMS No.1 band; mill programs reprice about monthly", "notes": "Thick structural steel cut to size. Regional spread is wide; yards quote per gross ton." },
+    { "id": "steel_light", "name": "Light iron (appliances, tin, sheet)", "short": "Light iron", "group": "other", "kind": "fixed", "usd": [0.04, 0.1], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts light iron and unprepared steel band", "notes": "Appliance shells, sheet, bed frames." },
+    { "id": "ss_304", "name": "Stainless steel 304", "short": "Stainless 304", "group": "other", "kind": "fixed", "usd": [0.34, 0.43], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts 304 stainless band (keyed to LME nickel)", "notes": "Non-magnetic. Sinks, restaurant equipment. 316 pays roughly double." },
+    { "id": "motor_small", "name": "Electric motors: small, whole", "short": "Small motor", "group": "units", "kind": "fixed", "usd": [0.2, 0.4], "source": "mc-motors", "confidence": "sourced", "basis": "MetalCharts small electric motor band (fan, pump, appliance, power tool)", "notes": "Copper-wound sells better than aluminum-wound; cut-out windings sell as #2 copper." },
+    { "id": "motor_large", "name": "Electric motors: large / industrial", "short": "Large motor", "group": "units", "kind": "fixed", "usd": [0.25, 0.45], "source": "derived", "confidence": "derived", "basis": "Derived: small-motor band shifted up for the higher copper share of large copper-wound motors; yards grade these separately, so ask", "notes": "Working industrial motors often resell for far more than scrap: check resale first." },
+    { "id": "alt_starter", "name": "Alternators & starters", "short": "Alt/starter", "group": "units", "kind": "fixed", "usd": [0.45, 0.6], "source": "mc-motors", "confidence": "sourced", "basis": "MetalCharts alternators and starters band", "notes": "Whole units." },
+    { "id": "sealed_unit", "name": "Sealed units / compressors", "short": "Sealed unit", "group": "units", "refrigerant": true, "kind": "fixed", "usd": [0.25, 0.35], "source": "mc-motors", "confidence": "sourced", "basis": "MetalCharts sealed units and compressors band (oil drained)", "notes": "Fridge and AC compressors. Oil drained; most yards want proof the refrigerant was recovered." },
+    { "id": "transformer", "name": "Transformers (copper-wound, dry)", "short": "Transformer", "group": "units", "kind": "fixed", "usd": [0.2, 0.4], "source": "derived", "confidence": "derived", "basis": "Derived: most yards price small dry transformers like whole motors (MetalCharts motor band); aluminium-wound pays less", "notes": "Oil-filled units may contain PCBs: do not cut or drain, and ask the yard first. Utility pole transformers are almost never legitimately for sale." },
+    { "id": "battery_lead", "name": "Lead-acid batteries", "short": "Lead-acid", "group": "other", "kind": "fixed", "usd": [0.21, 0.28], "source": "mc-metals", "confidence": "sourced", "basis": "MetalCharts car and truck battery band (keyed to LME lead)", "notes": "Keep upright, intact, not leaking." },
+    { "id": "escrap_boards", "name": "Circuit boards (high grade)", "short": "HG boards", "group": "other", "kind": "fixed", "usd": [1.0, 1.5], "source": "sm-escrap", "confidence": "sourced", "basis": "ScrapMonster listing 2026-08-11: high-grade board $1.25/lb, shown as a plus or minus 20% band", "notes": "Gold-finger memory and CPU boards are graded separately; low-grade (TV, appliance) boards pay far less." },
+    { "id": "escrap_whole", "name": "E-scrap: whole computers / servers", "short": "Whole e-scrap", "group": "other", "kind": "fixed", "usd": [0.2, 0.3], "source": "sm-escrap", "confidence": "sourced", "basis": "ScrapMonster listing 2026-08-11: computer/server complete $0.25/lb, shown as a plus or minus 20% band", "notes": "CRT monitors and TVs usually cost money to drop off." },
+    { "id": "nonrec", "name": "Non-recoverable (plastic, wood, glass, oil)", "short": "Non-recoverable", "group": "other", "kind": "fixed", "usd": [0, 0], "source": "derived", "confidence": "derived", "basis": "No scrap value; counts toward weight and disposal", "notes": "Budget a dump fee for this fraction under disposal." }
+  ]
+}

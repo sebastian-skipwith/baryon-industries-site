@@ -3,14 +3,32 @@ main = "worker.js"
 compatibility_date = "2026-09-01"
 
 [vars]
-# Hard daily ceiling on what the hosted agent may spend, in USD.
+# Hard daily ceiling on what the hosted AI (World Model agent + Reclaim) may spend, in USD.
 DAILY_BUDGET_USD = "5"
-# Requests per network per hour.
+# World Model agent: requests per network per hour.
 PER_IP_PER_HOUR = "40"
-# Comma-separated list of sites allowed to call the proxy.
+# Reclaim AI (appraisals/triage through the hosted key): messages per network per day.
+RECLAIM_MSGS_PER_IP_PER_DAY = "60"
+# Reclaim Marketplace scanner (each uncached sweep = one RapidAPI call):
+# sweeps per network per day, and for the whole site per day. Cached sweeps are free.
+SWEEP_PER_IP_PER_DAY = "8"
+SWEEP_PER_DAY = "150"
+# How long to wait for the scraper before giving up (it often takes 20–40 s).
+SWEEP_TIMEOUT_MS = "55000"
+# Comma-separated list of sites allowed to call the relay.
 ALLOWED_ORIGINS = "https://baryon.industries,http://localhost:8124"
+
+# Secrets (never in this file — set with `npx wrangler secret put NAME`):
+#   ANTHROPIC_API_KEY  hosted Claude for the World Model agent and Reclaim (optional)
+#   RAPIDAPI_KEY       the facebook-scraper-api9 RapidAPI subscription (Reclaim scanner)
+#   METALCHARTS_KEY    recommended: daily COMEX copper price (free MetalCharts plan is fine)
+#   METALS_DEV_KEY     optional intraday LME copper price; only with a paid Metals.Dev plan
 
 # Create with: npx wrangler kv namespace create BUDGET   (paste the id below)
 [[kv_namespaces]]
 binding = "BUDGET"
 id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Refresh the copper reference price into KV twice a day (UTC).
+[triggers]
+crons = ["17 5,17 * * *"]
