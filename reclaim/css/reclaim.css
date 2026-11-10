@@ -364,6 +364,7 @@ select.rc-dstatus { min-height: 2.5rem; padding-top: 0.35rem; padding-bottom: 0.
 .rc-weights { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .rc-wrow { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem 2.5rem; gap: 8px; width: 100%; }
 .rc-wrow .input { min-height: 2.5rem; padding: 0.4rem 0.9rem; font-size: 0.88rem; }
+.rc-wrow select.input { padding-right: 2rem; background-position: right 0.6rem center; }
 .rc-real { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--surface); font-size: 0.88rem; color: var(--graphite); }
 .rc-real b { color: var(--ink); font-size: 1.05rem; }
 .rc-deal-foot { display: flex; justify-content: flex-end; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair); }
@@ -421,6 +422,9 @@ select.rc-dstatus { min-height: 2.5rem; padding-top: 0.35rem; padding-bottom: 0.
 /* Touch screens: every small pill button still gets a 40px target. */
 @media (max-width: 960px), (pointer: coarse) {
   .rc-app .btn-sm, .rc-dialog .btn-sm, .rc-settings .btn-sm { min-height: 2.5rem; }
+  /* Below 16px, iOS Safari zooms the page when a field is focused. */
+  .rc-mrow .input, .rc-wrow .input, select.rc-dstatus, .rc-sort { font-size: 1rem; }
+  .rc-price-table .rc-src a { display: inline-flex; align-items: center; min-height: 2.5rem; }
 }
 @media (max-width: 1080px) {
   .rc-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -531,6 +535,7 @@ select.rc-dstatus { min-height: 2.5rem; padding-top: 0.35rem; padding-bottom: 0.
 @media (max-width: 400px) {
   .rc-row-2 { grid-template-columns: minmax(0, 1fr); }
   .rc-sfields { grid-template-columns: minmax(0, 1fr); }
+  .rc-wrow { grid-template-columns: minmax(0, 1fr) 5rem 2.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rc-spinner { animation: none; border-top-color: var(--ink-soft); }

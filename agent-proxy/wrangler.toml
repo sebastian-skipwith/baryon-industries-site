@@ -27,7 +27,7 @@ ALLOWED_ORIGINS = "https://baryon.industries,http://localhost:8124"
 # Create with: npx wrangler kv namespace create BUDGET   (paste the id below)
 [[kv_namespaces]]
 binding = "BUDGET"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "faa50b389fb6490880b184a40afadea7"
 
 # Refresh the copper reference price into KV twice a day (UTC).
 [triggers]

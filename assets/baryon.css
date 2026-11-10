@@ -185,7 +185,7 @@ select.input {
   border-bottom-color: var(--hair);
 }
 .site-header .bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 64px; }
-.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
+.brand { display: inline-flex; align-items: center; gap: 11px; min-height: 2.75rem; color: var(--ink); text-decoration: none; }
 .brand .word { font-weight: 600; letter-spacing: 0.32em; font-size: 0.82rem; }
 .site-nav { display: flex; align-items: center; gap: 4px; }
 .site-nav a.nl {
@@ -211,7 +211,7 @@ select.input {
   }
   .site-nav.is-open { display: flex; }
   .site-nav a.nl { padding: 0.75rem 0.9rem; font-size: 0.95rem; }
-  .site-nav .btn { margin: 6px 0 0; }
+  .site-nav .btn { margin: 6px 0 0; min-height: 3rem; }
 }
 
 /* ---------- Sections ---------- */

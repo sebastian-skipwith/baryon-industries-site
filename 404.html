@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Page not found | Baryon</title>
+<script>
+  // Pages serve /reclaim from reclaim.html but 404 on /reclaim/. Retry without the slash
+  // (can't loop: the retried URL has no trailing slash).
+  (function () {
+    var p = location.pathname;
+    if (p.length > 1 && /\/$/.test(p)) location.replace(p.replace(/\/+$/, "") + location.search + location.hash);
+  })();
+</script>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/assets/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">

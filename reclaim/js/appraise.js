@@ -4,7 +4,7 @@ import { S, on, gradeShort } from "./state.js";
 import { $, $$, esc, money, num, lb, range, load, save, debounce, uid, imageToBase64, announce, toast, reducedMotion, ICON, mi } from "./util.js";
 import { evaluate, ROAD_FACTOR, haversineMi, oneWayRoadMiles, MIN_TOWN_MI } from "./engine.js";
 import { identify, aiReady, aiLabel, currentModel, modelName, usageLine, syncChip } from "./ai.js";
-import { reportHTML, VERIFY_NOTICE } from "./report.js";
+import { reportHTML, VERIFY_NOTICE, noticesFor } from "./report.js";
 import { mountWireHelper } from "./wire.js";
 import { geocodeCitySt, parseCitySt } from "./geo.js";
 import { addDeal } from "./pipeline.js";
@@ -94,7 +94,11 @@ export function initAppraise() {
   const bind = (id, key) => {
     const el = $(`#${id}`);
     el.value = A.listing[key] ?? "";
-    el.addEventListener("input", () => { A.listing[key] = el.value; persist(); if (["asking", "disposal", "oneWayMi"].includes(key)) renderReport(); });
+    el.addEventListener("input", () => {
+      A.listing[key] = el.value; persist();
+      if (["asking", "disposal", "oneWayMi"].includes(key)) renderReport();
+      else if (key === "title" || key === "description") renderReportSoon(); // safety notices read the text
+    });
   };
   bind("a-title", "title");
   bind("a-desc", "description");
@@ -349,13 +353,16 @@ function renderReport() {
   const it = A.ident;
   const has = it.materials.some((m) => (m.lbEst || m.lbLow || m.lbHigh) > 0) || (it.resale?.available) || (it.parts?.available) || it.listingKind === "wanted_ad" || it.listingKind === "service_ad";
   $("#a-save").disabled = !has;
+  const flags = textFlags(`${A.listing.title ?? ""} ${A.listing.description ?? ""}`);
   if (!has) {
-    box.innerHTML = `<div class="rc-empty-report"><p><b>Nothing to price yet.</b></p><p class="rc-fine">${aiReady() ? "Run the AI appraisal, or list" : "List"} the materials and pounds under “What's in it”. The report then shows gross by path, every cost, expected net, the most you should offer and a verdict against your targets.</p><p class="rc-fine">${VERIFY_NOTICE}</p></div>`;
+    // Safety notices (PCBs, refrigerant, copper law) come from the listing text, so show them before anything is priced.
+    box.innerHTML = `<div class="rc-empty-report"><p><b>Nothing to price yet.</b></p><p class="rc-fine">${aiReady() ? "Run the AI appraisal, or list" : "List"} the materials and pounds under “What's in it”. The report then shows gross by path, every cost, expected net, the most you should offer and a verdict against your targets.</p>${noticesFor({ ident: it, flags })}<p class="rc-fine">${VERIFY_NOTICE}</p></div>`;
     return;
   }
   const ev = currentEval();
-  box.innerHTML = reportHTML(ev, it, { usage: A.usage, searched: A.searched, flags: textFlags(`${A.listing.title} ${A.listing.description}`) });
+  box.innerHTML = reportHTML(ev, it, { usage: A.usage, searched: A.searched, flags });
 }
+const renderReportSoon = debounce(renderReport, 250);
 
 /* ------------------------------------------------------------------ AI */
 function setBusy(b) {
